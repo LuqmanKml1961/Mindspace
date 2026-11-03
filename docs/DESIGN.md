@@ -152,10 +152,15 @@ tab bar.
 - The `theme-color` meta follows the **system** setting through its media query. If a manual
   light/dark switch is added later, the meta tag must follow it too, because next-themes doesn't
   update it.
-- **Icons are placeholders:** an "M" on Deep Teal. The source is `src/app/icon.svg` (favicon).
-  `src/app/apple-icon.png` (180) and `public/icons/icon-192.png` / `icon-512.png` were rendered
-  from it with sharp. The art stays within the maskable safe zone (172.6px of 204.8px). Replace
-  all four when a real logo exists.
+- **App icon:** your "Sleeping Brain House" (a white house with a sleeping brain, on black),
+  supplied 2026-11-03. The source image had a white margin around a rounded black square. Phones
+  apply their own rounded mask, so the artwork was cut out and placed on a **full-bleed square**
+  filled with the image's own near-black (`rgb(6,6,6)`), at the original 53% scale and 6px upward
+  offset. The house corners sit at 38% from the centre, inside the 40% maskable safe zone.
+  - Master: `docs/assets/mindspace-icon-1024.png`. Regenerate the sizes from it.
+  - Generated with sharp as palette PNGs with no alpha channel: `src/app/icon.png` (192, tab
+    icon), `src/app/apple-icon.png` (180, iOS), `public/icons/icon-192.png` and `icon-512.png`
+    (manifest, also used as maskable).
 - After changing any of this on a phone, **remove the home-screen icon and add it again**. The
   home-screen app is configured when it is added.
 

@@ -124,6 +124,29 @@ Template — copy it above the newest entry:
 - **Next:** <first task for the next session>
 -->
 
+### 2026-11-03 — Session 2 (cont.): real app icon
+
+- **Phase:** 1 · **Tasks:** D-014 follow-up
+- **Done:**
+  - Replaced the placeholder "M" with your "Sleeping Brain House" icon (source: a 1254×1254 PNG
+    in your Downloads). Measured it from the pixels: the black square is 658×643 with white
+    margins, the house is 348×339 and centred 6px above the middle, and the "black" is
+    `rgb(6,6,6)`.
+  - Built a full-bleed master by placing the house, with a 40px margin of its own black, on a
+    650px canvas of `rgb(6,6,6)` at the same scale and offset. Saved it at 1024px as
+    `docs/assets/mindspace-icon-1024.png`. Generated `src/app/icon.png` (192),
+    `src/app/apple-icon.png` (180) and `public/icons/icon-192.png` / `icon-512.png` as palette
+    PNGs with no alpha. The house sits at 38% radius, inside the 40% maskable zone. Checked
+    visually.
+  - Removed the placeholder `src/app/icon.svg`. Verified on a production server: the head links
+    `icon.png` (192) and `apple-icon.png` (180), all icons return 200, and `/icon.svg` is a 404.
+- **Decisions:** none new (D-014 updated: real icon).
+- **Problems / findings:** the first render had an alpha channel added by sharp's `composite`,
+  and the 512px icon was 92 KB. Re-encoding with `removeAlpha()` and a 64-colour palette fixed
+  both (512px is now 60 KB).
+- **Commits:** `feat(pwa): use the Sleeping Brain House app icon`
+- **Next:** push, re-add to the home screen, retest the edges and the icon.
+
 ### 2026-11-03 — Session 2 (cont.): screen edges and installable app
 
 - **Phase:** 1 (fix) plus P6.1 brought forward · **Tasks:** D-014

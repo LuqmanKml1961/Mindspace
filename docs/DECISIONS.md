@@ -230,7 +230,8 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Decision:** Accepted (your choice: "Steps 1 + 2"). Apply all four, with per-theme
   `theme-color`, and bring the manifest and icons forward from P6.1. Mindspace has a fixed tab
   bar, so also use `viewport-fit=cover` with `env(safe-area-inset-*)` padding. Details are in
-  DESIGN.md §7a. The icons are placeholders.
+  DESIGN.md §7a. The placeholder "M" icons were replaced the same day with your "Sleeping Brain
+  House" icon.
 - **Date:** 2026-11-03
 
 ---
