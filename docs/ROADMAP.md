@@ -104,13 +104,19 @@ screens. No backend yet.
       a forbidden import temporarily and confirming lint fails. Done with `regex` patterns in
       `eslint.config.mjs`. 31 temporary probe imports matched expectations (blocked or allowed),
       and the probes were removed afterwards.
-- [ ] P1.5 Initialise shadcn/ui. Add only the components the shell needs; add more when a feature
+- [x] P1.5 Initialise shadcn/ui. Add only the components the shell needs; add more when a feature
       needs them. Once `cn()` and `cva()` exist, add `"tailwindFunctions": ["cn", "cva"]` to
       `.prettierrc` so classes inside those calls are sorted too (the plugin README documents this
-      under "Sorting classes in function calls").
+      under "Sorting classes in function calls"). Done with `shadcn@4.23.0 init --defaults`
+      (`base-nova`, D-012), which also generated `Button`. Fixed a font bug that `init` caused:
+      it wrote `--font-sans: var(--font-sans)`, but the layout defined `--font-geist-sans`.
 - [ ] P1.6 Create the design tokens from D-002: colours (light, plus dark if confirmed), type
       scale, spacing and radius as CSS variables in the Tailwind theme. Write `docs/DESIGN.md`
-      covering the tokens and tone of voice (spec §3 and §6).
+      covering the tokens and tone of voice (spec §3 and §6). **Dark mode:** shadcn set up a
+      class-based variant (`@custom-variant dark (&:is(.dark *))` plus a `.dark {}` token block),
+      but D-002 says to follow the **system** setting. Switch to a `prefers-color-scheme` media
+      variant, or add a script that sets `.dark` from the system setting. Check the Tailwind v4
+      docs for the current syntax before choosing.
 - [ ] P1.7 Build the app shell: an `(app)` route group layout with a bottom tab bar on mobile and
       a sidebar on desktop. Nav items: Home, Brain Dump, Tasks, Mind Clarity, Settings.
 - [ ] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.

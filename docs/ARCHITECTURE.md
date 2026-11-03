@@ -113,6 +113,9 @@ raw import string. `^(@/|(\.\./)+)<layer>(/|$)` catches both alias (`@/infrastru
 relative (`../../infrastructure/...`) imports. This was verified on 2026-11-03 with 31 probe
 imports across all layers, including `import type` and `export … from`.
 
+`components.json` defines a `hooks` alias (`@/hooks`). If shadcn ever creates `src/hooks/`, add
+it to the presentation rule's `files` in `eslint.config.mjs`.
+
 Limits of the rule (from the ESLint 9.39 source): it checks `import`, `export … from` and
 `import x = require()`, but **not dynamic `import()`**. Do not use dynamic imports to cross
 layers. Package restrictions cover the listed frameworks only, not every UI library.

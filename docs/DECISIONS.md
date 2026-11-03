@@ -11,19 +11,20 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 ## Summary
 
-| ID    | Topic                    | Status   | Needed before                                    |
-| ----- | ------------------------ | -------- | ------------------------------------------------ |
-| D-001 | Product name             | Accepted | P6.1 (manifest). Working name is fine until then |
-| D-002 | Visual direction         | Accepted | P1.6 (design tokens)                             |
-| D-003 | Accounts                 | Accepted | Phase 2                                          |
-| D-004 | Scope and build order    | Accepted | Phase 1                                          |
-| D-005 | Technology stack         | Accepted | P1.1 (scaffold)                                  |
-| D-006 | Onion Architecture       | Accepted | —                                                |
-| D-007 | Sign-in method           | Accepted | P2.6                                             |
-| D-008 | Reminders in the MVP     | Accepted | Phase 4                                          |
-| D-009 | Hosting                  | Accepted | P1.10 (deployment previews)                      |
-| D-010 | Package manager          | Accepted | P1.1                                             |
-| D-011 | Local database and tests | Accepted | Phase 2                                          |
+| ID    | Topic                        | Status             | Needed before                                    |
+| ----- | ---------------------------- | ------------------ | ------------------------------------------------ |
+| D-001 | Product name                 | Accepted           | P6.1 (manifest). Working name is fine until then |
+| D-002 | Visual direction             | Accepted           | P1.6 (design tokens)                             |
+| D-003 | Accounts                     | Accepted           | Phase 2                                          |
+| D-004 | Scope and build order        | Accepted           | Phase 1                                          |
+| D-005 | Technology stack             | Accepted           | P1.1 (scaffold)                                  |
+| D-006 | Onion Architecture           | Accepted           | —                                                |
+| D-007 | Sign-in method               | Accepted           | P2.6                                             |
+| D-008 | Reminders in the MVP         | Accepted           | Phase 4                                          |
+| D-009 | Hosting                      | Accepted           | P1.10 (deployment previews)                      |
+| D-010 | Package manager              | Accepted           | P1.1                                             |
+| D-011 | Local database and tests     | Accepted           | Phase 2                                          |
+| D-012 | shadcn/ui library and preset | Proposed (applied) | Before more components are added                 |
 
 ---
 
@@ -170,6 +171,30 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   development and tests, and a hosted free-tier project for preview and production. Vitest,
   pgTAP, and Playwright later.
 - **Date:** 2026-11-03
+
+## D-012 — shadcn/ui component library and preset
+
+- **Context:** Came up during P1.5. `shadcn init` (CLI 4.23.0) asks for two things the plan did
+  not anticipate. The **component library** underneath the components can be `base` (Base UI),
+  `radix` or `aria` (React Aria); the CLI's own prompt labels Base UI "(Recommended)". The
+  **preset** sets style, font and icons; presets found in the CLI source are nova, vega, maia,
+  lyra, mira, luma, sera and rhea.
+- **Applied:** `--defaults`, i.e. **`base-nova`**: Base UI with Nova (Geist font, Lucide icons).
+  - It is the CLI's recommended and default option, so we fight the tool least.
+  - The scaffold's layout already uses Geist.
+  - Lucide fits D-002's "simple icons".
+  - Colours are replaced in P1.6 regardless.
+- **Side effect:** shadcn 4.x installs its own **`cn`** package (repository `shadcn-ui/cn`,
+  maintainer `shadcn <m@shadcn.com>`, the same as the CLI) instead of `clsx` + `tailwind-merge`.
+  Checked 2026-11-03: it has no dependencies and was revived from 0.2.0 in September 2026, so it
+  is young and pre-1.0. 0.5.1 is installed; pnpm's release-age guard skipped 0.5.2. Generated
+  components import it directly (`import { cn } from "cn"`).
+- **Alternatives:** Radix or React Aria; another preset; or swap `cn` for `clsx` +
+  `tailwind-merge`, which means editing every generated component's import. Only one component
+  (Button) exists, so changing course now is cheap.
+- **Status:** Proposed (applied). Waiting for your confirmation.
+- **Decision:**
+- **Date:**
 
 ---
 

@@ -5,14 +5,16 @@
 | Item               | Value                         |
 | ------------------ | ----------------------------- |
 | **Current phase**  | Phase 1 — Foundation          |
-| **Phase progress** | 4 / 11 tasks done (P1.1–P1.4) |
+| **Phase progress** | 5 / 11 tasks done (P1.1–P1.5) |
 | **Last updated**   | 2026-11-03 (Session 2)        |
 | **Blocked on**     | Nothing                       |
 
 **Next actions (in order)**
 
-1. **P1.5**: initialise shadcn/ui, then add `tailwindFunctions` to `.prettierrc`.
-2. **P1.6**: design tokens (D-002, with system light/dark) and `docs/DESIGN.md`.
+1. Confirm or change **D-012** (Base UI with the Nova preset, and the `cn` package) before more
+   components are added.
+2. **P1.6**: design tokens (D-002), including switching dark mode from the `.dark` class to the
+   system setting (see ROADMAP P1.6), and `docs/DESIGN.md`.
 3. Once it is published, upgrade to the Next.js security release (see Known issues).
 
 **Known issues**
@@ -68,18 +70,25 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 | Supabase CLI | not installed (plan: project dev dependency, D-011)       |
 | GitHub CLI   | not installed                                             |
 | Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git |
-| Git history  | no commits yet; branch `main`                             |
+| Git history  | branch `main`, nothing pushed yet (see `git log`)         |
 
-**Project dependencies** (installed at P1.1, 2026-11-03):
+**Project dependencies** (as of P1.5, 2026-11-03):
 
-| Package                              | Version  | Notes                                                                                        |
-| ------------------------------------ | -------- | -------------------------------------------------------------------------------------------- |
-| next / eslint-config-next            | 16.4.4   | published 2026-11-02; the security release is pending (Known issues)                         |
-| react / react-dom                    | 19.3.0   | exact pin from the template                                                                  |
-| tailwindcss / @tailwindcss/turbopack | 4.3.3    | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config` |
-| typescript                           | 5.9.3    |                                                                                              |
-| eslint                               | 9.39.5   | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9`                  |
-| @types/node                          | 20.19.43 | template default (`^20`), while local Node is 22                                             |
+| Package                                | Version        | Notes                                                                                         |
+| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
+| next / eslint-config-next              | 16.4.4         | published 2026-11-02; the security release is pending (Known issues)                          |
+| react / react-dom                      | 19.3.0         | exact pin from the template                                                                   |
+| tailwindcss / @tailwindcss/turbopack   | 4.3.3          | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config`  |
+| typescript                             | 5.9.3          |                                                                                               |
+| eslint                                 | 9.39.5         | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9`                   |
+| @types/node                            | 20.19.43       | template default (`^20`), while local Node is 22                                              |
+| prettier / prettier-plugin-tailwindcss | 3.9.10 / 0.8.1 | exact pins (P1.3)                                                                             |
+| shadcn                                 | 4.23.0         | runtime dependency added by `init`; provides `shadcn/tailwind.css`, imported by `globals.css` |
+| @base-ui/react                         | 1.9.0          | component primitives (D-012)                                                                  |
+| cn                                     | 0.5.1          | shadcn's class merger, replacing clsx + tailwind-merge (D-012)                                |
+| class-variance-authority               | 0.7.1          | component variants (`cva`)                                                                    |
+| lucide-react                           | 1.66.0         | icons                                                                                         |
+| tw-animate-css                         | 1.4.0          | animation utilities imported by `globals.css`                                                 |
 
 ## Personal-use observations
 
@@ -106,6 +115,36 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): shadcn/ui
+
+- **Phase:** 1 · **Tasks:** P1.5
+- **Done:**
+  - Read the `shadcn@4.23.0` CLI source before running it. `init` offers a component library
+    (`base`, `radix` or `aria`) and a style preset. Ran `init --defaults --yes --no-monorepo`,
+    which means `base-nova`. It wrote `components.json`, `src/lib/utils.ts`,
+    `src/components/ui/button.tsx` and the `globals.css` theme tokens, and added 6 dependencies
+    (224 packages including transitive ones).
+  - Fixed a font bug caused by `init`. It set `--font-sans: var(--font-sans)` but left the
+    layout's `--font-geist-sans`, so the compiled CSS had a self-referencing variable and `html`
+    would fall back to the browser's default font. Renamed the next/font variable in
+    `layout.tsx` to `--font-sans`, which is the name shadcn's font step looks for. Verified in
+    the compiled CSS: the next/font rule is unlayered (depth 0) and overrides the self-reference
+    inside `@layer theme`.
+  - Added `tailwindFunctions: ["cn", "cva"]` to `.prettierrc` and formatted the generated files.
+  - Lint (including the layer rules), typecheck, format check and build all pass.
+- **Decisions:** D-012 recorded as Proposed (applied). Base UI with the Nova preset is the CLI's
+  recommended default; it waits for your confirmation.
+- **Problems / findings:**
+  - shadcn 4.x uses its own young `cn` package instead of `clsx` + `tailwind-merge`. Ownership
+    was verified on npm (see D-012).
+  - shadcn's dark mode is class-based (`.dark`), but D-002 says to follow the system setting.
+    This is noted in ROADMAP P1.6.
+  - `components.json` has a `hooks` alias. A `src/hooks/` folder would need adding to the
+    presentation lint rule (noted in ARCHITECTURE.md §4).
+  - Long `.{0,3000}` grep regexes over minified bundles hang. Use small Node scripts instead.
+- **Commits:** `feat(ui): initialise shadcn/ui with Base UI and fix font variable (P1.5)`
+- **Next:** confirm D-012, then P1.6.
 
 ### 2026-11-03 — Session 2 (cont.): onion import rules
 
