@@ -100,8 +100,10 @@ screens. No backend yet.
       exactly; the config is in `.prettierrc` (`tailwindStylesheet: ./src/app/globals.css`).
       `eslint-config-prettier` is not needed: none of the 86 active ESLint rules is on its
       358-rule disable list (checked 2026-11-03). `.gitattributes` keeps line endings LF.
-- [ ] P1.4 Enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4). Check them by adding
-      a forbidden import temporarily and confirming lint fails.
+- [x] P1.4 Enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4). Check them by adding
+      a forbidden import temporarily and confirming lint fails. Done with `regex` patterns in
+      `eslint.config.mjs`. 31 temporary probe imports matched expectations (blocked or allowed),
+      and the probes were removed afterwards.
 - [ ] P1.5 Initialise shadcn/ui. Add only the components the shell needs; add more when a feature
       needs them. Once `cn()` and `cva()` exist, add `"tailwindFunctions": ["cn", "cva"]` to
       `.prettierrc` so classes inside those calls are sorted too (the plugin README documents this

@@ -5,14 +5,14 @@
 | Item               | Value                         |
 | ------------------ | ----------------------------- |
 | **Current phase**  | Phase 1 — Foundation          |
-| **Phase progress** | 3 / 11 tasks done (P1.1–P1.3) |
+| **Phase progress** | 4 / 11 tasks done (P1.1–P1.4) |
 | **Last updated**   | 2026-11-03 (Session 2)        |
 | **Blocked on**     | Nothing                       |
 
 **Next actions (in order)**
 
-1. **P1.4**: enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4).
-2. **P1.5**: initialise shadcn/ui, then add `tailwindFunctions` to `.prettierrc`.
+1. **P1.5**: initialise shadcn/ui, then add `tailwindFunctions` to `.prettierrc`.
+2. **P1.6**: design tokens (D-002, with system light/dark) and `docs/DESIGN.md`.
 3. Once it is published, upgrade to the Next.js security release (see Known issues).
 
 **Known issues**
@@ -106,6 +106,30 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): onion import rules
+
+- **Phase:** 1 · **Tasks:** P1.4
+- **Done:**
+  - Added per-layer `no-restricted-imports` rules to `eslint.config.mjs` for domain, application,
+    infrastructure and presentation (app, components, lib), as in ARCHITECTURE.md §4.
+  - Verified with 31 temporary probe imports across all five layer folders. Every case matched
+    its expected result (blocked or allowed), covering alias and relative paths, `import type`,
+    `export … from`, and the container-only rule for presentation. The probes were deleted.
+  - `eslint` and `format:check` pass on the real project.
+  - Replaced the sketch in ARCHITECTURE.md §4 with a pointer to `eslint.config.mjs`, and added
+    `src/lib/**` to the presentation row.
+- **Decisions:** none new. The rules use `regex` patterns, not gitignore-style `group`
+  patterns, so one expression covers alias and relative imports.
+- **Problems / findings:**
+  - Read in the ESLint 9.39.5 source: the rule does not check dynamic `import()`. This is
+    documented in ARCHITECTURE.md §4.
+  - `eslint-config-next` does not set `no-restricted-imports`, so these overrides replace
+    nothing.
+  - The layer folders (`src/domain` etc.) still do not exist. They are created by the first
+    feature task that needs them, and the rules apply automatically.
+- **Commits:** `chore: enforce onion architecture import rules with ESLint (P1.4)`
+- **Next:** P1.5.
 
 ### 2026-11-03 — Session 2 (cont.): typecheck and Prettier
 

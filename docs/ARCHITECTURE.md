@@ -100,32 +100,22 @@ an infrastructure helper.
 
 ## 4. Dependency rules
 
-| Layer (files)                     | May import                                                   | Must not import                                                                          |
-| --------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| `src/domain/**`                   | other domain files                                           | application, infrastructure, app, components, lib; `react`, `next`, `@supabase/*`, `zod` |
-| `src/application/**`              | domain, `zod`                                                | infrastructure, app, components, lib; `react`, `next`, `@supabase/*`                     |
-| `src/infrastructure/**`           | domain, application, `@supabase/*`, `server-only`            | app, components                                                                          |
-| `src/app/**`, `src/components/**` | application, domain (types), `infrastructure/container`, lib | `@supabase/*` directly (always go through infrastructure)                                |
+| Layer (files)                                   | May import                                                   | Must not import                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `src/domain/**`                                 | other domain files                                           | application, infrastructure, app, components, lib; `react`, `react-dom`, `next`, `@supabase/*`, `zod` |
+| `src/application/**`                            | domain, `zod`                                                | infrastructure, app, components, lib; `react`, `react-dom`, `next`, `@supabase/*`                     |
+| `src/infrastructure/**`                         | domain, application, `@supabase/*`, `server-only`            | app, components                                                                                       |
+| `src/app/**`, `src/components/**`, `src/lib/**` | application, domain (types), `infrastructure/container`, lib | `@supabase/*` directly; any other `infrastructure/*` module (always go through the container)         |
 
-**Enforcement (P1.4):** ESLint `no-restricted-imports` overrides per layer in `eslint.config.*`.
-Use `patterns` that match both alias imports and relative imports (for example
-`['@/infrastructure/*', '**/infrastructure/**']`), so relative paths cannot get around a rule.
-Sketch:
+**Enforcement (P1.4, done):** `no-restricted-imports` overrides per layer in `eslint.config.mjs`,
+which is the source of truth for the exact patterns. They use `regex` patterns matched against the
+raw import string. `^(@/|(\.\./)+)<layer>(/|$)` catches both alias (`@/infrastructure/...`) and
+relative (`../../infrastructure/...`) imports. This was verified on 2026-11-03 with 31 probe
+imports across all layers, including `import type` and `export … from`.
 
-```js
-{
-  files: ['src/domain/**/*.ts'],
-  rules: {
-    'no-restricted-imports': ['error', {
-      patterns: [{
-        group: ['@/application/*', '@/infrastructure/*', '@/app/*', '@/components/*', '@/lib/*',
-                '**/application/**', '**/infrastructure/**', 'react', 'next', 'next/*', '@supabase/*', 'zod'],
-        message: 'Domain must stay framework-free (Onion Architecture).',
-      }],
-    }],
-  },
-}
-```
+Limits of the rule (from the ESLint 9.39 source): it checks `import`, `export … from` and
+`import x = require()`, but **not dynamic `import()`**. Do not use dynamic imports to cross
+layers. Package restrictions cover the listed frameworks only, not every UI library.
 
 ## 5. Request flow example: capturing a thought
 
