@@ -75,8 +75,35 @@ darken `input`.
 - Tailwind's `dark:` variant is `@custom-variant dark (&:is(.dark *))`, shadcn's default.
 - **Rule:** use semantic tokens (`bg-background`, `text-muted-foreground`, …). Don't add manual
   `dark:` colour overrides (shadcn skill, `rules/styling.md`).
-- A manual light/dark/system switch in Settings is possible later with `useTheme()`. It is not
-  built yet.
+- **Appearance setting (D-015):** Settings → Appearance offers **Light / Dark / System**
+  (`src/components/theme/theme-toggle.tsx`), and System is the default. next-themes stores the
+  choice in `localStorage` (`theme`), per device.
+  - The control renders only after hydration, because the theme is unknown on the server. This
+    uses `useSyncExternalStore`, not the README's `useEffect` + `setState`, which the
+    eslint-config-next 16 hooks rules reject. A 40px placeholder prevents layout shift.
+  - `src/components/theme/theme-color-sync.tsx` rewrites the `theme-color` metas to the
+    **resolved** theme, so the status bar follows a manual choice and not just the system.
+  - Verified in Chrome on 2026-11-03 (system dark): System is the default. Choosing Light switches
+    `<html>` to `light`, the page to `#f9faf8` and both metas to `#f9faf8`, and survives reload.
+    Dark and System switch back correctly. No console errors.
+  - **Limit:** Android's navigation bar on an installed app comes from the manifest (§7a), so it
+    can't follow a manual choice. Only the system theme (via `color_scheme_dark`, if Chrome reads
+    it) can affect it.
+  - **Change animation:** the new theme is revealed by **growing the pressed button's own
+    outline** (its box and corner radius) until it fills the screen (400ms,
+    `cubic-bezier(0.2, 0, 0, 1)`, an ease-out). The first version, a 600ms circle from the button
+    centre, was too slow and didn't match the button's shape, per your feedback.
+    - It uses the View Transitions API: `document.startViewTransition` snapshots the page, then
+      `clip-path` animates on `::view-transition-new(root)` from
+      `inset(<button box> round <its border-radius>)` to `inset(0 0 0 0 round 0)`.
+      `globals.css` turns off the default cross-fade for the root snapshots.
+    - `setTheme` runs inside `flushSync`, because next-themes applies the class in a `useEffect`.
+      Without it, the "after" snapshot would still be the old theme. Verified in Chrome: inside
+      the transition callback the `<html>` class flips `dark`→`light`, and the start shape
+      exactly equals the Light button's measured box and 26px radius.
+    - **No animation (instant switch)** when the browser has no View Transitions, the user has
+      `prefers-reduced-motion: reduce`, or the visible theme doesn't change (e.g. Dark → System
+      while the system is dark).
 
 ## 5. Typography
 
@@ -108,6 +135,11 @@ darken `input`.
   similar components, set their default height to 40px (`h-10`) to match. Check the generated
   classes first; the shadcn skill's `design-system.md` lists where heights live.
 
+- **Toggle and ToggleGroup** (`src/components/ui/toggle.tsx`, added for D-015) follow the same
+  heights: default `h-10` (40px) and `lg` `h-11`. The pressed state was restyled from `bg-muted`
+  (about 1.1:1 against the page, nearly invisible) to `bg-primary text-primary-foreground` (about
+  4.6:1 in both themes), via `aria-pressed:`. Base UI sets `aria-pressed`/`data-pressed`, not
+  Radix's `data-state`, so the `data-[state=on]` class in `toggle-group.tsx` never applies.
 - **Links that look like buttons:** use `<Link className={buttonVariants({ … })}>`. Don't use
   Base UI's `<Button nativeButton={false} render={<Link />}>` for navigation. It renders
   `<a role="button">` (verified 2026-11-03), so screen readers announce a button for something
@@ -138,20 +170,34 @@ This fixes the coloured strips at the top and bottom of the screen when the app 
 screen. It follows the approach of the `card-share` reference repo, plus safe areas for our fixed
 tab bar.
 
-| Technique                                                     | Where                                         | Why                                                                                                       |
-| ------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `theme-color` per scheme (`#f9faf8` light, `#2f3e46` dark)    | `viewport` in `src/app/layout.tsx`            | Status and browser bars match the page. **Must equal `--background`.**                                    |
-| `appleWebApp` (`capable`, title, `statusBarStyle: "default"`) | `metadata` in `src/app/layout.tsx`            | An iOS home-screen launch opens as an app with a solid status bar                                         |
-| Web app manifest (`display: "standalone"`, colours, icons)    | `src/app/manifest.ts`                         | The installed app has no browser bars on Android or iOS                                                   |
-| `html` and `body` background (`bg-background`)                | `globals.css` base layer                      | Over-scroll and the edges show the app colour                                                             |
-| `viewport-fit=cover` plus `env(safe-area-inset-*)`            | `viewport`; `(app)/layout.tsx`; `app-nav.tsx` | Edge to edge. The tab bar background runs under the iPhone home bar, and content stays clear of the notch |
+| Technique                                                     | Where                                         | Why                                                                                                                                                         |
+| ------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `theme-color` per scheme (`#f9faf8` light, `#2f3e46` dark)    | `viewport` in `src/app/layout.tsx`            | Status and browser bars match the page. **Must equal `--background`.**                                                                                      |
+| `appleWebApp` (`capable`, title, `statusBarStyle: "default"`) | `metadata` in `src/app/layout.tsx`            | An iOS home-screen launch opens as an app with a solid status bar                                                                                           |
+| Web app manifest (`display: "standalone"`, colours, icons)    | `src/app/manifest.ts`                         | The installed app has no browser bars on Android or iOS                                                                                                     |
+| `html` and `body` background (`bg-background`)                | `globals.css` base layer                      | Over-scroll and the edges show the app colour                                                                                                               |
+| `viewport-fit=cover` plus `env(safe-area-inset-*)`            | `viewport`; `(app)/layout.tsx`; `app-nav.tsx` | Edge to edge. The tab bar sits above the iPhone home bar or Android gesture bar, the page background shows beneath it, and content stays clear of the notch |
+| `color_scheme_dark` in the manifest (`#2f3e46`)               | `src/app/manifest.ts`                         | The dark colour for Android's navigation bar on an installed app (see below)                                                                                |
 
-- Safe-area padding uses `max(<normal spacing>, env(safe-area-inset-*))`, so it never shrinks the
+- Content padding uses `max(<normal spacing>, env(safe-area-inset-*))`, so it never shrinks the
   normal spacing. `main`'s bottom padding is `calc(7rem + env(safe-area-inset-bottom))`, so content
-  clears the taller tab bar.
-- The `theme-color` meta follows the **system** setting through its media query. If a manual
-  light/dark switch is added later, the meta tag must follow it too, because next-themes doesn't
-  update it.
+  clears the tab bar.
+- **The tab bar is lifted with `bottom: env(safe-area-inset-bottom, 0px)`, not padded.** Chrome's
+  edge-to-edge guide says: "Don't set the `padding` to a safe-area-inset value", because it
+  causes layout thrashing and stops the chin sliding away
+  (developer.chrome.com/docs/css-ui/edge-to-edge).
+- **Android installed-app navigation bar:** Android paints this bar from the **manifest**
+  colours, fixed at install, not from the page. It uses `theme_color` up to Android 14 and
+  `background_color` behind a transparent bar from Android 15 (as reported by other projects;
+  Google's docs don't cover it). The base colours are light (`#f9faf8`), and `color_scheme_dark`
+  supplies `#2f3e46`. **Chrome on Android support for `color_scheme_dark` is unconfirmed**
+  (2026-11-03): it is in the W3C manifest spec, but no shipping notice was found.
+  - If the bar stays white in dark mode after reinstalling, the fallback is a dark base colour.
+    That costs a dark strip under the light theme. This is your decision.
+- The `theme-color` metas are rendered per system scheme (media queries). `ThemeColorSync`
+  then sets both to the resolved theme, so a manual Light or Dark choice wins (§4). The two
+  colours live in `src/lib/theme-colors.ts`, which the viewport, the manifest and the sync use.
+  They must equal `--background` in `globals.css`.
 - **App icon:** your "Sleeping Brain House" (a white house with a sleeping brain, on black),
   supplied 2026-11-03. The source image had a white margin around a rounded black square. Phones
   apply their own rounded mask, so the artwork was cut out and placed on a **full-bleed square**

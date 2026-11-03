@@ -188,7 +188,7 @@ auth (gap G-2).
 - [ ] P2.8 Set up the pgTAP harness in `supabase/tests/`. First test: user A cannot read or update
       user B's profile. Add a `db:test` script.
 - [ ] P2.9 Settings page: the signed-in email, a timezone setting (pre-filled from the browser,
-      editable), and sign-out.
+      editable), and sign-out. (Settings → Appearance already exists: D-015.)
 
 **Acceptance**
 

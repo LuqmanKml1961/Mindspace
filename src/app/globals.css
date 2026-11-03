@@ -129,3 +129,10 @@
     @apply bg-background font-sans;
   }
 }
+
+/* Theme change: replace the default cross-fade with the circular reveal in theme-toggle.tsx. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}

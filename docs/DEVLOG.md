@@ -11,10 +11,13 @@
 
 **Next actions (in order)**
 
-1. **Retest the screen edges on your phone** (D-014). Push, wait for Vercel, then **remove the old
-   home-screen icon and add it again** (the home-screen app is configured when added). Check the
-   top and bottom edges in light and dark. If they look right, the Phase 1 acceptance check is
-   done: 360px with no horizontal scroll, nav, focus, active route. Then mark Phase 1 Done.
+1. **Retest the bottom bar on Android in dark mode** (D-014 follow-up). Push, wait for Vercel,
+   then **uninstall the app and install it again**, because Android fixes the navigation-bar
+   colour at install. If the bottom bar is now charcoal, it's solved. If it is still white,
+   choose the fallback in D-014. The top already looks right. Also try Settings → Appearance
+   (D-015): Light and Dark should switch the page and the status bar. The Android bottom bar
+   can't follow a manual choice. After that, the Phase 1 acceptance check is done and Phase 1
+   can be marked Done.
 2. **Upgrade to the Next.js security release** as soon as it is on npm (see Known issues). This
    is urgent, because the app is now public.
 3. **Phase 2 (P2.1):** create a hosted Supabase free-tier project (your action), then set up
@@ -123,6 +126,87 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): appearance setting (theme toggle)
+
+- **Phase:** 1 (extra, at your request) · **Tasks:** D-015
+- **Done:**
+  - Read the next-themes README: `useTheme` returns `theme`, `setTheme` and `resolvedTheme`, and
+    the theme is unknown on the server, so the UI must render after mount.
+  - Added the shadcn `toggle-group` (dry run first: 2 new files, nothing overwritten). Read
+    Base UI 1.9.0's types: single-select by default, `value` is an array, and it sets
+    `aria-pressed`/`data-pressed`.
+  - Restyled `toggle.tsx`: heights `h-10`/`h-11` (DESIGN.md control rule), and the pressed state
+    to `bg-primary` because `bg-muted` measured about 1.1:1.
+  - Added `src/components/theme/theme-toggle.tsx` (Light/Dark/System with Hugeicons; renders
+    after hydration via `useSyncExternalStore`; ignores the empty array from deselecting) and
+    `theme-color-sync.tsx`, which sets the `theme-color` metas to the resolved theme.
+  - Added `src/lib/theme-colors.ts` as the single TS source for `#f9faf8`/`#2f3e46`, used by the
+    viewport, the manifest and the sync. Settings now has an Appearance section, labelled by its
+    heading.
+  - Verified in Chrome against a production build (system dark):
+    - System is the default (pressed, 40px, dark primary fill).
+    - Light gives `<html class="light">`, page `#f9faf8` and both metas `#f9faf8`, and persists
+      after reload.
+    - Dark and System behave correctly.
+    - No console messages on reload.
+    - Lint, typecheck and build pass.
+- **Decisions:** D-015 Accepted. I added System as a third option, kept as the default per D-002.
+- **Problems / findings:**
+  - The README's `useEffect` + `setState` mounted pattern would conflict with eslint-config-next
+    16's hooks rules, so this uses `useSyncExternalStore`.
+  - shadcn's ToggleGroup uses Radix's `data-[state=on]` (inert with Base UI). The working pressed
+    style comes from `aria-pressed:` in `toggle.tsx`.
+  - The theme choice is per device, not per account (revisit in Phase 2).
+- **Theme-change animation (your request, same session):** a circular reveal growing from the
+  pressed button using View Transitions. `setTheme` runs inside `flushSync`, because next-themes
+  applies the class in a `useEffect` (read from its dist source). The cross-fade is disabled in
+  `globals.css`. It is skipped for reduced motion, unsupported browsers, or no visible change.
+  - Verified in Chrome with test-only instrumentation: the class flips inside the transition
+    callback, and the `clip-path` circle starts at the button centre (552.9, 244) with a radius
+    equal to the farthest corner, over 600ms on `::view-transition-new(root)`.
+  - The screenshot tool didn't capture a frame mid-animation, so the visual feel is yours to
+    judge on the phone.
+  - A third transition (back to Light) was recorded during the test that I didn't trigger.
+    You were probably using the test tab.
+  - **Your feedback: "too slow; should grow from the button outline".** Changed to 400ms with
+    ease-out `cubic-bezier(0.2, 0, 0, 1)`, and the shape to `inset(<button box> round
+<border-radius>)` → `inset(0 0 0 0 round 0)`. Without a button origin it switches instantly.
+    Re-verified in Chrome: the start shape `inset(224px 942.2px 422px 512px round 26px)` exactly
+    equals the Light button's measured box and radius, 400ms, and the class flips inside the
+    callback.
+- **Commits:** `fix(pwa): add dark manifest colours and lift tab bar above the safe area (D-014)`
+  and `feat(settings): add appearance toggle with animated theme change (D-015)`
+- **Next:** your Android reinstall test, then the security upgrade, then P2.1.
+
+### 2026-11-03 — Session 2 (cont.): Android bottom bar in dark mode
+
+- **Phase:** 1 · **Tasks:** D-014 follow-up
+- **Done:**
+  - Your retest on Android 17 (installed app): the top is perfect. The bottom bar is white in both
+    themes, so it comes from Android and not from the page. card-share has the same white bar but
+    is light-only, so it blends.
+  - Research:
+    - Chrome's edge-to-edge guide covers browser tabs only, not installed apps. It says to lift
+      bottom bars with `bottom: env(safe-area-inset-bottom)` and not to pad them.
+    - Project reports (ompweb #313, STUPA-Workflow #507, tablito #129, zapiszprzepis #475,
+      lastro #19) say Android paints an installed app's navigation bar from the manifest
+      colours, fixed at install: `theme_color` up to Android 14, `background_color` from
+      Android 15.
+    - `color_scheme_dark` is in the W3C spec, but its Chrome Android support is unconfirmed.
+  - Added `color_scheme_dark: { background_color, theme_color: "#2f3e46" }` to `manifest.ts`,
+    using a small type extension because Next's type lacks the field. Switched the tab bar from
+    `pb-[env(…)]` to `bottom-[env(safe-area-inset-bottom,0px)]`.
+  - Verified on a production server: the manifest serves `color_scheme_dark`, the CSS has
+    `bottom:env(safe-area-inset-bottom,0px)`, and the old padding rule is gone. Lint, typecheck
+    and build pass.
+- **Decisions:** none final. The fallback (dark base colour vs light base) waits for your
+  reinstall test (D-014 Open).
+- **Problems / findings:** the navigation-bar colour can't be changed from page CSS or meta tags
+  on Android 15+ installed apps. Only the manifest controls it, and only after reinstalling or
+  Chrome's periodic app update.
+- **Commits:** `fix(pwa): add dark manifest colours and lift tab bar above the safe area (D-014)`
+- **Next:** reinstall test on Android in dark mode.
 
 ### 2026-11-03 — Session 2 (cont.): real app icon
 

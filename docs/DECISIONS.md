@@ -27,6 +27,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-012 | shadcn/ui library and preset      | Accepted | Before more components are added                 |
 | D-013 | Colour palette and control height | Accepted | P1.6                                             |
 | D-014 | Installable app and screen edges  | Accepted | —                                                |
+| D-015 | Appearance setting (theme toggle) | Accepted | —                                                |
 
 ---
 
@@ -232,6 +233,27 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   bar, so also use `viewport-fit=cover` with `env(safe-area-inset-*)` padding. Details are in
   DESIGN.md §7a. The placeholder "M" icons were replaced the same day with your "Sleeping Brain
   House" icon.
+- **Follow-up (2026-11-03):** your retest on Android 17 showed the top was right, but a white bar
+  at the bottom stayed white in dark mode. That means it comes from the manifest colours Android
+  uses for the navigation bar, not from the page. card-share avoids it only because it is
+  light-only. Added `color_scheme_dark` (`#2f3e46`), which is spec-correct but unconfirmed on
+  Chrome Android, and moved the tab bar to `bottom: env(safe-area-inset-bottom)`, as Chrome's
+  guide recommends. **Open:** if it is still white in dark mode after reinstalling, choose
+  between a dark base colour (dark strip in light mode) and keeping the light base (white strip
+  in dark mode).
+- **Date:** 2026-11-03
+
+## D-015 — Appearance setting (theme toggle)
+
+- **Context:** You asked for a Settings toggle to choose dark or light mode. D-002 makes "follow
+  the system" the default.
+- **Decision:** Accepted. Settings → Appearance has **Light / Dark / System**, with System as the
+  default so nothing changes for anyone who doesn't choose. The choice is stored per device in
+  `localStorage` by next-themes. It is not synced to the account; that can be revisited once
+  accounts exist (Phase 2). The status-bar `theme-color` follows the choice via `ThemeColorSync`.
+  Android's installed-app navigation bar cannot (D-014, DESIGN.md §4). At your request, a change
+  is animated by growing the pressed button's outline to fill the screen (View Transitions,
+  400ms). It is skipped for reduced motion and in unsupported browsers.
 - **Date:** 2026-11-03
 
 ---

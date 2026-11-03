@@ -2,7 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Figtree } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import { ThemeColorSync } from "@/components/theme/theme-color-sync";
 import { siteConfig } from "@/lib/site";
+import { themeColors } from "@/lib/theme-colors";
 import { cn } from "@/lib/utils";
 
 const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
@@ -22,11 +24,10 @@ export const metadata: Metadata = {
   },
 };
 
-// Must match --background in globals.css (light and dark).
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f9faf8" },
-    { media: "(prefers-color-scheme: dark)", color: "#2f3e46" },
+    { media: "(prefers-color-scheme: light)", color: themeColors.light },
+    { media: "(prefers-color-scheme: dark)", color: themeColors.dark },
   ],
   viewportFit: "cover",
 };
@@ -51,6 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
+          <ThemeColorSync />
           {children}
         </ThemeProvider>
       </body>
