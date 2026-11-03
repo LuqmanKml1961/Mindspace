@@ -1,5 +1,3 @@
-// Browser and OS chrome colours. Must equal --background in globals.css.
-export const themeColors = {
-  light: "#f9faf8",
-  dark: "#2f3e46",
-} as const;
+// Status bar and Android navigation bar colour, the same in light and dark (D-016).
+// It is the dark --background in globals.css (Charcoal Blue).
+export const systemBarColor = "#2f3e46";

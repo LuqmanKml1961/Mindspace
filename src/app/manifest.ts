@@ -1,17 +1,8 @@
 import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site";
-import { themeColors } from "@/lib/theme-colors";
+import { systemBarColor } from "@/lib/theme-colors";
 
-// color_scheme_dark is in the W3C manifest spec but not in Next's type yet.
-// Android paints an installed app's navigation bar from these colours.
-type Manifest = MetadataRoute.Manifest & {
-  color_scheme_dark?: Pick<
-    MetadataRoute.Manifest,
-    "background_color" | "theme_color"
-  >;
-};
-
-export default function manifest(): Manifest {
+export default function manifest(): MetadataRoute.Manifest {
   return {
     name: siteConfig.name,
     short_name: siteConfig.name,
@@ -19,12 +10,8 @@ export default function manifest(): Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: themeColors.light,
-    theme_color: themeColors.light,
-    color_scheme_dark: {
-      background_color: themeColors.dark,
-      theme_color: themeColors.dark,
-    },
+    background_color: systemBarColor,
+    theme_color: systemBarColor,
     icons: [
       {
         src: "/icons/icon-192.png",
