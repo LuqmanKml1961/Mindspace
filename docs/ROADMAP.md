@@ -111,7 +111,7 @@ screens. No backend yet.
       (`base-nova`), which also generated `Button`, then switched to `base-maia` with
       `shadcn apply --preset maia` (D-012). Fixed a font bug that `init` caused:
       it wrote `--font-sans: var(--font-sans)`, but the layout defined `--font-geist-sans`.
-- [ ] P1.6 Create the design tokens from D-002: colours (light, plus dark if confirmed), type
+- [x] P1.6 Create the design tokens from D-002: colours (light, plus dark if confirmed), type
       scale, spacing and radius as CSS variables in the Tailwind theme. Write `docs/DESIGN.md`
       covering the tokens and tone of voice (spec §3 and §6). **Dark mode:** shadcn set up a
       class-based variant (`@custom-variant dark (&:is(.dark *))` plus a `.dark {}` token block),
@@ -121,7 +121,9 @@ screens. No backend yet.
       and it keeps `shadcn apply` theme updates working. Check the `next-themes` version and its
       React 19.3 / Next 16.4 support before installing. **Control heights:** Maia's default is
       36px (`h-9`). Decide whether to raise it for touch. If so, change every control together,
-      following the skill's "control heights move together" table.
+      following the skill's "control heights move together" table. **Done:** your five-colour
+      palette, mapped and contrast-checked (D-013, DESIGN.md §2–3); `next-themes` 0.4.6 with
+      the system default; Button default 40px and `lg` 44px (option B); `docs/DESIGN.md`.
 - [ ] P1.7 Build the app shell: an `(app)` route group layout with a bottom tab bar on mobile and
       a sidebar on desktop. Nav items: Home, Brain Dump, Tasks, Mind Clarity, Settings.
 - [ ] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.

@@ -25,6 +25,7 @@ decisions or schema changes in DECISIONS.md and DATA_MODEL.md.
 | `docs/DECISIONS.md`                         | Decision log and spec gaps resolved                           |
 | `docs/ARCHITECTURE.md`                      | Onion layers, folder structure, dependency rules, conventions |
 | `docs/DATA_MODEL.md`                        | Schema draft, RLS template, RLS test checklist                |
+| `docs/DESIGN.md`                            | Palette, tokens, contrast, dark mode, controls, tone of voice |
 
 ## Project rules
 

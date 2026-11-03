@@ -11,20 +11,21 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 ## Summary
 
-| ID    | Topic                        | Status   | Needed before                                    |
-| ----- | ---------------------------- | -------- | ------------------------------------------------ |
-| D-001 | Product name                 | Accepted | P6.1 (manifest). Working name is fine until then |
-| D-002 | Visual direction             | Accepted | P1.6 (design tokens)                             |
-| D-003 | Accounts                     | Accepted | Phase 2                                          |
-| D-004 | Scope and build order        | Accepted | Phase 1                                          |
-| D-005 | Technology stack             | Accepted | P1.1 (scaffold)                                  |
-| D-006 | Onion Architecture           | Accepted | —                                                |
-| D-007 | Sign-in method               | Accepted | P2.6                                             |
-| D-008 | Reminders in the MVP         | Accepted | Phase 4                                          |
-| D-009 | Hosting                      | Accepted | P1.10 (deployment previews)                      |
-| D-010 | Package manager              | Accepted | P1.1                                             |
-| D-011 | Local database and tests     | Accepted | Phase 2                                          |
-| D-012 | shadcn/ui library and preset | Accepted | Before more components are added                 |
+| ID    | Topic                             | Status   | Needed before                                    |
+| ----- | --------------------------------- | -------- | ------------------------------------------------ |
+| D-001 | Product name                      | Accepted | P6.1 (manifest). Working name is fine until then |
+| D-002 | Visual direction                  | Accepted | P1.6 (design tokens)                             |
+| D-003 | Accounts                          | Accepted | Phase 2                                          |
+| D-004 | Scope and build order             | Accepted | Phase 1                                          |
+| D-005 | Technology stack                  | Accepted | P1.1 (scaffold)                                  |
+| D-006 | Onion Architecture                | Accepted | —                                                |
+| D-007 | Sign-in method                    | Accepted | P2.6                                             |
+| D-008 | Reminders in the MVP              | Accepted | Phase 4                                          |
+| D-009 | Hosting                           | Accepted | P1.10 (deployment previews)                      |
+| D-010 | Package manager                   | Accepted | P1.1                                             |
+| D-011 | Local database and tests          | Accepted | Phase 2                                          |
+| D-012 | shadcn/ui library and preset      | Accepted | Before more components are added                 |
+| D-013 | Colour palette and control height | Accepted | P1.6                                             |
 
 ---
 
@@ -206,6 +207,17 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   unused), and a pill-shaped Button. The shadcn `cn` package stays. Measured in the generated
   `button.tsx`: the default control height is **36px** (`h-9`), `lg` is **40px** (`h-10`), and
   Nova's default was 32px. Decide in P1.6 whether to raise control heights for touch.
+- **Date:** 2026-11-03
+
+## D-013 — Colour palette and control height
+
+- **Context:** P1.6. My first proposal was warm neutrals with a sage accent. You replaced it with
+  your own five-colour palette, and chose option B for control heights.
+- **Decision:** Accepted. The palette is Ash Grey `#cad2c5`, Muted Teal `#84a98c`, Deep Teal
+  `#52796f`, Dark Slate Grey `#354f52` and Charcoal Blue `#2f3e46`. It is mapped onto shadcn
+  tokens, with derived tints for surfaces and an added soft terracotta for destructive actions
+  only. Every text pair passes 4.5:1 in both themes (DESIGN.md §2–3). The default control height
+  is 40px (`lg` 44px), and future form controls must match.
 - **Date:** 2026-11-03
 
 ---

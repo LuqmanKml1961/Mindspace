@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Figtree } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -26,8 +27,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         "font-sans",
         figtree.variable,
       )}
+      suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
