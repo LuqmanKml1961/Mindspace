@@ -19,21 +19,28 @@ const options = [
 
 const noopSubscribe = () => () => {};
 
-// Reveals the new theme by growing the pressed button's outline until it fills the screen.
+// Reveals the new theme by morphing the pressed pill button into a circle that covers the screen.
 function revealFrom(origin: Element, applyTheme: () => void) {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
   const rect = origin.getBoundingClientRect();
   const { borderRadius } = getComputedStyle(origin);
-  const buttonOutline = `inset(${rect.top}px ${window.innerWidth - rect.right}px ${window.innerHeight - rect.bottom}px ${rect.left}px round ${borderRadius})`;
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const radius = Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
+
+  const pill = `inset(${rect.top}px ${width - rect.right}px ${height - rect.bottom}px ${rect.left}px round ${borderRadius})`;
+  const circle = `inset(${y - radius}px ${width - x - radius}px ${height - y - radius}px ${x - radius}px round ${radius}px)`;
 
   // next-themes applies the class in an effect; flushSync makes it land before the snapshot.
   const transition = document.startViewTransition(() => flushSync(applyTheme));
   transition.ready
     .then(() => {
       document.documentElement.animate(
-        { clipPath: [buttonOutline, "inset(0 0 0 0 round 0)"] },
+        { clipPath: [pill, circle] },
         {
-          duration: 400,
-          easing: "cubic-bezier(0.2, 0, 0, 1)",
+          duration: 450,
+          easing: "cubic-bezier(0.4, 0, 0.2, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
       );

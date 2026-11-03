@@ -11,17 +11,22 @@
 
 **Next actions (in order)**
 
-1. **Retest the bottom bar on Android in dark mode** (D-014 follow-up). Push, wait for Vercel,
-   then **uninstall the app and install it again**, because Android fixes the navigation-bar
-   colour at install. If the bottom bar is now charcoal, it's solved. If it is still white,
-   choose the fallback in D-014. The top already looks right. Also try Settings → Appearance
-   (D-015): Light and Dark should switch the page and the status bar. The Android bottom bar
-   can't follow a manual choice. After that, the Phase 1 acceptance check is done and Phase 1
-   can be marked Done.
+1. **Retest on Android** (D-016, D-015). Push, wait for Vercel, then **uninstall the app and
+   install it again**, because Android fixes the bar colours at install. The top and bottom bars
+   should be Charcoal Blue in both themes. Then try Settings → Appearance: the pill should morph
+   into a circle that fills the screen. After that, the Phase 1 acceptance check is done and
+   Phase 1 can be marked Done.
 2. **Upgrade to the Next.js security release** as soon as it is on npm (see Known issues). This
    is urgent, because the app is now public.
 3. **Phase 2 (P2.1):** create a hosted Supabase free-tier project (your action), then set up
    the CLI and the local stack.
+
+**Open questions (yours to decide)**
+
+- **App icon:** keep the current black "Sleeping Brain House", or switch to the outline version
+  (source: `Downloads\Sleepy Brain Home Icon.png`, transparent 1536×1024) on a palette
+  background: **2** Deep Teal `#52796f` (recommended), **3** Charcoal Blue `#2f3e46`, or **4**
+  off-white `#f9faf8`. The outline file could also become the in-app logo mark.
 
 **Running the app:** use **pnpm** (`pnpm dev`), not yarn. The `packageManager` field enforces
 pnpm. If the dev server shows old colours, restart it and hard-refresh.
@@ -126,6 +131,40 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 3: always-dark system bars, fluid theme animation
+
+- **Phase:** 1 (polish, from your feedback) · **Tasks:** D-016, D-015 revision
+- **Done:**
+  - **System bars (D-016):** at your request, after you saw card-share's always-blue bars on
+    Android, the bars are now always dark. `theme-color` and the manifest `theme_color` and
+    `background_color` are all `#2f3e46` (`systemBarColor`). Removed the per-scheme metas,
+    `color_scheme_dark` with its type extension, and `ThemeColorSync`.
+  - **Animation v3:** you found v2 (a growing rounded box) "stale, boxy". Now the pill button
+    morphs into a circle centred on it, with radius R equal to the distance to the farthest
+    corner, over 450ms with ease-in-out. Both ends are `inset()` shapes; the circle uses
+    negative insets.
+  - Verified on a production build:
+    - The head has a single `<meta name="theme-color" content="#2f3e46">`, and the manifest is
+      dark with no `color_scheme_dark`.
+    - In Chrome, `CSS.supports` accepts negative `inset()` with `round`.
+    - The start shape equals the Light button (`inset(224px 942.2px 422px 512px round 26px)`).
+    - The end shape is a true circle (diameter 2155.8 = 2 × 1077.9) centred on the button, with
+      all four corners inside it. The animation is `running` at 450ms.
+    - The meta stays `#2f3e46` in light mode.
+    - Lint, typecheck and build pass.
+- **Decisions:** D-016 Accepted (it supersedes parts of D-014 and D-015). D-015 was updated.
+- **Problems / findings:** five transitions were recorded during one click test; you were
+  clicking in the test tab, and each one switched cleanly. iOS status-bar behaviour with an
+  always-dark `theme-color` is untested.
+  - Commit slip, fixed before pushing: `git add` failed on the already-removed
+    `theme-color-sync.tsx`, so a commit (`3d934b5`) went in with the deletion but without
+    `layout.tsx`, and wouldn't build on its own. I undid it with `git reset --soft` (no changes
+    lost) and recommitted in order. I checked that the bar-fix commit typechecks and builds
+    alone. Lesson: stage deletions done with `git rm` once, and don't `git add` them again.
+- **Commits:** `fix(pwa): always use the dark colour for status and navigation bars (D-016)` and
+  `feat(settings): morph the theme change from the pill button into a circle (D-015)`
+- **Next:** Android reinstall test, then the security upgrade, then P2.1.
 
 ### 2026-11-03 — Session 2 (cont.): appearance setting (theme toggle)
 

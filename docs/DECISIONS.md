@@ -28,6 +28,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-013 | Colour palette and control height | Accepted | P1.6                                             |
 | D-014 | Installable app and screen edges  | Accepted | —                                                |
 | D-015 | Appearance setting (theme toggle) | Accepted | —                                                |
+| D-016 | System bars always dark           | Accepted | —                                                |
 
 ---
 
@@ -250,10 +251,21 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Decision:** Accepted. Settings → Appearance has **Light / Dark / System**, with System as the
   default so nothing changes for anyone who doesn't choose. The choice is stored per device in
   `localStorage` by next-themes. It is not synced to the account; that can be revisited once
-  accounts exist (Phase 2). The status-bar `theme-color` follows the choice via `ThemeColorSync`.
-  Android's installed-app navigation bar cannot (D-014, DESIGN.md §4). At your request, a change
-  is animated by growing the pressed button's outline to fill the screen (View Transitions,
-  400ms). It is skipped for reduced motion and in unsupported browsers.
+  accounts exist (Phase 2). The system bars stay dark regardless (D-016). At your request, a change
+  is animated: the pressed pill button morphs into a circle that fills the screen (View
+  Transitions, 450ms). This is the third iteration, after your feedback on a slow circle and a
+  boxy outline. It is skipped for reduced motion and in unsupported browsers.
+- **Date:** 2026-11-03
+
+## D-016 — System bars always dark
+
+- **Context:** After testing on Android, you wanted the top and bottom bars dark in both themes,
+  like card-share's always-blue bars, so neither theme shows a mismatched strip. A manifest can't
+  reliably follow the theme anyway (D-014).
+- **Decision:** Accepted. `theme-color` and the manifest's `theme_color` and `background_color`
+  are all Charcoal Blue `#2f3e46` (`systemBarColor` in `src/lib/theme-colors.ts`). This supersedes
+  the per-scheme `theme-color`, `color_scheme_dark` (D-014 follow-up) and `ThemeColorSync`
+  (D-015), which were removed. Not yet tested on iOS.
 - **Date:** 2026-11-03
 
 ---
