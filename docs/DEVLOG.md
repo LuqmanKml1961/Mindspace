@@ -2,31 +2,35 @@
 
 ## ▶ Resume here
 
-| Item               | Value                         |
-| ------------------ | ----------------------------- |
-| **Current phase**  | Phase 1 — Foundation          |
-| **Phase progress** | 8 / 11 tasks done (P1.1–P1.8) |
-| **Last updated**   | 2026-11-03 (Session 2)        |
-| **Blocked on**     | Nothing                       |
+| Item               | Value                                              |
+| ------------------ | -------------------------------------------------- |
+| **Current phase**  | Phase 1 — Foundation                               |
+| **Phase progress** | 11 / 11 tasks done. Phase acceptance check pending |
+| **Last updated**   | 2026-11-03 (Session 2)                             |
+| **Blocked on**     | Nothing                                            |
 
 **Next actions (in order)**
 
-1. **P1.9**: `.env.example`, and add `!.env.example` and `.claude/settings.local.json` to
-   `.gitignore`.
-2. **P1.11**: rewrite `README.md` (pnpm commands; the template still says `yarn dev`).
-3. **P1.10**: deployment previews on Vercel (your action). First upgrade to the Next.js
-   security release (see Known issues).
+1. **Phase 1 acceptance check.** Not yet done in a real browser: at 360px and on desktop with no
+   horizontal scroll, keyboard nav with visible focus, and the active route marked. Check on
+   your phone at https://m1ndspace.vercel.app, or ask Claude to run a browser check. Then mark
+   Phase 1 Done.
+2. **Upgrade to the Next.js security release** as soon as it is on npm (see Known issues). This
+   is urgent, because the app is now public.
+3. **Phase 2 (P2.1):** create a hosted Supabase free-tier project (your action), then set up
+   the CLI and the local stack.
 
 **Running the app:** use **pnpm** (`pnpm dev`), not yarn. The `packageManager` field enforces
 pnpm. If the dev server shows old colours, restart it and hard-refresh.
 
 **Known issues**
 
-- **Next.js security release due 2026-11-03.** It fixes seven medium vulnerabilities; affected
-  versions are not yet stated (source: nextjs.org/blog/upcoming-nextjs-security-release-november-2026).
-  It was not yet on npm when checked (`latest` = 16.4.4). Upgrade `next` and `eslint-config-next`
-  to the patched version once it is out, and **before P1.10, the first deploy**. Nothing is
-  deployed yet, so there is no exposure now.
+- **The Next.js security release is pending and the app is now live on 16.4.4.** Next.js
+  announced seven medium vulnerabilities for 2026-11-03; affected versions are not yet stated
+  (source: nextjs.org/blog/upcoming-nextjs-security-release-november-2026). It was not on npm
+  at the last check (`latest` = 16.4.4). You deployed to https://m1ndspace.vercel.app on
+  2026-11-03. There is no sign-in and no user data yet, so exposure is low, but upgrade `next`
+  and `eslint-config-next` to the patched version as soon as it is published, then redeploy.
 
 ## How to resume (for you or Claude)
 
@@ -62,18 +66,19 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 
 Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 
-| Tool         | Version / state                                           |
-| ------------ | --------------------------------------------------------- |
-| Node.js      | v22.23.1                                                  |
-| npm          | 10.9.8                                                    |
-| pnpm         | 11.17.0 (latest stable on npm: 12.16.1)                   |
-| yarn         | 4.12.0                                                    |
-| Docker       | 29.6.1 (daemon not checked)                               |
-| Git          | 2.44.0.windows.1                                          |
-| Supabase CLI | not installed (plan: project dev dependency, D-011)       |
-| GitHub CLI   | not installed                                             |
-| Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git |
-| Git history  | branch `main`, nothing pushed yet (see `git log`)         |
+| Tool         | Version / state                                                           |
+| ------------ | ------------------------------------------------------------------------- |
+| Node.js      | v22.23.1                                                                  |
+| npm          | 10.9.8                                                                    |
+| pnpm         | 11.17.0 (latest stable on npm: 12.16.1)                                   |
+| yarn         | 4.12.0                                                                    |
+| Docker       | 29.6.1 (daemon not checked)                                               |
+| Git          | 2.44.0.windows.1                                                          |
+| Supabase CLI | not installed (plan: project dev dependency, D-011)                       |
+| GitHub CLI   | not installed                                                             |
+| Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git                 |
+| Git history  | branch `main`; you push (Claude doesn't). `cb37847` was pushed 2026-11-03 |
+| Deployment   | https://m1ndspace.vercel.app (Vercel, from `main`; D-009)                 |
 
 **Project dependencies** (as of P1.5, 2026-11-03):
 
@@ -118,6 +123,30 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): gitignore, README, deployment
+
+- **Phase:** 1 · **Tasks:** P1.9, P1.10 (done by you), P1.11
+- **Done:**
+  - P1.9: `.gitignore` now has `!.env.example` and `.claude/settings.local.json`. Verified with
+    `git -c core.excludesFile=/dev/null check-ignore -v`: `.env.example` is allowed; `.env`,
+    `.env.local` and `.env.production.local` are ignored; `settings.local.json` is ignored by the
+    repo rule; `settings.json` is still tracked. `.env.example` itself moves to P2.2.
+  - P1.10: you connected Vercel and deployed https://m1ndspace.vercel.app. Verified read-only:
+    `/` returns a 307 to `/home`, the title is "Home · Mindspace", both navs are present, and
+    `origin/main` = local `main` = `cb37847`.
+  - P1.11: rewrote `README.md` with the tagline, live URL, status, stack, prerequisites (Node
+    20.9+ per Next.js `engines`; pnpm 11 pinned), pnpm-only commands, scripts, the pre-commit
+    checks and a docs map.
+- **Decisions:** none new.
+- **Problems / findings:**
+  - The deploy happened before the Next.js security release existed, so the upgrade is now
+    urgent rather than "before the first deploy".
+  - The Phase 1 acceptance checks for layout (360px, no horizontal scroll, keyboard, focus) are
+    not yet verified in a real browser. Only the HTML was checked.
+- **Commits:** `chore: ignore personal Claude settings and allow .env.example (P1.9)` and
+  `docs: rewrite README and record the Vercel deployment (P1.10, P1.11)`
+- **Next:** Phase 1 acceptance check, then the security upgrade, then P2.1.
 
 ### 2026-11-03 — Session 2 (cont.): app shell and placeholder screens
 

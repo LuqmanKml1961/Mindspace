@@ -133,15 +133,21 @@ screens. No backend yet.
       Home uses the spec §6 copy ("Take a breath." / "You don't have to figure everything out
       right now."). `/` redirects to `/home`. Done: pages use the title template
       `%s · Mindspace`, and the unused template SVGs are removed from `public/`.
-- [ ] P1.9 Commit a `.env.example` with no values. The generated `.gitignore` ignores `.env*`,
+- [x] P1.9 Commit a `.env.example` with no values. The generated `.gitignore` ignores `.env*`,
       which would also hide `.env.example`, so add `!.env.example`. Also add
       `.claude/settings.local.json` (personal Claude settings; for now only this machine's global
-      git ignore covers it). The variables themselves come in Phase 2.
-- [ ] P1.10 Deployment previews: connect the `origin` GitHub repo to the host chosen in D-009. This
+      git ignore covers it). The variables themselves come in Phase 2. **Done:** both
+      `.gitignore` rules were added and verified with `git check-ignore` (global excludes off).
+      `.env.example` itself moves to **P2.2**, because there are no variables yet and an empty
+      file adds nothing.
+- [x] P1.10 Deployment previews: connect the `origin` GitHub repo to the host chosen in D-009. This
       is your action (you push). Confirm a preview build succeeds. **Before the first deploy,**
       upgrade `next` and `eslint-config-next` to the Next.js November 2026 security release
-      (see DEVLOG Known issues).
-- [ ] P1.11 Write a root `README.md`: prerequisites, setup, scripts, and links to the docs.
+      (see DEVLOG Known issues). **Done by you on 2026-11-03:** https://m1ndspace.vercel.app
+      serves `cb37847` (verified: `/` returns a 307 to `/home`, with the right title and nav). It
+      was deployed on 16.4.4 **before** the security release existed, so the upgrade is now
+      urgent (DEVLOG Known issues).
+- [x] P1.11 Write a root `README.md`: prerequisites, setup, scripts, and links to the docs.
 
 **Acceptance**
 
@@ -163,7 +169,8 @@ auth (gap G-2).
 - [ ] P2.1 Add the Supabase CLI as a dev dependency and run `supabase init`. The local stack runs on
       Docker (`supabase start`). You create a hosted free-tier project for preview and production.
 - [ ] P2.2 Environment config: put the Supabase URL and public key in `.env.local` and the host
-      settings. Add a typed, validated env module in `src/infrastructure/config/`. Take the variable
+      settings. Create `.env.example` listing the variable names with no values (moved from P1.9;
+      `.gitignore` already allows it). Add a typed, validated env module in `src/infrastructure/config/`. Take the variable
       names from the current Supabase Next.js guide, since Supabase's key naming has changed
       (anon → publishable). Verify before using.
 - [ ] P2.3 Create the Supabase clients with `@supabase/ssr` in `src/infrastructure/supabase/`: a
