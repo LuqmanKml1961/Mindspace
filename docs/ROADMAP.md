@@ -68,15 +68,30 @@ messages refer to tasks by ID, e.g. `feat(thoughts): add capture box (P3.6)`.
 screens. No backend yet.
 **Needs:** D-002, D-005, D-010, and D-009 for P1.10.
 
-- [ ] P1.1 Scaffold with `create-next-app` using pnpm: TypeScript, App Router, ESLint, Tailwind CSS,
+- [x] P1.1 Scaffold with `create-next-app` using pnpm: TypeScript, App Router, ESLint, Tailwind CSS,
       `src/` directory, `@/*` import alias. Record the installed Next.js, React and Tailwind
       versions in the DEVLOG.
-      _Constraints (checked in create-next-app 16.4.4 source, 2026-11-03):_ it refuses a folder
-      that holds files outside its allow-list. `.claude/`, `.git`, `.gitignore` and `docs/` are
-      allowed, but `CLAUDE.md` and `mindspace_product_and_development_plan.md` are not. Move those
-      two files out temporarily, scaffold, then move them back (they are committed, so
-      `git status` confirms nothing is lost). It also **overwrites** any existing `.gitignore`.
-- [ ] P1.2 Confirm TypeScript strict mode. Add a `typecheck` script (`tsc --noEmit`).
+      _Constraints (checked in create-next-app 16.4.4 source, 2026-11-03):_
+      - The package name comes from the folder name, and npm names cannot contain capitals, so
+        scaffolding in `Mindspace/` fails.
+      - It refuses a folder holding files outside its allow-list. `CLAUDE.md` and the spec file
+        are not on the list.
+      - It **overwrites** any existing `.gitignore`.
+      - Without `--yes` and explicit flags it prompts interactively.
+      - **Approach:** scaffold into a temporary lowercase folder `mindspace/` with
+        `--skip-install --disable-git`, copy the generated files (dotfiles included) into the
+        repo root, then run `pnpm install`. This sidesteps all three problems.
+      - **Flags:** `--ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-pnpm
+        --no-react-compiler --agents-md --no-agent-feedback --yes`, plus the Cache Components
+        choice (on by default in 16.4.4).
+      - Generated `AGENTS.md` points to the version-matched Next.js docs in
+        `node_modules/next/dist/docs/`; use them to check APIs. After install, check what
+        `next dev` regenerates (`node_modules/next/dist/server/lib/generate-agent-files.js`)
+        and confirm it never touches `CLAUDE.md`.
+- [ ] P1.2 Confirm TypeScript strict mode (`strict: true` is already in the generated
+      `tsconfig.json`). Add a `typecheck` script that runs `next typegen && tsc --noEmit`. A bare
+      `tsc` fails on a clean checkout, because types such as `LayoutProps` are generated into
+      `.next/types/` (verified 2026-11-03).
 - [ ] P1.3 Add Prettier (with Tailwind class sorting) and a `format` script, without conflicting
       with ESLint.
 - [ ] P1.4 Enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4). Check them by adding
@@ -96,7 +111,9 @@ screens. No backend yet.
       `.claude/settings.local.json` (personal Claude settings; for now only this machine's global
       git ignore covers it). The variables themselves come in Phase 2.
 - [ ] P1.10 Deployment previews: connect the `origin` GitHub repo to the host chosen in D-009. This
-      is your action (you push). Confirm a preview build succeeds.
+      is your action (you push). Confirm a preview build succeeds. **Before the first deploy,**
+      upgrade `next` and `eslint-config-next` to the Next.js November 2026 security release
+      (see DEVLOG Known issues).
 - [ ] P1.11 Write a root `README.md`: prerequisites, setup, scripts, and links to the docs.
 
 **Acceptance**

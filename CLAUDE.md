@@ -36,6 +36,19 @@ decisions or schema changes in DECISIONS.md and DATA_MODEL.md.
   `chore:`, `refactor:`, `test:`). Never push. No co-authored-by trailers.
 - Product tone: calm and non-judgemental. No streaks, guilt, or medical claims (spec §1, §3).
 
+## Next.js version
+
+The installed Next.js (see the DEVLOG environment snapshot) may be newer than Claude's training
+data. Check APIs against the version-matched docs in `node_modules/next/dist/docs/` (see
+`AGENTS.md`, which `next dev` maintains) before writing Next.js code.
+
 ## Commands
 
-Added in Phase 1 (P1.1–P1.3).
+| Command      | Purpose |
+| ------------ | ------- |
+| `pnpm dev`   | Start the dev server (Turbopack) at http://localhost:3000 |
+| `pnpm build` | Production build |
+| `pnpm start` | Serve the production build |
+| `pnpm lint`  | ESLint |
+
+`typecheck` and `format` are added in P1.2 and P1.3.

@@ -151,6 +151,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Decision:** Accepted: pnpm, using **stable releases only** (no canary, beta or RC) for tools
   and dependencies. Checked on npm, 2026-11-03: the latest stable Next.js is 16.4.4 and the
   latest stable pnpm is 12.16.1. The installed pnpm, 11.17.0, is a stable release, but behind.
+  **Stay on pnpm 11.17.0 for now.** You will upgrade it yourself later.
 - **Date:** 2026-11-03
 
 ## D-011 — Local database and testing

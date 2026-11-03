@@ -4,19 +4,22 @@
 
 | Item              | Value |
 | ----------------- | ----- |
-| **Current phase** | Phase 1 — Foundation (ready to start) |
-| **Phase progress**| 0 / 11 tasks done. Phase 0 is complete |
-| **Last updated**  | 2026-11-03 (Session 1) |
+| **Current phase** | Phase 1 — Foundation |
+| **Phase progress**| 1 / 11 tasks done (P1.1) |
+| **Last updated**  | 2026-11-03 (Session 2) |
 | **Blocked on**    | Nothing |
 
 **Next actions (in order)**
-1. Optional: decide whether to upgrade pnpm from 11.17.0 to the current stable 12.x before
-   P1.1 (D-010).
-2. **P1.1**: scaffold Next.js with pnpm, using the latest stable release (16.4.4 as of
-   2026-11-03). Follow the constraints noted under P1.1 in [`ROADMAP.md`](ROADMAP.md).
+1. **P1.2**: add the `typecheck` script (`next typegen && tsc --noEmit`).
+2. **P1.3**: Prettier with Tailwind class sorting, and a `format` script.
+3. Once it is published, upgrade to the Next.js security release (see Known issues).
 
 **Known issues**
-- None.
+- **Next.js security release due 2026-11-03.** It fixes seven medium vulnerabilities; affected
+  versions are not yet stated (source: nextjs.org/blog/upcoming-nextjs-security-release-november-2026).
+  It was not yet on npm when checked (`latest` = 16.4.4). Upgrade `next` and `eslint-config-next`
+  to the patched version once it is out, and **before P1.10, the first deploy**. Nothing is
+  deployed yet, so there is no exposure now.
 
 ## How to resume (for you or Claude)
 
@@ -39,7 +42,7 @@
 | Phase | Name                            | Status      | Started    | Completed |
 | ----- | ------------------------------- | ----------- | ---------- | --------- |
 | 0     | Planning and decisions          | Done        | 2026-11-03 | 2026-11-03 |
-| 1     | Foundation                      | Not started | —          | —         |
+| 1     | Foundation                      | In progress | 2026-11-03 | —         |
 | 2     | Supabase and authentication     | Not started | —          | —         |
 | 3     | Brain Dump                      | Not started | —          | —         |
 | —     | Checkpoint A: personal use      | Not started | —          | —         |
@@ -65,7 +68,16 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 | Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git |
 | Git history  | no commits yet; branch `main` |
 
-Installed framework versions are recorded here at P1.1.
+**Project dependencies** (installed at P1.1, 2026-11-03):
+
+| Package                                    | Version | Notes |
+| ------------------------------------------ | ------- | ----- |
+| next / eslint-config-next                  | 16.4.4  | published 2026-11-02; the security release is pending (Known issues) |
+| react / react-dom                          | 19.3.0  | exact pin from the template |
+| tailwindcss / @tailwindcss/turbopack       | 4.3.3   | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config` |
+| typescript                                 | 5.9.3   | |
+| eslint                                     | 9.39.5  | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9` |
+| @types/node                                | 20.19.43 | template default (`^20`), while local Node is 22 |
 
 ## Personal-use observations
 
@@ -92,6 +104,31 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2: Phase 1 start, scaffold
+
+- **Phase:** 1 · **Tasks:** P1.1
+- **Done:**
+  - Scaffolded with `create-next-app@16.4.4` into a temporary lowercase folder (flags in ROADMAP
+    P1.1; Cache Components **off**, React Compiler off, AGENTS.md on). Copied the files into the
+    repo root without overwriting anything, then ran `pnpm install` (pnpm 11.17.0).
+  - Verified: `pnpm lint` passes; `pnpm build` passes (`/` is static); `next dev` serves `/`
+    with HTTP 200; `tsc --noEmit` passes once route types exist.
+  - Verified in `node_modules/next/dist/server/lib/generate-agent-files.js` that `next dev` only
+    manages a block inside `AGENTS.md` and never touches `CLAUDE.md`.
+- **Decisions:** Cache Components off (your call; it can be enabled later in `next.config.ts`).
+  Next.js stays on 16.4.4 rather than 16.4.3, with an upgrade to the security release before
+  the first deploy.
+- **Problems / findings:**
+  - pnpm 11 holds back very new releases. Because create-next-app pinned exact versions, pnpm
+    added 12 exact-version entries (`next@16.4.4` and its `@next/*` packages) to
+    `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`. The same file has `allowBuilds`, with
+    the `sharp` and `unrs-resolver` build scripts disabled (template default).
+  - A bare `tsc --noEmit` fails on a clean checkout (`LayoutProps` comes from the generated
+    `.next/types/routes.d.ts`), so the P1.2 script runs `next typegen` first.
+  - The Next.js security release is pending (Known issues).
+- **Commits:** `chore: scaffold Next.js app with pnpm (P1.1)`
+- **Next:** P1.2.
 
 ### 2026-11-03 — Session 1: Planning
 
@@ -121,6 +158,10 @@ Template — copy it above the newest entry:
     conflicting files, overwrites `.gitignore`, and its template ignores `.env*`. Workarounds
     are noted in ROADMAP P1.1 and P1.9. Because of the overwrite, the `.gitignore` is deferred
     to P1.1.
+  - It also fails on the folder name `Mindspace`, because npm package names cannot contain
+    capitals. The plan is to scaffold in a temporary lowercase folder and copy the files in.
+    Cache Components is on by default in 16.4.4, so you decide on it before P1.1.
+  - pnpm stays at 11.17.0 for now (D-010). You will upgrade it yourself later.
 - **Commits:**
   - `b80760e docs: add project plan, architecture and development log` (P0.5)
   - `4f65916 chore: add Claude Code project settings and rules hook`
