@@ -4,15 +4,16 @@
 
 | Item              | Value |
 | ----------------- | ----- |
-| **Current phase** | Phase 0 — Planning and decisions |
-| **Phase progress**| 4 / 5 tasks done (P0.1, P0.2, P0.4, P0.5). Only P0.3 remains |
+| **Current phase** | Phase 1 — Foundation (ready to start) |
+| **Phase progress**| 0 / 11 tasks done. Phase 0 is complete |
 | **Last updated**  | 2026-11-03 (Session 1) |
-| **Blocked on**    | Your confirmation of the Phase 1 decisions in [`DECISIONS.md`](DECISIONS.md) |
+| **Blocked on**    | Nothing |
 
 **Next actions (in order)**
-1. Review [`DECISIONS.md`](DECISIONS.md) and confirm or change D-002, D-004, D-005, D-009 and
-   D-010 (P0.3). Confirming D-003, D-007 and D-011 now saves time before Phase 2.
-2. Start Phase 1 at **P1.1**: scaffold Next.js with pnpm. See [`ROADMAP.md`](ROADMAP.md).
+1. Optional: decide whether to upgrade pnpm from 11.17.0 to the current stable 12.x before
+   P1.1 (D-010).
+2. **P1.1**: scaffold Next.js with pnpm, using the latest stable release (16.4.4 as of
+   2026-11-03). Follow the constraints noted under P1.1 in [`ROADMAP.md`](ROADMAP.md).
 
 **Known issues**
 - None.
@@ -37,7 +38,7 @@
 
 | Phase | Name                            | Status      | Started    | Completed |
 | ----- | ------------------------------- | ----------- | ---------- | --------- |
-| 0     | Planning and decisions          | In progress | 2026-11-03 | —         |
+| 0     | Planning and decisions          | Done        | 2026-11-03 | 2026-11-03 |
 | 1     | Foundation                      | Not started | —          | —         |
 | 2     | Supabase and authentication     | Not started | —          | —         |
 | 3     | Brain Dump                      | Not started | —          | —         |
@@ -55,7 +56,7 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 | ------------ | --------------- |
 | Node.js      | v22.23.1 |
 | npm          | 10.9.8 |
-| pnpm         | 11.17.0 |
+| pnpm         | 11.17.0 (latest stable on npm: 12.16.1) |
 | yarn         | 4.12.0 |
 | Docker       | 29.6.1 (daemon not checked) |
 | Git          | 2.44.0.windows.1 |
@@ -94,7 +95,7 @@ Template — copy it above the newest entry:
 
 ### 2026-11-03 — Session 1: Planning
 
-- **Phase:** 0 · **Tasks:** P0.1, P0.2, P0.4, P0.5
+- **Phase:** 0 · **Tasks:** P0.1–P0.5 (Phase 0 complete)
 - **Done:**
   - Read the spec (`mindspace_product_and_development_plan.md`).
   - Wrote `docs/ROADMAP.md`: phases 0–6 with task IDs, acceptance points, a Definition of Done,
@@ -107,7 +108,8 @@ Template — copy it above the newest entry:
     (Onion) is Accepted from the standing rules.
   - Wrote this DEVLOG and a root `CLAUDE.md` so future sessions start from here.
   - Took the environment snapshot (above).
-- **Decisions:** D-006 Accepted. All others Proposed and waiting for your confirmation.
+- **Decisions:** D-001 to D-011 all Accepted. D-006 comes from the standing rules; you confirmed
+  the rest with the recommended defaults. D-009 is Vercel. D-010 adds "stable releases only".
 - **Problems / findings:**
   - The spec has eight gaps or conflicts (voice ordering, no auth milestone, convert-to-task
     dependency, reminder scope, missing data export and deletion, category model, folder
@@ -119,5 +121,9 @@ Template — copy it above the newest entry:
     conflicting files, overwrites `.gitignore`, and its template ignores `.env*`. Workarounds
     are noted in ROADMAP P1.1 and P1.9. Because of the overwrite, the `.gitignore` is deferred
     to P1.1.
-- **Commits:** `docs: add project plan, architecture and development log` (P0.5).
-- **Next:** P0.3 (confirm decisions), then P1.1.
+- **Commits:**
+  - `b80760e docs: add project plan, architecture and development log` (P0.5)
+  - `4f65916 chore: add Claude Code project settings and rules hook`
+  - `5c23720 docs: note create-next-app constraints for scaffolding`
+  - `docs: record accepted decisions and close phase 0` (P0.3)
+- **Next:** P1.1.

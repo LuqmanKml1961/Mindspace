@@ -51,7 +51,7 @@ messages refer to tasks by ID, e.g. `feat(thoughts): add capture box (P3.6)`.
 
 - [x] P0.1 Read the spec and find its gaps and conflicts (see DECISIONS.md, "Spec gaps").
 - [x] P0.2 Write the planning docs: ROADMAP, ARCHITECTURE, DATA_MODEL, DECISIONS, DEVLOG, CLAUDE.md.
-- [ ] P0.3 You confirm the decisions Phase 1 needs: D-002, D-004, D-005, D-009, D-010.
+- [x] P0.3 You confirm the decisions Phase 1 needs: D-002, D-004, D-005, D-009, D-010.
       (D-001 can stay as a working name.)
 - [x] P0.4 Fix the syntax error in `.claude/hooks/user-prompt-rules.cjs`: a missing comma after
       `'Onion Architecture'`. Until it is fixed, the hook crashes and the standing rules are not

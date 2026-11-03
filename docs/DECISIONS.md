@@ -11,19 +11,19 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 ## Summary
 
-| ID    | Topic                     | Status   | Needed before                            |
-| ----- | ------------------------- | -------- | ---------------------------------------- |
-| D-001 | Product name              | Proposed | P6.1 (manifest). Working name is fine until then |
-| D-002 | Visual direction          | Proposed | P1.6 (design tokens)                     |
-| D-003 | Accounts                  | Proposed | Phase 2                                  |
-| D-004 | Scope and build order     | Proposed | Phase 1                                  |
-| D-005 | Technology stack          | Proposed | P1.1 (scaffold)                          |
-| D-006 | Onion Architecture        | Accepted | —                                        |
-| D-007 | Sign-in method            | Proposed | P2.6                                     |
-| D-008 | Reminders in the MVP      | Proposed | Phase 4                                  |
-| D-009 | Hosting                   | Proposed | P1.10 (deployment previews)              |
-| D-010 | Package manager           | Proposed | P1.1                                     |
-| D-011 | Local database and tests  | Proposed | Phase 2                                  |
+| ID    | Topic                    | Status   | Needed before                                    |
+| ----- | ------------------------ | -------- | ------------------------------------------------ |
+| D-001 | Product name             | Accepted | P6.1 (manifest). Working name is fine until then |
+| D-002 | Visual direction         | Accepted | P1.6 (design tokens)                             |
+| D-003 | Accounts                 | Accepted | Phase 2                                          |
+| D-004 | Scope and build order    | Accepted | Phase 1                                          |
+| D-005 | Technology stack         | Accepted | P1.1 (scaffold)                                  |
+| D-006 | Onion Architecture       | Accepted | —                                                |
+| D-007 | Sign-in method           | Accepted | P2.6                                             |
+| D-008 | Reminders in the MVP     | Accepted | Phase 4                                          |
+| D-009 | Hosting                  | Accepted | P1.10 (deployment previews)                      |
+| D-010 | Package manager          | Accepted | P1.1                                             |
+| D-011 | Local database and tests | Accepted | Phase 2                                          |
 
 ---
 
@@ -33,9 +33,10 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Recommendation:** Keep **Mindspace** as the working name. Check trademarks and domain
   availability yourself before launch. Claude cannot verify trademarks.
 - **Impact:** Keep the app name in one config constant, plus the manifest, so a rename stays cheap.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: **Mindspace** as the working name. You check trademarks and the domain
+  before launch.
+- **Date:** 2026-11-03
 
 ## D-002 — Visual direction
 
@@ -48,9 +49,10 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   often happen late at night, so following the system light/dark setting from the start is
   worth considering. With shadcn/ui tokens the extra cost is small.
   **Recommendation:** support system light/dark in P1.6.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: minimalist, calm and modern, following the system light/dark setting
+  from P1.6.
+- **Date:** 2026-11-03
 
 ## D-003 — Accounts
 
@@ -59,9 +61,10 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   access, server backups, and RLS-enforced privacy. Guest mode can be added later (backlog).
 - **Consequence if local-only is chosen instead:** Phase 2 and the infrastructure adapters change
   to browser storage. Domain and application layers stay the same (that is a benefit of D-006).
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: Supabase Auth accounts from the first release. Guest mode stays in the
+  backlog.
+- **Date:** 2026-11-03
 
 ## D-004 — Scope and build order
 
@@ -70,9 +73,10 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Recommendation:** **Build the core modules progressively, starting with Brain Dump**, in the
   phase order in [`ROADMAP.md`](ROADMAP.md). This includes the spec corrections G-1 to G-8
   below, most importantly **moving Voice Capture after the MVP**.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: progressive modules starting with Brain Dump, in the ROADMAP phase
+  order, including resolutions G-1 to G-8.
+- **Date:** 2026-11-03
 
 ## D-005 — Technology stack
 
@@ -81,9 +85,9 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Recommendation:** **Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui + Supabase**
   (PostgreSQL, Auth, Storage later). Add a separate C# API only if a real need appears (spec §7).
   Use the latest stable versions at scaffold time and record them in the DEVLOG.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui + Supabase.
+- **Date:** 2026-11-03
 
 ## D-006 — Onion Architecture
 
@@ -110,9 +114,9 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
     lands in the wrong place. A typed one-time code avoids that.
   - Google OAuth avoids email delivery but needs a Google Cloud OAuth setup.
 - **Recommendation:** **Email one-time code** for Phase 2. Consider adding Google OAuth later.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: email one-time code.
+- **Date:** 2026-11-03
 
 ## D-008 — Reminders in the MVP
 
@@ -122,9 +126,9 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   and platform-specific limits, e.g. iOS only for installed PWAs); email reminders.
 - **Recommendation:** **In-app only for the MVP.** Each reminder belongs to a task. Due reminders
   show on Home and Tasks. Push notifications go to the post-MVP backlog.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: in-app reminders only, each attached to a task.
+- **Date:** 2026-11-03
 
 ## D-009 — Hosting
 
@@ -134,17 +138,20 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Recommendation:** **Vercel Hobby for development and personal use (Stage 1).** The spec notes
   Hobby is for personal, non-commercial use, so review the terms again at P6.9 before the private
   beta. You connect the GitHub repo yourself (Claude does not push).
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: Vercel (Hobby plan) for development and personal use. Review the terms
+  at P6.9 before the private beta.
+- **Date:** 2026-11-03
 
 ## D-010 — Package manager
 
 - **Context:** pnpm 11.17.0, npm 10.9.8 and yarn 4.12.0 are installed (checked 2026-11-03).
 - **Recommendation:** **pnpm.**
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: pnpm, using **stable releases only** (no canary, beta or RC) for tools
+  and dependencies. Checked on npm, 2026-11-03: the latest stable Next.js is 16.4.4 and the
+  latest stable pnpm is 12.16.1. The installed pnpm, 11.17.0, is a stable release, but behind.
+- **Date:** 2026-11-03
 
 ## D-011 — Local database and testing
 
@@ -157,9 +164,11 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
     **Playwright** later, only for critical flows.
 - **Alternative:** develop against a hosted dev project only, with no Docker. Setup is simpler,
   but tests run remotely and can pollute data.
-- **Status:** Proposed
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: the local Supabase stack (CLI as a dev dependency, plus Docker) for
+  development and tests, and a hosted free-tier project for preview and production. Vitest,
+  pgTAP, and Playwright later.
+- **Date:** 2026-11-03
 
 ---
 
@@ -167,13 +176,13 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 Found while reviewing the spec on 2026-11-03. These resolutions are part of D-004.
 
-| ID  | Gap or conflict in the spec | Resolution in this plan |
-| --- | --------------------------- | ----------------------- |
-| G-1 | §5 says voice transcription comes after the MVP, but §11 puts Voice Capture at Milestone 4, before Mind Clarity. | Voice Capture moves to the post-MVP backlog (Phase 7 candidate). |
-| G-2 | No milestone covers authentication (only §17 step 7), but RLS in Milestone 2 needs it. | New **Phase 2 — Supabase & authentication**. |
-| G-3 | "Convert a thought into a task" is in Module 1, but it needs tasks (Module 2). | Scheduled in Phase 4 (P4.7). |
-| G-4 | Reminders are in the MVP, but notification workflows are deferred. | In-app reminders only (D-008). |
-| G-5 | Data export and account deletion (§14 minimum requirements) are in no milestone. | Added to Phase 6 (P6.5), before anyone else uses the app. |
-| G-6 | The `thoughts.category TEXT` example conflicts with the separate `categories` table. | A `categories` table plus a nullable FK on `thoughts` (see DATA_MODEL.md). |
-| G-7 | §17 suggests a feature-folder structure; the project rule requires Onion Architecture. | Layer-first onion structure (D-006, ARCHITECTURE.md). |
-| G-8 | §11 Milestone 6 says "public beta", while §15 stages personal use → private beta → public. | Phase 6 is "beta readiness"; launch follows the §15 stages. |
+| ID  | Gap or conflict in the spec                                                                                      | Resolution in this plan                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| G-1 | §5 says voice transcription comes after the MVP, but §11 puts Voice Capture at Milestone 4, before Mind Clarity. | Voice Capture moves to the post-MVP backlog (Phase 7 candidate).           |
+| G-2 | No milestone covers authentication (only §17 step 7), but RLS in Milestone 2 needs it.                           | New **Phase 2 — Supabase & authentication**.                               |
+| G-3 | "Convert a thought into a task" is in Module 1, but it needs tasks (Module 2).                                   | Scheduled in Phase 4 (P4.7).                                               |
+| G-4 | Reminders are in the MVP, but notification workflows are deferred.                                               | In-app reminders only (D-008).                                             |
+| G-5 | Data export and account deletion (§14 minimum requirements) are in no milestone.                                 | Added to Phase 6 (P6.5), before anyone else uses the app.                  |
+| G-6 | The `thoughts.category TEXT` example conflicts with the separate `categories` table.                             | A `categories` table plus a nullable FK on `thoughts` (see DATA_MODEL.md). |
+| G-7 | §17 suggests a feature-folder structure; the project rule requires Onion Architecture.                           | Layer-first onion structure (D-006, ARCHITECTURE.md).                      |
+| G-8 | §11 Milestone 6 says "public beta", while §15 stages personal use → private beta → public.                       | Phase 6 is "beta readiness"; launch follows the §15 stages.                |
