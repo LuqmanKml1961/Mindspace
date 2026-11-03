@@ -17,14 +17,14 @@ decisions or schema changes in DECISIONS.md and DATA_MODEL.md.
 
 ## Docs map
 
-| File | Purpose |
-| ---- | ------- |
-| `mindspace_product_and_development_plan.md` | Product spec: the source of product intent |
-| `docs/ROADMAP.md` | Phases, task IDs, acceptance points, Definition of Done |
-| `docs/DEVLOG.md` | Current status, phase tracker, session history |
-| `docs/DECISIONS.md` | Decision log and spec gaps resolved |
-| `docs/ARCHITECTURE.md` | Onion layers, folder structure, dependency rules, conventions |
-| `docs/DATA_MODEL.md` | Schema draft, RLS template, RLS test checklist |
+| File                                        | Purpose                                                       |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| `mindspace_product_and_development_plan.md` | Product spec: the source of product intent                    |
+| `docs/ROADMAP.md`                           | Phases, task IDs, acceptance points, Definition of Done       |
+| `docs/DEVLOG.md`                            | Current status, phase tracker, session history                |
+| `docs/DECISIONS.md`                         | Decision log and spec gaps resolved                           |
+| `docs/ARCHITECTURE.md`                      | Onion layers, folder structure, dependency rules, conventions |
+| `docs/DATA_MODEL.md`                        | Schema draft, RLS template, RLS test checklist                |
 
 ## Project rules
 
@@ -44,11 +44,12 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
 
 ## Commands
 
-| Command      | Purpose |
-| ------------ | ------- |
-| `pnpm dev`   | Start the dev server (Turbopack) at http://localhost:3000 |
-| `pnpm build` | Production build |
-| `pnpm start` | Serve the production build |
-| `pnpm lint`  | ESLint |
-
-`typecheck` and `format` are added in P1.2 and P1.3.
+| Command             | Purpose                                                   |
+| ------------------- | --------------------------------------------------------- |
+| `pnpm dev`          | Start the dev server (Turbopack) at http://localhost:3000 |
+| `pnpm build`        | Production build                                          |
+| `pnpm start`        | Serve the production build                                |
+| `pnpm lint`         | ESLint                                                    |
+| `pnpm typecheck`    | Generate Next.js route types, then `tsc --noEmit`         |
+| `pnpm format`       | Format with Prettier (sorts Tailwind classes)             |
+| `pnpm format:check` | Check formatting without writing                          |

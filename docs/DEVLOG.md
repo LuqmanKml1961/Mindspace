@@ -2,19 +2,21 @@
 
 ## ▶ Resume here
 
-| Item              | Value |
-| ----------------- | ----- |
-| **Current phase** | Phase 1 — Foundation |
-| **Phase progress**| 1 / 11 tasks done (P1.1) |
-| **Last updated**  | 2026-11-03 (Session 2) |
-| **Blocked on**    | Nothing |
+| Item               | Value                         |
+| ------------------ | ----------------------------- |
+| **Current phase**  | Phase 1 — Foundation          |
+| **Phase progress** | 3 / 11 tasks done (P1.1–P1.3) |
+| **Last updated**   | 2026-11-03 (Session 2)        |
+| **Blocked on**     | Nothing                       |
 
 **Next actions (in order)**
-1. **P1.2**: add the `typecheck` script (`next typegen && tsc --noEmit`).
-2. **P1.3**: Prettier with Tailwind class sorting, and a `format` script.
+
+1. **P1.4**: enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4).
+2. **P1.5**: initialise shadcn/ui, then add `tailwindFunctions` to `.prettierrc`.
 3. Once it is published, upgrade to the Next.js security release (see Known issues).
 
 **Known issues**
+
 - **Next.js security release due 2026-11-03.** It fixes seven medium vulnerabilities; affected
   versions are not yet stated (source: nextjs.org/blog/upcoming-nextjs-security-release-november-2026).
   It was not yet on npm when checked (`latest` = 16.4.4). Upgrade `next` and `eslint-config-next`
@@ -39,45 +41,45 @@
 
 ## Phase tracker
 
-| Phase | Name                            | Status      | Started    | Completed |
-| ----- | ------------------------------- | ----------- | ---------- | --------- |
+| Phase | Name                            | Status      | Started    | Completed  |
+| ----- | ------------------------------- | ----------- | ---------- | ---------- |
 | 0     | Planning and decisions          | Done        | 2026-11-03 | 2026-11-03 |
-| 1     | Foundation                      | In progress | 2026-11-03 | —         |
-| 2     | Supabase and authentication     | Not started | —          | —         |
-| 3     | Brain Dump                      | Not started | —          | —         |
-| —     | Checkpoint A: personal use      | Not started | —          | —         |
-| 4     | External Memory                 | Not started | —          | —         |
-| 5     | Mind Clarity                    | Not started | —          | —         |
-| 6     | PWA, privacy and beta readiness | Not started | —          | —         |
-| —     | Validation stages 1–3           | Not started | —          | —         |
+| 1     | Foundation                      | In progress | 2026-11-03 | —          |
+| 2     | Supabase and authentication     | Not started | —          | —          |
+| 3     | Brain Dump                      | Not started | —          | —          |
+| —     | Checkpoint A: personal use      | Not started | —          | —          |
+| 4     | External Memory                 | Not started | —          | —          |
+| 5     | Mind Clarity                    | Not started | —          | —          |
+| 6     | PWA, privacy and beta readiness | Not started | —          | —          |
+| —     | Validation stages 1–3           | Not started | —          | —          |
 
 ## Environment snapshot
 
 Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 
-| Tool         | Version / state |
-| ------------ | --------------- |
-| Node.js      | v22.23.1 |
-| npm          | 10.9.8 |
-| pnpm         | 11.17.0 (latest stable on npm: 12.16.1) |
-| yarn         | 4.12.0 |
-| Docker       | 29.6.1 (daemon not checked) |
-| Git          | 2.44.0.windows.1 |
-| Supabase CLI | not installed (plan: project dev dependency, D-011) |
-| GitHub CLI   | not installed |
+| Tool         | Version / state                                           |
+| ------------ | --------------------------------------------------------- |
+| Node.js      | v22.23.1                                                  |
+| npm          | 10.9.8                                                    |
+| pnpm         | 11.17.0 (latest stable on npm: 12.16.1)                   |
+| yarn         | 4.12.0                                                    |
+| Docker       | 29.6.1 (daemon not checked)                               |
+| Git          | 2.44.0.windows.1                                          |
+| Supabase CLI | not installed (plan: project dev dependency, D-011)       |
+| GitHub CLI   | not installed                                             |
 | Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git |
-| Git history  | no commits yet; branch `main` |
+| Git history  | no commits yet; branch `main`                             |
 
 **Project dependencies** (installed at P1.1, 2026-11-03):
 
-| Package                                    | Version | Notes |
-| ------------------------------------------ | ------- | ----- |
-| next / eslint-config-next                  | 16.4.4  | published 2026-11-02; the security release is pending (Known issues) |
-| react / react-dom                          | 19.3.0  | exact pin from the template |
-| tailwindcss / @tailwindcss/turbopack       | 4.3.3   | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config` |
-| typescript                                 | 5.9.3   | |
-| eslint                                     | 9.39.5  | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9` |
-| @types/node                                | 20.19.43 | template default (`^20`), while local Node is 22 |
+| Package                              | Version  | Notes                                                                                        |
+| ------------------------------------ | -------- | -------------------------------------------------------------------------------------------- |
+| next / eslint-config-next            | 16.4.4   | published 2026-11-02; the security release is pending (Known issues)                         |
+| react / react-dom                    | 19.3.0   | exact pin from the template                                                                  |
+| tailwindcss / @tailwindcss/turbopack | 4.3.3    | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config` |
+| typescript                           | 5.9.3    |                                                                                              |
+| eslint                               | 9.39.5   | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9`                  |
+| @types/node                          | 20.19.43 | template default (`^20`), while local Node is 22                                             |
 
 ## Personal-use observations
 
@@ -104,6 +106,32 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): typecheck and Prettier
+
+- **Phase:** 1 · **Tasks:** P1.2, P1.3
+- **Done:**
+  - P1.2: added `typecheck` (`next typegen && tsc --noEmit`). It passes after deleting `.next/`,
+    which matches a fresh checkout.
+  - P1.3: added `prettier` 3.9.10 and `prettier-plugin-tailwindcss` 0.8.1 (exact pins), plus
+    `.prettierrc` with `tailwindStylesheet`, the `format` and `format:check` scripts, and a
+    `.prettierignore`. The ignore list covers files that tools generate or rewrite
+    (`pnpm-lock.yaml`, `pnpm-workspace.yaml`, `AGENTS.md`), the spec, and `.claude/`.
+  - Added `.gitattributes` (`* text=auto eol=lf`) so Windows checkouts stay LF, which matches
+    Prettier's default.
+  - Ran `pnpm format` across the repo. Code changes are Tailwind class order only; doc changes
+    are table padding and blank lines.
+- **Decisions:** no `eslint-config-prettier`. It was checked rather than assumed: no active ESLint
+  rule conflicts with Prettier.
+- **Problems / findings:**
+  - Prettier exposed broken markdown in ROADMAP P1.1: the sub-list was over-indented, so it
+    rendered as one paragraph. Fixed the source.
+  - Prettier would flip `pnpm-workspace.yaml` to double quotes, while pnpm rewrites it with single
+    quotes, so it is in `.prettierignore` to avoid churn.
+  - Once, `pnpm exec eslint --print-config > file` hung for over 2 minutes, while
+    `node node_modules/eslint/bin/eslint.js` finished in 12 s. The cause was not investigated.
+- **Commits:** `chore: add typecheck script and Prettier with Tailwind sorting (P1.2, P1.3)`
+- **Next:** P1.4.
 
 ### 2026-11-03 — Session 2: Phase 1 start, scaffold
 

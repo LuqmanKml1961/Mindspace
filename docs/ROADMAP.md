@@ -10,18 +10,18 @@ messages refer to tasks by ID, e.g. `feat(thoughts): add capture box (P3.6)`.
 
 ## Phase overview
 
-| Phase | Name                                    | Spec reference               |
-| ----- | --------------------------------------- | ---------------------------- |
-| 0     | Planning and decisions                  | §17, §18                     |
-| 1     | Foundation                              | Milestone 1                  |
-| 2     | Supabase and authentication             | §17 steps 7–8 (gap G-2)      |
-| 3     | Brain Dump                              | Milestone 2 / MVP Module 1   |
-| —     | Checkpoint A: personal use              | §17 step 10                  |
-| 4     | External Memory                         | Milestone 3 / MVP Module 2   |
-| 5     | Mind Clarity                            | Milestone 5 / MVP Module 3   |
-| 6     | PWA, privacy and beta readiness         | Milestone 6, §10, §14        |
-| —     | Validation stages                       | §15                          |
-| 7+    | Post-MVP backlog (Voice Capture first)  | Milestone 4, §4              |
+| Phase | Name                                   | Spec reference             |
+| ----- | -------------------------------------- | -------------------------- |
+| 0     | Planning and decisions                 | §17, §18                   |
+| 1     | Foundation                             | Milestone 1                |
+| 2     | Supabase and authentication            | §17 steps 7–8 (gap G-2)    |
+| 3     | Brain Dump                             | Milestone 2 / MVP Module 1 |
+| —     | Checkpoint A: personal use             | §17 step 10                |
+| 4     | External Memory                        | Milestone 3 / MVP Module 2 |
+| 5     | Mind Clarity                           | Milestone 5 / MVP Module 3 |
+| 6     | PWA, privacy and beta readiness        | Milestone 6, §10, §14      |
+| —     | Validation stages                      | §15                        |
+| 7+    | Post-MVP backlog (Voice Capture first) | Milestone 4, §4            |
 
 ## Definition of Done (every task)
 
@@ -71,33 +71,41 @@ screens. No backend yet.
 - [x] P1.1 Scaffold with `create-next-app` using pnpm: TypeScript, App Router, ESLint, Tailwind CSS,
       `src/` directory, `@/*` import alias. Record the installed Next.js, React and Tailwind
       versions in the DEVLOG.
-      _Constraints (checked in create-next-app 16.4.4 source, 2026-11-03):_
-      - The package name comes from the folder name, and npm names cannot contain capitals, so
-        scaffolding in `Mindspace/` fails.
-      - It refuses a folder holding files outside its allow-list. `CLAUDE.md` and the spec file
-        are not on the list.
-      - It **overwrites** any existing `.gitignore`.
-      - Without `--yes` and explicit flags it prompts interactively.
-      - **Approach:** scaffold into a temporary lowercase folder `mindspace/` with
-        `--skip-install --disable-git`, copy the generated files (dotfiles included) into the
-        repo root, then run `pnpm install`. This sidesteps all three problems.
-      - **Flags:** `--ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-pnpm
-        --no-react-compiler --agents-md --no-agent-feedback --yes`, plus the Cache Components
-        choice (on by default in 16.4.4).
-      - Generated `AGENTS.md` points to the version-matched Next.js docs in
-        `node_modules/next/dist/docs/`; use them to check APIs. After install, check what
-        `next dev` regenerates (`node_modules/next/dist/server/lib/generate-agent-files.js`)
-        and confirm it never touches `CLAUDE.md`.
-- [ ] P1.2 Confirm TypeScript strict mode (`strict: true` is already in the generated
+
+  _Constraints (checked in create-next-app 16.4.4 source, 2026-11-03):_
+
+  - The package name comes from the folder name, and npm names cannot contain capitals, so
+    scaffolding in `Mindspace/` fails.
+  - It refuses a folder holding files outside its allow-list. `CLAUDE.md` and the spec file are
+    not on the list.
+  - It **overwrites** any existing `.gitignore`.
+  - Without `--yes` and explicit flags it prompts interactively.
+  - **Approach used:** scaffold into a temporary lowercase folder `mindspace/` with
+    `--skip-install --disable-git`, copy the generated files (dotfiles included) into the repo
+    root, then run `pnpm install`. This avoids the first three problems, and the explicit flags
+    with `--yes` avoid the fourth.
+  - **Flags used:** `--ts --tailwind --eslint --app --src-dir --import-alias "@/*" --use-pnpm
+--no-react-compiler --no-cache-components --agents-md --no-agent-feedback --yes`.
+  - Generated `AGENTS.md` points to the version-matched Next.js docs in
+    `node_modules/next/dist/docs/`; use them to check APIs. Verified: `next dev` only manages a
+    block in `AGENTS.md` (`node_modules/next/dist/server/lib/generate-agent-files.js`) and never
+    touches `CLAUDE.md`.
+
+- [x] P1.2 Confirm TypeScript strict mode (`strict: true` is already in the generated
       `tsconfig.json`). Add a `typecheck` script that runs `next typegen && tsc --noEmit`. A bare
       `tsc` fails on a clean checkout, because types such as `LayoutProps` are generated into
       `.next/types/` (verified 2026-11-03).
-- [ ] P1.3 Add Prettier (with Tailwind class sorting) and a `format` script, without conflicting
-      with ESLint.
+- [x] P1.3 Add Prettier (with Tailwind class sorting) and a `format` script, without conflicting
+      with ESLint. Done with `prettier` 3.9.10 and `prettier-plugin-tailwindcss` 0.8.1, pinned
+      exactly; the config is in `.prettierrc` (`tailwindStylesheet: ./src/app/globals.css`).
+      `eslint-config-prettier` is not needed: none of the 86 active ESLint rules is on its
+      358-rule disable list (checked 2026-11-03). `.gitattributes` keeps line endings LF.
 - [ ] P1.4 Enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4). Check them by adding
       a forbidden import temporarily and confirming lint fails.
 - [ ] P1.5 Initialise shadcn/ui. Add only the components the shell needs; add more when a feature
-      needs them.
+      needs them. Once `cn()` and `cva()` exist, add `"tailwindFunctions": ["cn", "cva"]` to
+      `.prettierrc` so classes inside those calls are sorted too (the plugin README documents this
+      under "Sorting classes in function calls").
 - [ ] P1.6 Create the design tokens from D-002: colours (light, plus dark if confirmed), type
       scale, spacing and radius as CSS variables in the Tailwind theme. Write `docs/DESIGN.md`
       covering the tokens and tone of voice (spec §3 and §6).
@@ -117,6 +125,7 @@ screens. No backend yet.
 - [ ] P1.11 Write a root `README.md`: prerequisites, setup, scripts, and links to the docs.
 
 **Acceptance**
+
 - `pnpm build`, `pnpm lint` and `pnpm typecheck` pass.
 - The shell works at 360px and on desktop with no horizontal scroll. The nav can be used with a
   keyboard, focus is visible, and the active route is marked.
@@ -156,6 +165,7 @@ auth (gap G-2).
       editable), and sign-out.
 
 **Acceptance**
+
 - Sign-in and sign-out work locally and on the preview deployment.
 - Visiting any `(app)` route while signed out redirects to sign-in.
 - `supabase test db` passes, and the profiles RLS is proven with two users.
@@ -193,6 +203,7 @@ auth (gap G-2).
       with no urgency styling.
 
 **Acceptance**
+
 - From the capture screen, a thought is saved in a few seconds: one field, one action.
 - Create, edit, delete, search and categorise all work. Text is never lost on a failed save.
 - RLS tests pass for `thoughts` and `categories`. Domain and application tests pass.
@@ -232,6 +243,7 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
 - [ ] P4.10 Validation, empty and error states.
 
 **Acceptance**
+
 - Tasks, with or without due dates, land in the right view for the user's timezone.
 - Converting a thought creates a linked task.
 - RLS tests pass for `tasks` and `reminders`.
@@ -260,6 +272,7 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
       `prefers-reduced-motion`. No medical claims.
 
 **Acceptance**
+
 - A check-in takes a couple of minutes. Every step can be skipped, and nothing guilt-trips the
   user about missed days.
 - Home shows one priority without hiding other tasks.
@@ -295,6 +308,7 @@ and then the private beta.
       beta.
 
 **Acceptance**
+
 - The app installs on supported browsers, and offline shows the app's fallback page rather than
   a browser error.
 - Export returns all of the user's data, and account deletion leaves no rows for that user

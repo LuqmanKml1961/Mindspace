@@ -22,6 +22,7 @@ External services: speech-to-text · AI categorisation · notifications
 ```
 
 Principles, from spec §8:
+
 - Keep the first version simple, and add external services only when there is a clear need.
 - Secrets and privileged operations run on the server only. Service-role and secret keys never
   reach browser code.
@@ -51,12 +52,12 @@ Principles, from spec §8:
 Dependencies always point inward.
 ```
 
-| Layer          | Responsibility | Examples |
-| -------------- | -------------- | -------- |
-| Domain         | Business concepts and rules. Pure TypeScript. | `Thought` type and `createThought()` validation, `ThoughtRepository` interface, `ValidationError` |
-| Application    | Use cases that orchestrate domain objects through the repository interfaces. | `makeCaptureThought()`, `makeConvertThoughtToTask()`, `captureThoughtSchema` |
-| Infrastructure | Implements the ports with Supabase. Reads config. Wires everything together. | `createSupabaseThoughtRepository()`, `env.ts`, `container.ts` |
-| Presentation   | Routes, pages, server actions, UI components. | `app/(app)/thoughts/page.tsx`, `actions.ts`, `components/thoughts/capture-box.tsx` |
+| Layer          | Responsibility                                                               | Examples                                                                                          |
+| -------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Domain         | Business concepts and rules. Pure TypeScript.                                | `Thought` type and `createThought()` validation, `ThoughtRepository` interface, `ValidationError` |
+| Application    | Use cases that orchestrate domain objects through the repository interfaces. | `makeCaptureThought()`, `makeConvertThoughtToTask()`, `captureThoughtSchema`                      |
+| Infrastructure | Implements the ports with Supabase. Reads config. Wires everything together. | `createSupabaseThoughtRepository()`, `env.ts`, `container.ts`                                     |
+| Presentation   | Routes, pages, server actions, UI components.                                | `app/(app)/thoughts/page.tsx`, `actions.ts`, `components/thoughts/capture-box.tsx`                |
 
 ## 3. Folder structure (target; create folders only when the first file needs them)
 
@@ -99,12 +100,12 @@ an infrastructure helper.
 
 ## 4. Dependency rules
 
-| Layer (files)                     | May import                                   | Must not import |
-| --------------------------------- | -------------------------------------------- | --------------- |
-| `src/domain/**`                   | other domain files                           | application, infrastructure, app, components, lib; `react`, `next`, `@supabase/*`, `zod` |
-| `src/application/**`              | domain, `zod`                                | infrastructure, app, components, lib; `react`, `next`, `@supabase/*` |
-| `src/infrastructure/**`           | domain, application, `@supabase/*`, `server-only` | app, components |
-| `src/app/**`, `src/components/**` | application, domain (types), `infrastructure/container`, lib | `@supabase/*` directly (always go through infrastructure) |
+| Layer (files)                     | May import                                                   | Must not import                                                                          |
+| --------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| `src/domain/**`                   | other domain files                                           | application, infrastructure, app, components, lib; `react`, `next`, `@supabase/*`, `zod` |
+| `src/application/**`              | domain, `zod`                                                | infrastructure, app, components, lib; `react`, `next`, `@supabase/*`                     |
+| `src/infrastructure/**`           | domain, application, `@supabase/*`, `server-only`            | app, components                                                                          |
+| `src/app/**`, `src/components/**` | application, domain (types), `infrastructure/container`, lib | `@supabase/*` directly (always go through infrastructure)                                |
 
 **Enforcement (P1.4):** ESLint `no-restricted-imports` overrides per layer in `eslint.config.*`.
 Use `patterns` that match both alias imports and relative imports (for example
@@ -179,11 +180,11 @@ CaptureBox (client component)
 
 ## 8. Testing strategy
 
-| What                         | Tool                         | When |
-| ---------------------------- | ---------------------------- | ---- |
-| Domain rules, use cases      | Vitest, with in-memory fake repositories | from Phase 3 |
-| RLS and database constraints | pgTAP via `supabase test db`, using two users per table | from Phase 2 |
-| Critical user flows          | Playwright (optional)        | Phase 6, or once flows settle |
+| What                         | Tool                                                          | When                             |
+| ---------------------------- | ------------------------------------------------------------- | -------------------------------- |
+| Domain rules, use cases      | Vitest, with in-memory fake repositories                      | from Phase 3                     |
+| RLS and database constraints | pgTAP via `supabase test db`, using two users per table       | from Phase 2                     |
+| Critical user flows          | Playwright (optional)                                         | Phase 6, or once flows settle    |
 | Layouts and devices          | Manual: 360px and desktop; Chrome, Edge, Safari, Android, iOS | every UI task; full pass in P6.3 |
 
 ## 9. PWA and offline
