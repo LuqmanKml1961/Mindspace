@@ -114,9 +114,11 @@ screens. No backend yet.
       scale, spacing and radius as CSS variables in the Tailwind theme. Write `docs/DESIGN.md`
       covering the tokens and tone of voice (spec §3 and §6). **Dark mode:** shadcn set up a
       class-based variant (`@custom-variant dark (&:is(.dark *))` plus a `.dark {}` token block),
-      but D-002 says to follow the **system** setting. Switch to a `prefers-color-scheme` media
-      variant, or add a script that sets `.dark` from the system setting. Check the Tailwind v4
-      docs for the current syntax before choosing.
+      but D-002 says to follow the **system** setting. Keep the `.dark` convention and add
+      `next-themes` with `<ThemeProvider attribute="class" defaultTheme="system" enableSystem>`.
+      This is the approach documented in the shadcn skill (`.claude/skills/shadcn/customization.md`),
+      and it keeps `shadcn apply` theme updates working. Check the `next-themes` version and its
+      React 19.3 / Next 16.4 support before installing.
 - [ ] P1.7 Build the app shell: an `(app)` route group layout with a bottom tab bar on mobile and
       a sidebar on desktop. Nav items: Home, Brain Dump, Tasks, Mind Clarity, Settings.
 - [ ] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.

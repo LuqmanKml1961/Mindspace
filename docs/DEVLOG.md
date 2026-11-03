@@ -2,19 +2,19 @@
 
 ## ▶ Resume here
 
-| Item               | Value                         |
-| ------------------ | ----------------------------- |
-| **Current phase**  | Phase 1 — Foundation          |
-| **Phase progress** | 5 / 11 tasks done (P1.1–P1.5) |
-| **Last updated**   | 2026-11-03 (Session 2)        |
-| **Blocked on**     | Nothing                       |
+| Item               | Value                                         |
+| ------------------ | --------------------------------------------- |
+| **Current phase**  | Phase 1 — Foundation                          |
+| **Phase progress** | 5 / 11 tasks done (P1.1–P1.5)                 |
+| **Last updated**   | 2026-11-03 (Session 2)                        |
+| **Blocked on**     | D-012 style choice (Nova vs Maia) before P1.6 |
 
 **Next actions (in order)**
 
-1. Confirm or change **D-012** (Base UI with the Nova preset, and the `cn` package) before more
-   components are added.
-2. **P1.6**: design tokens (D-002), including switching dark mode from the `.dark` class to the
-   system setting (see ROADMAP P1.6), and `docs/DESIGN.md`.
+1. Decide **D-012**: keep Nova (compact) or switch to Maia (soft, generous spacing). See D-012
+   "Finding".
+2. **P1.6**: design tokens (D-002), plus `next-themes` with the system default for dark mode
+   (see ROADMAP P1.6), and `docs/DESIGN.md`.
 3. Once it is published, upgrade to the Next.js security release (see Known issues).
 
 **Known issues**
@@ -115,6 +115,33 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): shadcn skill and MCP config
+
+- **Phase:** 1 · **Tasks:** tooling, at your request (no ROADMAP task)
+- **Done:**
+  - Installed the `shadcn` agent skill:
+    `yarn dlx skills@1.7.4 add shadcn/ui --skill shadcn -a claude-code --copy -y`, with telemetry
+    off (`DO_NOT_TRACK=1`). I pinned 1.7.4 (15 days old) because 1.7.5 and 1.7.6 were under a
+    day old. Files: `.claude/skills/shadcn/` and `skills-lock.json`. Skipped the repo's other
+    skill, `migrate-radix-to-base`, which does not apply.
+  - Reviewed the skill before use. I scanned every file for risky content and read SKILL.md,
+    the bundled script, `customization.md`, `rules/styling.md`, `mcp.md` and `design-system.md`
+    in full. Nothing malicious was found. The script only reads files.
+  - Ran `yarn dlx shadcn@latest mcp init --client vscode`, which wrote `.vscode/mcp.json`. It
+    also moved `shadcn` from `dependencies` to `devDependencies` (same 4.23.0; the lockfile only
+    moved the entry). The build still passes.
+  - Added `.vscode/mcp.json` to `.prettierignore`, because the CLI writes its own JSON layout.
+- **Findings:**
+  - When the skill loads, it runs `npx shadcn@latest info --json`, and its `allowed-tools`
+    pre-approves `npx/pnpm dlx shadcn@latest *`. `.vscode/mcp.json` also uses
+    `shadcn@latest`. These are unpinned, unlike the rest of the project.
+  - The skill's `design-system.md` describes Nova as compact (32–36px controls) and Maia as
+    soft with generous spacing (40px+). This reopened D-012.
+  - The skill documents dark mode as `next-themes` with `defaultTheme="system"`, keeping
+    `.dark`. ROADMAP P1.6 now says this instead of a media-query switch.
+- **Commits:** `chore: add shadcn agent skill and VS Code MCP config`
+- **Next:** D-012 style choice, then P1.6.
 
 ### 2026-11-03 — Session 2 (cont.): shadcn/ui
 

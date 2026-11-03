@@ -42,6 +42,15 @@ The installed Next.js (see the DEVLOG environment snapshot) may be newer than Cl
 data. Check APIs against the version-matched docs in `node_modules/next/dist/docs/` (see
 `AGENTS.md`, which `next dev` maintains) before writing Next.js code.
 
+## shadcn/ui tooling
+
+- Project skill `.claude/skills/shadcn/` is installed from `shadcn/ui` with `skills@1.7.4` and
+  tracked in `skills-lock.json`. It loads automatically for shadcn work. When it loads it runs
+  `npx shadcn@latest info --json`, and it pre-approves `npx/pnpm dlx shadcn@latest *` commands.
+- `.vscode/mcp.json` configures the shadcn MCP server for VS Code (`npx shadcn@latest mcp`).
+- Use pnpm as the runner (`pnpm dlx shadcn@…` or `pnpm exec shadcn`). Read every file the CLI
+  adds before relying on it.
+
 ## Commands
 
 | Command             | Purpose                                                   |

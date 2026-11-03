@@ -192,7 +192,14 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Alternatives:** Radix or React Aria; another preset; or swap `cn` for `clsx` +
   `tailwind-merge`, which means editing every generated component's import. Only one component
   (Button) exists, so changing course now is cheap.
-- **Status:** Proposed (applied). Waiting for your confirmation.
+- **Finding (2026-11-03, from the shadcn skill's `design-system.md` style table):** the style
+  sets component geometry that tokens can't change. **Nova** is described as "reduced padding
+  and margins for compact layouts (32–36px controls, 6–8px radius, hairlines over shadows)",
+  which runs against spec §6 ("generous spacing") and comfortable touch targets. **Maia** is
+  "soft and rounded, with generous spacing (40px+ controls, 12px+ card radius, generous padding,
+  editorial pacing)", which fits D-002 better. Maia's preset defaults to Hugeicons (MIT) and the
+  Figtree font.
+- **Status:** Proposed (applied). Waiting for your confirmation. Revisit the style before P1.6.
 - **Decision:**
 - **Date:**
 
