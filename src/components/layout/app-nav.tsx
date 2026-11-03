@@ -75,7 +75,7 @@ export function AppTabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 border-t bg-background pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] md:hidden"
+      className="fixed inset-x-0 bottom-[env(safe-area-inset-bottom,0px)] border-t bg-background pr-[env(safe-area-inset-right)] pl-[env(safe-area-inset-left)] md:hidden"
     >
       <ul className="grid grid-cols-5">
         {navItems.map((item) => {
