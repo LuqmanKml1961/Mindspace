@@ -31,7 +31,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col gap-8 border-r bg-sidebar px-4 py-6 text-sidebar-foreground md:flex">
+    <div className="sticky top-0 hidden h-svh w-64 shrink-0 flex-col gap-8 border-r bg-sidebar pt-[max(1.5rem,env(safe-area-inset-top))] pr-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] text-sidebar-foreground md:flex">
       <div className="flex flex-col gap-1 px-3">
         <span className="text-lg font-semibold">{siteConfig.name}</span>
         <span className="text-sm text-muted-foreground">
@@ -75,7 +75,7 @@ export function AppTabBar() {
   return (
     <nav
       aria-label="Main"
-      className="fixed inset-x-0 bottom-0 border-t bg-background md:hidden"
+      className="fixed inset-x-0 bottom-0 border-t bg-background pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] md:hidden"
     >
       <ul className="grid grid-cols-5">
         {navItems.map((item) => {

@@ -26,6 +26,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-011 | Local database and tests          | Accepted | Phase 2                                          |
 | D-012 | shadcn/ui library and preset      | Accepted | Before more components are added                 |
 | D-013 | Colour palette and control height | Accepted | P1.6                                             |
+| D-014 | Installable app and screen edges  | Accepted | —                                                |
 
 ---
 
@@ -218,6 +219,18 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   tokens, with derived tints for surfaces and an added soft terracotta for destructive actions
   only. Every text pair passes 4.5:1 in both themes (DESIGN.md §2–3). The default control height
   is 40px (`lg` 44px), and future form controls must match.
+- **Date:** 2026-11-03
+
+## D-014 — Installable app and screen edges
+
+- **Context:** On your phone, with the app added to the home screen, there were strips at the top
+  and bottom of the screen. You pointed to the `card-share` repo as the reference. Its source
+  showed four techniques: `theme-color`, `appleWebApp`, a standalone manifest, and an
+  `html`/`body` background. It uses no safe-area handling, because it has no fixed bottom bar.
+- **Decision:** Accepted (your choice: "Steps 1 + 2"). Apply all four, with per-theme
+  `theme-color`, and bring the manifest and icons forward from P6.1. Mindspace has a fixed tab
+  bar, so also use `viewport-fit=cover` with `env(safe-area-inset-*)` padding. Details are in
+  DESIGN.md §7a. The icons are placeholders.
 - **Date:** 2026-11-03
 
 ---

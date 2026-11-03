@@ -11,10 +11,10 @@
 
 **Next actions (in order)**
 
-1. **Phase 1 acceptance check.** Not yet done in a real browser: at 360px and on desktop with no
-   horizontal scroll, keyboard nav with visible focus, and the active route marked. Check on
-   your phone at https://m1ndspace.vercel.app, or ask Claude to run a browser check. Then mark
-   Phase 1 Done.
+1. **Retest the screen edges on your phone** (D-014). Push, wait for Vercel, then **remove the old
+   home-screen icon and add it again** (the home-screen app is configured when added). Check the
+   top and bottom edges in light and dark. If they look right, the Phase 1 acceptance check is
+   done: 360px with no horizontal scroll, nav, focus, active route. Then mark Phase 1 Done.
 2. **Upgrade to the Next.js security release** as soon as it is on npm (see Known issues). This
    is urgent, because the app is now public.
 3. **Phase 2 (P2.1):** create a hosted Supabase free-tier project (your action), then set up
@@ -123,6 +123,38 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): screen edges and installable app
+
+- **Phase:** 1 (fix) plus P6.1 brought forward · **Tasks:** D-014
+- **Done:**
+  - Studied the `card-share` reference repo, cloned read-only into scratch and deleted afterwards
+    because it holds company data. Its edges come from `viewport.themeColor`,
+    `metadata.appleWebApp` (`capable`, `statusBarStyle: 'default'`), a standalone
+    `manifest.json`, and an `html`/`body` background. It has no safe-area code and no fixed
+    bottom bar.
+  - The live Mindspace head had none of the first three. You confirmed you saw the issue with the
+    app added to the home screen, and chose "Steps 1 + 2".
+  - Checked the bundled Next 16.4.4 docs and types: `themeColor` with `media`, `viewportFit`, the
+    `appleWebApp` output, and the `manifest.ts`, `icon` and `apple-icon` conventions.
+  - Added `viewport` (per-theme `theme-color` plus `viewport-fit=cover`), `appleWebApp`,
+    `src/app/manifest.ts`, and a placeholder icon `src/app/icon.svg`. Rendered
+    `apple-icon.png` (180), `icon-192.png` and `icon-512.png` with the sharp already installed by
+    Next. Removed the template `favicon.ico`. Added `html` `bg-background`, plus safe-area
+    padding on `main`, the sidebar and the tab bar.
+  - Verified on a production server (port 3200): the head has viewport-fit, two theme-colors,
+    the manifest, the Apple tags and the icons; the manifest JSON is correct; all icons return
+    200; the CSS compiled `calc(7rem + env(…))` and `max(…, env(…))` correctly. Lint, typecheck,
+    format and build pass.
+- **Decisions:** D-014 Accepted. P6.1 is done early, with placeholder icons.
+- **Problems / findings:**
+  - Not testable here on a real iPhone or Android. Retest after pushing, and re-add the
+    home-screen icon.
+  - Next emits `mobile-web-app-capable`, not Apple's legacy `apple-mobile-web-app-capable`. The
+    manifest's `display: standalone` drives home-screen mode on current iOS and Android, and
+    card-share uses the same Next API.
+- **Commits:** `feat(pwa): add manifest, icons, theme colour and safe areas for home-screen use (D-014)`
+- **Next:** your phone retest, then the security upgrade, then P2.1.
 
 ### 2026-11-03 — Session 2 (cont.): gitignore, README, deployment
 

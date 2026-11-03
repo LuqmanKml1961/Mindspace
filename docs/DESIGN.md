@@ -132,6 +132,33 @@ Hugeicons (`@hugeicons/react` with `@hugeicons/core-free-icons`, MIT), from the 
 Inside a Button, mark icons with `data-icon="inline-start"` or `"inline-end"`. Don't add sizing
 classes to icons inside components (shadcn skill, `rules/icons.md`).
 
+## 7a. Screen edges and the installed app (D-014)
+
+This fixes the coloured strips at the top and bottom of the screen when the app runs from the home
+screen. It follows the approach of the `card-share` reference repo, plus safe areas for our fixed
+tab bar.
+
+| Technique                                                     | Where                                         | Why                                                                                                       |
+| ------------------------------------------------------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `theme-color` per scheme (`#f9faf8` light, `#2f3e46` dark)    | `viewport` in `src/app/layout.tsx`            | Status and browser bars match the page. **Must equal `--background`.**                                    |
+| `appleWebApp` (`capable`, title, `statusBarStyle: "default"`) | `metadata` in `src/app/layout.tsx`            | An iOS home-screen launch opens as an app with a solid status bar                                         |
+| Web app manifest (`display: "standalone"`, colours, icons)    | `src/app/manifest.ts`                         | The installed app has no browser bars on Android or iOS                                                   |
+| `html` and `body` background (`bg-background`)                | `globals.css` base layer                      | Over-scroll and the edges show the app colour                                                             |
+| `viewport-fit=cover` plus `env(safe-area-inset-*)`            | `viewport`; `(app)/layout.tsx`; `app-nav.tsx` | Edge to edge. The tab bar background runs under the iPhone home bar, and content stays clear of the notch |
+
+- Safe-area padding uses `max(<normal spacing>, env(safe-area-inset-*))`, so it never shrinks the
+  normal spacing. `main`'s bottom padding is `calc(7rem + env(safe-area-inset-bottom))`, so content
+  clears the taller tab bar.
+- The `theme-color` meta follows the **system** setting through its media query. If a manual
+  light/dark switch is added later, the meta tag must follow it too, because next-themes doesn't
+  update it.
+- **Icons are placeholders:** an "M" on Deep Teal. The source is `src/app/icon.svg` (favicon).
+  `src/app/apple-icon.png` (180) and `public/icons/icon-192.png` / `icon-512.png` were rendered
+  from it with sharp. The art stays within the maskable safe zone (172.6px of 204.8px). Replace
+  all four when a real logo exists.
+- After changing any of this on a phone, **remove the home-screen icon and add it again**. The
+  home-screen app is configured when it is added.
+
 ## 8. Tone of voice
 
 From spec §1, §3 and §6. Mindspace speaks calmly and never judges.

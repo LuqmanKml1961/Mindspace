@@ -182,6 +182,7 @@ CaptureBox (client component)
 
 ## 9. PWA and offline
 
-Planned for Phase 6 (spec §10): a manifest, icons, and a service worker that caches the app shell
-and static assets, with an offline fallback. Do not cache user data or claim offline support until
-draft sync exists (post-MVP).
+The manifest (`src/app/manifest.ts`), icons, `theme-color` and safe areas are **done** (brought
+forward, D-014; see DESIGN.md §7a). Still planned for Phase 6 (spec §10): a service worker that
+caches the app shell and static assets, with an offline fallback. Do not cache user data or claim
+offline support until draft sync exists (post-MVP).

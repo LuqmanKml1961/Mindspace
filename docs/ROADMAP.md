@@ -311,8 +311,10 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
 **Goal:** an installable app that has passed a privacy review, ready for 30 days of personal use
 and then the private beta.
 
-- [ ] P6.1 Web app manifest through `app/manifest.ts` (name, short name, start URL, `standalone`,
+- [x] P6.1 Web app manifest through `app/manifest.ts` (name, short name, start URL, `standalone`,
       theme and background colours), plus icons (192, 512 and maskable). Uses the name from D-001.
+      **Brought forward on 2026-11-03 (D-014)** to fix the screen edges on the home-screen app.
+      The icons are placeholders until a real logo exists (DESIGN.md §7a).
 - [ ] P6.2 Service worker: cache the app shell and static assets, add an offline fallback page and
       a connection-status indicator. Choose between a hand-written worker (Next.js PWA guide) and a
       library such as Serwist after checking compatibility with the installed Next.js version.
