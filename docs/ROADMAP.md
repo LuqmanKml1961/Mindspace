@@ -1,0 +1,303 @@
+# Mindspace — Roadmap
+
+- Product intent ("the spec"): [`mindspace_product_and_development_plan.md`](../mindspace_product_and_development_plan.md)
+- Current status and session history: [`DEVLOG.md`](DEVLOG.md). Phase **status** lives there only.
+- Decisions: [`DECISIONS.md`](DECISIONS.md) · Architecture: [`ARCHITECTURE.md`](ARCHITECTURE.md) ·
+  Data model: [`DATA_MODEL.md`](DATA_MODEL.md)
+
+Tick a task here (`- [x]`) when it meets the Definition of Done. DEVLOG entries and commit
+messages refer to tasks by ID, e.g. `feat(thoughts): add capture box (P3.6)`.
+
+## Phase overview
+
+| Phase | Name                                    | Spec reference               |
+| ----- | --------------------------------------- | ---------------------------- |
+| 0     | Planning and decisions                  | §17, §18                     |
+| 1     | Foundation                              | Milestone 1                  |
+| 2     | Supabase and authentication             | §17 steps 7–8 (gap G-2)      |
+| 3     | Brain Dump                              | Milestone 2 / MVP Module 1   |
+| —     | Checkpoint A: personal use              | §17 step 10                  |
+| 4     | External Memory                         | Milestone 3 / MVP Module 2   |
+| 5     | Mind Clarity                            | Milestone 5 / MVP Module 3   |
+| 6     | PWA, privacy and beta readiness         | Milestone 6, §10, §14        |
+| —     | Validation stages                       | §15                          |
+| 7+    | Post-MVP backlog (Voice Capture first)  | Milestone 4, §4              |
+
+## Definition of Done (every task)
+
+- The task's acceptance points are met and checked by hand at mobile width (~360px) and on desktop.
+- `pnpm lint` and `pnpm typecheck` pass, plus `pnpm test` once tests exist. `pnpm build` must
+  pass to complete a phase.
+- Onion dependency rules hold (lint enforces them, see ARCHITECTURE.md §4).
+- Every new table has RLS enabled, four owner policies, and a two-user pgTAP test.
+- Every new screen has loading, empty and error states, with calm, non-judgemental copy.
+- No secret keys in client code or `NEXT_PUBLIC_` variables.
+- ROADMAP and DEVLOG are updated.
+- The work is committed with a Conventional Commit message (`feat:`, `fix:`, `docs:`, `chore:`,
+  `refactor:`, `test:`) **only after your confirmation**. Claude never pushes.
+
+## How to work a task (spec §12, condensed)
+
+1. Pick the next unticked task in the current phase. Re-read its acceptance points.
+2. Inspect the code that already exists. Do not assume it.
+3. Make the smallest change that completes the task.
+4. Run the app and test the feature. Run lint, typecheck and tests.
+5. For database work, review the migration and RLS policies.
+6. Update the DEVLOG, then commit after confirmation.
+
+---
+
+## Phase 0 — Planning and decisions
+
+- [x] P0.1 Read the spec and find its gaps and conflicts (see DECISIONS.md, "Spec gaps").
+- [x] P0.2 Write the planning docs: ROADMAP, ARCHITECTURE, DATA_MODEL, DECISIONS, DEVLOG, CLAUDE.md.
+- [ ] P0.3 You confirm the decisions Phase 1 needs: D-002, D-004, D-005, D-009, D-010.
+      (D-001 can stay as a working name.)
+- [x] P0.4 Fix the syntax error in `.claude/hooks/user-prompt-rules.cjs`: a missing comma after
+      `'Onion Architecture'`. Until it is fixed, the hook crashes and the standing rules are not
+      injected.
+- [x] P0.5 First commit: `docs: add project plan, architecture and development log`.
+
+**Exit:** the Phase 1 decisions are confirmed and the docs are committed.
+
+---
+
+## Phase 1 — Foundation
+
+**Goal (spec deliverable):** a responsive application shell with navigation and placeholder
+screens. No backend yet.
+**Needs:** D-002, D-005, D-010, and D-009 for P1.10.
+
+- [ ] P1.1 Scaffold with `create-next-app` using pnpm: TypeScript, App Router, ESLint, Tailwind CSS,
+      `src/` directory, `@/*` import alias. Record the installed Next.js, React and Tailwind
+      versions in the DEVLOG.
+- [ ] P1.2 Confirm TypeScript strict mode. Add a `typecheck` script (`tsc --noEmit`).
+- [ ] P1.3 Add Prettier (with Tailwind class sorting) and a `format` script, without conflicting
+      with ESLint.
+- [ ] P1.4 Enforce the onion dependency rules in ESLint (ARCHITECTURE.md §4). Check them by adding
+      a forbidden import temporarily and confirming lint fails.
+- [ ] P1.5 Initialise shadcn/ui. Add only the components the shell needs; add more when a feature
+      needs them.
+- [ ] P1.6 Create the design tokens from D-002: colours (light, plus dark if confirmed), type
+      scale, spacing and radius as CSS variables in the Tailwind theme. Write `docs/DESIGN.md`
+      covering the tokens and tone of voice (spec §3 and §6).
+- [ ] P1.7 Build the app shell: an `(app)` route group layout with a bottom tab bar on mobile and
+      a sidebar on desktop. Nav items: Home, Brain Dump, Tasks, Mind Clarity, Settings.
+- [ ] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.
+      Home uses the spec §6 copy ("Take a breath." / "You don't have to figure everything out
+      right now."). `/` redirects to `/home`.
+- [ ] P1.9 Commit a `.env.example` with no values, and git-ignore `.env*.local`. The variables
+      themselves come in Phase 2.
+- [ ] P1.10 Deployment previews: connect the `origin` GitHub repo to the host chosen in D-009. This
+      is your action (you push). Confirm a preview build succeeds.
+- [ ] P1.11 Write a root `README.md`: prerequisites, setup, scripts, and links to the docs.
+
+**Acceptance**
+- `pnpm build`, `pnpm lint` and `pnpm typecheck` pass.
+- The shell works at 360px and on desktop with no horizontal scroll. The nav can be used with a
+  keyboard, focus is visible, and the active route is marked.
+- Lint rejects a deliberate cross-layer import.
+- The preview URL loads (once D-009 is decided).
+
+---
+
+## Phase 2 — Supabase and authentication
+
+**Goal:** only signed-in users get in, every user has a profile row, and the RLS testing harness
+is in place. This phase is separate because RLS needs auth and the spec has no milestone for
+auth (gap G-2).
+**Needs:** D-003, D-007, D-011.
+
+- [ ] P2.1 Add the Supabase CLI as a dev dependency and run `supabase init`. The local stack runs on
+      Docker (`supabase start`). You create a hosted free-tier project for preview and production.
+- [ ] P2.2 Environment config: put the Supabase URL and public key in `.env.local` and the host
+      settings. Add a typed, validated env module in `src/infrastructure/config/`. Take the variable
+      names from the current Supabase Next.js guide, since Supabase's key naming has changed
+      (anon → publishable). Verify before using.
+- [ ] P2.3 Create the Supabase clients with `@supabase/ssr` in `src/infrastructure/supabase/`: a
+      server client that reads cookies, and a browser client only if needed. Add session refresh
+      in Next.js middleware/proxy, following the current Supabase SSR guide for the installed
+      Next.js version. Server-only modules import `server-only`.
+- [ ] P2.4 Migration: the `set_updated_at()` trigger function, the `profiles` table and its RLS,
+      and the `handle_new_user()` trigger (DATA_MODEL.md).
+- [ ] P2.5 Generate the database types into `src/infrastructure/supabase/database.types.ts`. Add a
+      `db:types` script.
+- [ ] P2.6 Build the auth flow for D-007: a `(auth)/sign-in` page, server actions for sign-in and
+      sign-out, an `auth/callback` route if the method needs one, and friendly error states.
+- [ ] P2.7 Protect routes: the `(app)` layout requires a session (checked on the server), and a
+      signed-in user who visits sign-in is sent to `/home`.
+- [ ] P2.8 Set up the pgTAP harness in `supabase/tests/`. First test: user A cannot read or update
+      user B's profile. Add a `db:test` script.
+- [ ] P2.9 Settings page: the signed-in email, a timezone setting (pre-filled from the browser,
+      editable), and sign-out.
+
+**Acceptance**
+- Sign-in and sign-out work locally and on the preview deployment.
+- Visiting any `(app)` route while signed out redirects to sign-in.
+- `supabase test db` passes, and the profiles RLS is proven with two users.
+- No secret or service-role key appears in a client component or a `NEXT_PUBLIC_` variable
+  (checked with grep).
+
+---
+
+## Phase 3 — Brain Dump (spec Milestone 2, MVP Module 1)
+
+**Goal (spec deliverable):** users can capture and manage their thoughts securely.
+
+- [ ] P3.1 Set up Vitest for `src/domain` and `src/application`, with a `test` script.
+- [ ] P3.2 Domain: `Thought` and `Category`, their rules (trimmed content must not be empty;
+      length limits match the database checks), and the `ThoughtRepository` and
+      `CategoryRepository` interfaces. Unit tests.
+- [ ] P3.3 Migration: `categories` and `thoughts`, with indexes, composite ownership FKs, RLS and
+      updated_at triggers. Two-user pgTAP tests for both tables. Regenerate the types.
+- [ ] P3.4 Infrastructure: the Supabase repositories and row ↔ domain mappers, wired into the
+      composition root.
+- [ ] P3.5 Application use cases: capture; list (newest first, filter by category or status); get;
+      update; delete; search; create, rename and delete a category; assign a category. Zod input
+      schemas. Unit tests with in-memory fakes.
+- [ ] P3.6 Capture UI: a single text area with autofocus. Save with a button or Ctrl/Cmd+Enter.
+      After saving, the field clears and keeps focus for the next thought. Show a saving state.
+      A failed save keeps the text.
+- [ ] P3.7 List and detail/edit UI. Delete through an in-app confirmation dialog (shadcn
+      AlertDialog), not the browser's `confirm()`.
+- [ ] P3.8 Categories UI: pick or create a category in place. Offer suggested names from spec
+      §4.1 and §4.2, but create none in advance.
+- [ ] P3.9 Search: a case-insensitive match on title and content, escaping `%` and `_`. Add
+      full-text search later only if needed.
+- [ ] P3.10 Loading, empty and error states on every Brain Dump screen.
+- [ ] P3.11 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
+      with no urgency styling.
+
+**Acceptance**
+- From the capture screen, a thought is saved in a few seconds: one field, one action.
+- Create, edit, delete, search and categorise all work. Text is never lost on a failed save.
+- RLS tests pass for `thoughts` and `categories`. Domain and application tests pass.
+- It is deployed so you can use it yourself.
+
+### Checkpoint A — personal use (spec §17 step 10)
+
+Use Brain Dump yourself before widening the scope. Record what helped and what caused friction
+in the DEVLOG, then adjust Phases 4–5 if needed.
+
+---
+
+## Phase 4 — External Memory (spec Milestone 3, MVP Module 2)
+
+**Goal (spec deliverable):** users can manage basic tasks and reminders.
+**Needs:** D-008.
+
+- [ ] P4.1 Domain: `Task` (title, notes, due date with optional time, priority low/normal/high,
+      completion) and `Reminder`. Rules: a time needs a date, and a reminder belongs to a task.
+      Repository interfaces and unit tests.
+- [ ] P4.2 Dates and timezones: compute "today" in the profile's timezone. Add a small date library
+      only if `Intl` is not enough. Test the boundaries (late at night, timezone offsets).
+- [ ] P4.3 Migration: `tasks` and `reminders`, with indexes, ownership FKs and RLS. pgTAP tests,
+      including a cross-user FK attempt that must be rejected. Regenerate the types.
+- [ ] P4.4 Infrastructure repositories, wired into the composition root.
+- [ ] P4.5 Use cases: create, edit, complete, reopen and delete a task; set due date and priority;
+      add and dismiss a reminder; list Today (overdue plus today), Upcoming, No date and recently
+      Completed. Unit tests.
+- [ ] P4.6 Tasks UI: quick add (only the title is required), an edit sheet with due date/time and
+      priority pickers, and complete with undo.
+- [ ] P4.7 Convert a thought into a task from Brain Dump: the title is pre-filled and linked through
+      `source_thought_id`. What happens to the thought is settled in DATA_MODEL.md, Q-2.
+- [ ] P4.8 In-app reminders (D-008): due reminders appear on Home ("Upcoming reminders") and on
+      Tasks, with a dismiss action. No push.
+- [ ] P4.9 Home: a summary of today's tasks and upcoming reminders. Overdue items look neutral, with
+      no red alarms.
+- [ ] P4.10 Validation, empty and error states.
+
+**Acceptance**
+- Tasks, with or without due dates, land in the right view for the user's timezone.
+- Converting a thought creates a linked task.
+- RLS tests pass for `tasks` and `reminders`.
+
+---
+
+## Phase 5 — Mind Clarity (spec Milestone 5, MVP Module 3)
+
+**Goal (spec deliverable):** users can reflect and choose a manageable priority.
+
+- [ ] P5.1 Domain: `DailyCheckIn` (one per user per local date; every prompt optional), its
+      repository interface, and tests.
+- [ ] P5.2 Migration: `daily_checkins`, with an ownership FK to tasks and RLS. pgTAP tests.
+      Regenerate the types.
+- [ ] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing
+      task or free text), and list past check-ins.
+- [ ] P5.4 Check-in flow UI: one prompt per step (spec §4.6). Every step can be skipped and the
+      flow can end early. Separates "act on now" from "can wait".
+- [ ] P5.5 One Thing at a Time: today's priority is prominent on Home, and every other task is
+      still one tap away (spec §4.7).
+- [ ] P5.6 Thought review flow: go through inbox thoughts one at a time and choose park, convert to
+      task, archive or delete.
+- [ ] P5.7 Past reflections: a simple list by date. No scores, streaks or "insights".
+- [ ] P5.8 (Stretch) Slow Down Mode: a short breathing exercise and the prompt "What is actually
+      bothering you right now?", with an optional save as a thought. Respects
+      `prefers-reduced-motion`. No medical claims.
+
+**Acceptance**
+- A check-in takes a couple of minutes. Every step can be skipped, and nothing guilt-trips the
+  user about missed days.
+- Home shows one priority without hiding other tasks.
+- RLS tests pass for `daily_checkins`.
+
+---
+
+## Phase 6 — PWA, privacy and beta readiness (spec Milestone 6, §10, §14)
+
+**Goal:** an installable app that has passed a privacy review, ready for 30 days of personal use
+and then the private beta.
+
+- [ ] P6.1 Web app manifest through `app/manifest.ts` (name, short name, start URL, `standalone`,
+      theme and background colours), plus icons (192, 512 and maskable). Uses the name from D-001.
+- [ ] P6.2 Service worker: cache the app shell and static assets, add an offline fallback page and
+      a connection-status indicator. Choose between a hand-written worker (Next.js PWA guide) and a
+      library such as Serwist after checking compatibility with the installed Next.js version.
+      Do not cache user data yet.
+- [ ] P6.3 Test installation and browser behaviour on Chrome and Edge desktop, Android Chrome, and
+      iOS Safari (Add to Home Screen). Record the results in the DEVLOG.
+- [ ] P6.4 Accessibility review: keyboard navigation, visible focus, WCAG AA contrast, labels,
+      reduced motion, and readable text at 200% zoom.
+- [ ] P6.5 Data controls (spec §14): export my data (a JSON download of all the user's rows), and
+      delete my account (server-side only; removes the auth user and cascades their data).
+- [ ] P6.6 Security review: re-run every RLS test, confirm no secret keys are in the client bundle,
+      add security headers, audit dependencies, and consider rate limiting on auth.
+- [ ] P6.7 Reliability: check Supabase backup options on the chosen tier, decide on error
+      monitoring (optional), and sort out auth email delivery (custom SMTP if needed; check the
+      current Supabase limits).
+- [ ] P6.8 Privacy policy, terms of use, and a contact / report-a-problem link. A PDPA (Malaysia)
+      review is your task (legal); Claude can draft.
+- [ ] P6.9 Production deployment on the chosen host. Review the hosting terms (D-009) before the
+      beta.
+
+**Acceptance**
+- The app installs on supported browsers, and offline shows the app's fallback page rather than
+  a browser error.
+- Export returns all of the user's data, and account deletion leaves no rows for that user
+  (checked).
+- The security and accessibility checklists are done, with findings fixed or logged.
+
+---
+
+## Validation stages (spec §15)
+
+1. **Stage 1: personal use for 30 days.** Log observations in the DEVLOG using the spec §15
+   questions.
+2. **Stage 2: private beta with 5–10 people.** Starts after Stage 1 and P6.8.
+3. **Stage 3: public launch.** Landing page, policies, and a feedback loop.
+
+---
+
+## Post-MVP backlog (unscheduled; prioritise from real usage)
+
+- **Voice Capture (spec Milestone 4), the Phase 7 candidate:** microphone permission handling,
+  recording where supported, server-side speech-to-text (provider to be decided), review and edit
+  of the transcript, saving it as a thought, and a text fallback. Also a consent flow, an audio
+  retention policy, and a `voice_recordings` table plus a Storage bucket with RLS.
+- Offline draft capture with a sync queue and explicit conflict handling (spec §10 steps 3–5).
+- Conversation Mode (spec §4.4).
+- AI categorisation: opt-in, server-side, disclosed (spec §4.1, §14).
+- Push notifications and a morning review (spec §4.5).
+- Reflection pattern review, in non-medical language (spec §4.6).
+- Guest or local-only mode (D-003).
+- Dark theme, if it is not delivered in P1.6.
