@@ -1,0 +1,19 @@
+{
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "deny": ["Bash(git push:*)"],
+    "ask": ["Bash(git commit:*)"]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/user-prompt-rules.cjs\""
+          }
+        ]
+      }
+    ]
+  }
+}
