@@ -71,6 +71,11 @@ screens. No backend yet.
 - [ ] P1.1 Scaffold with `create-next-app` using pnpm: TypeScript, App Router, ESLint, Tailwind CSS,
       `src/` directory, `@/*` import alias. Record the installed Next.js, React and Tailwind
       versions in the DEVLOG.
+      _Constraints (checked in create-next-app 16.4.4 source, 2026-11-03):_ it refuses a folder
+      that holds files outside its allow-list. `.claude/`, `.git`, `.gitignore` and `docs/` are
+      allowed, but `CLAUDE.md` and `mindspace_product_and_development_plan.md` are not. Move those
+      two files out temporarily, scaffold, then move them back (they are committed, so
+      `git status` confirms nothing is lost). It also **overwrites** any existing `.gitignore`.
 - [ ] P1.2 Confirm TypeScript strict mode. Add a `typecheck` script (`tsc --noEmit`).
 - [ ] P1.3 Add Prettier (with Tailwind class sorting) and a `format` script, without conflicting
       with ESLint.
@@ -86,8 +91,10 @@ screens. No backend yet.
 - [ ] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.
       Home uses the spec §6 copy ("Take a breath." / "You don't have to figure everything out
       right now."). `/` redirects to `/home`.
-- [ ] P1.9 Commit a `.env.example` with no values, and git-ignore `.env*.local`. The variables
-      themselves come in Phase 2.
+- [ ] P1.9 Commit a `.env.example` with no values. The generated `.gitignore` ignores `.env*`,
+      which would also hide `.env.example`, so add `!.env.example`. Also add
+      `.claude/settings.local.json` (personal Claude settings; for now only this machine's global
+      git ignore covers it). The variables themselves come in Phase 2.
 - [ ] P1.10 Deployment previews: connect the `origin` GitHub repo to the host chosen in D-009. This
       is your action (you push). Confirm a preview build succeeds.
 - [ ] P1.11 Write a root `README.md`: prerequisites, setup, scripts, and links to the docs.

@@ -115,5 +115,9 @@ Template — copy it above the newest entry:
     DECISIONS.md "Spec gaps" G-1 to G-8.
   - The prompt-rules hook had a syntax error (a missing comma). You fixed it, and the hook now
     runs and injects the standing rules (P0.4).
+  - Checked the create-next-app 16.4.4 source: it rejects `CLAUDE.md` and the spec file as
+    conflicting files, overwrites `.gitignore`, and its template ignores `.env*`. Workarounds
+    are noted in ROADMAP P1.1 and P1.9. Because of the overwrite, the `.gitignore` is deferred
+    to P1.1.
 - **Commits:** `docs: add project plan, architecture and development log` (P0.5).
 - **Next:** P0.3 (confirm decisions), then P1.1.
