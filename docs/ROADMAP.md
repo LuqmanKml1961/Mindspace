@@ -124,11 +124,15 @@ screens. No backend yet.
       following the skill's "control heights move together" table. **Done:** your five-colour
       palette, mapped and contrast-checked (D-013, DESIGN.md §2–3); `next-themes` 0.4.6 with
       the system default; Button default 40px and `lg` 44px (option B); `docs/DESIGN.md`.
-- [ ] P1.7 Build the app shell: an `(app)` route group layout with a bottom tab bar on mobile and
-      a sidebar on desktop. Nav items: Home, Brain Dump, Tasks, Mind Clarity, Settings.
-- [ ] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.
+- [x] P1.7 Build the app shell: an `(app)` route group layout with a bottom tab bar on mobile and
+      a sidebar on desktop. Nav items: Home, Brain Dump, Tasks, Mind Clarity, Settings. Done
+      with a custom `app-nav.tsx`, not the shadcn Sidebar. A dry run showed that Sidebar would
+      overwrite our 40px Button and add 7 unused files plus `src/hooks/`, and it has no bottom
+      tab bar (DESIGN.md §6a).
+- [x] P1.8 Add placeholder screens for `/home`, `/thoughts`, `/tasks`, `/clarity` and `/settings`.
       Home uses the spec §6 copy ("Take a breath." / "You don't have to figure everything out
-      right now."). `/` redirects to `/home`.
+      right now."). `/` redirects to `/home`. Done: pages use the title template
+      `%s · Mindspace`, and the unused template SVGs are removed from `public/`.
 - [ ] P1.9 Commit a `.env.example` with no values. The generated `.gitignore` ignores `.env*`,
       which would also hide `.env.example`, so add `!.env.example`. Also add
       `.claude/settings.local.json` (personal Claude settings; for now only this machine's global

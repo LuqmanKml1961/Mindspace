@@ -108,6 +108,24 @@ darken `input`.
   similar components, set their default height to 40px (`h-10`) to match. Check the generated
   classes first; the shadcn skill's `design-system.md` lists where heights live.
 
+- **Links that look like buttons:** use `<Link className={buttonVariants({ … })}>`. Don't use
+  Base UI's `<Button nativeButton={false} render={<Link />}>` for navigation. It renders
+  `<a role="button">` (verified 2026-11-03), so screen readers announce a button for something
+  that navigates.
+
+## 6a. App shell and navigation (P1.7)
+
+- `src/components/layout/app-nav.tsx`: a sidebar on desktop (`md` and up, 256px, sticky) and a
+  bottom tab bar on mobile. Both use one `navItems` list and `usePathname()`.
+- Active item: `aria-current="page"`, plus a visible cue that is not colour alone. The sidebar
+  uses an `accent` background; the tab bar uses an `accent` pill behind the icon and `primary`
+  text.
+- Every nav target is at least 40px tall (sidebar `h-10`, tab bar `min-h-16`). Focus shows the
+  same ring as Button (`ring-3 ring-ring/50`).
+- On mobile, `main` has `pb-28` so content clears the fixed tab bar. The tab bar comes after
+  `main` in the DOM, so it paints on top without a manual `z-index`.
+- The app name and tagline come from `src/lib/site.ts` (D-001: one place to rename).
+
 ## 7. Icons
 
 Hugeicons (`@hugeicons/react` with `@hugeicons/core-free-icons`, MIT), from the Maia preset.

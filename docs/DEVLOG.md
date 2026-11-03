@@ -5,15 +5,17 @@
 | Item               | Value                         |
 | ------------------ | ----------------------------- |
 | **Current phase**  | Phase 1 — Foundation          |
-| **Phase progress** | 6 / 11 tasks done (P1.1–P1.6) |
+| **Phase progress** | 8 / 11 tasks done (P1.1–P1.8) |
 | **Last updated**   | 2026-11-03 (Session 2)        |
 | **Blocked on**     | Nothing                       |
 
 **Next actions (in order)**
 
-1. **P1.7**: app shell, with a bottom tab bar on mobile and a sidebar on desktop. Use the tokens
-   and 40px controls from `docs/DESIGN.md`.
-2. Once it is published, upgrade to the Next.js security release (see Known issues).
+1. **P1.9**: `.env.example`, and add `!.env.example` and `.claude/settings.local.json` to
+   `.gitignore`.
+2. **P1.11**: rewrite `README.md` (pnpm commands; the template still says `yarn dev`).
+3. **P1.10**: deployment previews on Vercel (your action). First upgrade to the Next.js
+   security release (see Known issues).
 
 **Running the app:** use **pnpm** (`pnpm dev`), not yarn. The `packageManager` field enforces
 pnpm. If the dev server shows old colours, restart it and hard-refresh.
@@ -116,6 +118,40 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): app shell and placeholder screens
+
+- **Phase:** 1 · **Tasks:** P1.7, P1.8, done together because the shell can't be checked without
+  routes. They are committed separately.
+- **Done:**
+  - Read the bundled Next.js 16.4.4 docs for route groups, `usePathname` (client-only), `redirect`
+    (307 in Server Components), `LayoutProps` and the metadata `title.template`. Read the
+    Hugeicons 1.1.10 and Base UI 1.9.0 type definitions for `HugeiconsIcon` props and Button
+    `render`/`nativeButton`. Confirmed the five icon names exist in the free set.
+  - Searched the shadcn registry (`sidebar`, `navigation`, `bottom`, `tab`). There is no bottom
+    nav component. A Sidebar dry run showed it would overwrite Button and add 7 files, so I chose
+    a custom `src/components/layout/app-nav.tsx`.
+  - Added `src/app/(app)/layout.tsx` (sidebar, `main`, tab bar) and `src/lib/site.ts` (name,
+    tagline, description). The root metadata now uses the `%s · Mindspace` title template.
+  - P1.8: five placeholder pages, `/` now `redirect("/home")`, and the five unused template SVGs
+    removed.
+  - Verified: lint, typecheck, format and build pass (7 routes). Against your running dev server:
+    `/` returns a 307 to `/home`; every route serves the right `<h1>` and title; exactly the
+    current link carries `aria-current="page"` in both navs.
+- **Decisions:** none new. The custom nav instead of shadcn Sidebar is recorded in ROADMAP P1.7
+  and DESIGN.md §6a.
+- **Problems / findings:**
+  - Base UI `Button` with `nativeButton={false} render={<Link />}` rendered
+    `<a role="button">`, which is wrong for navigation. Switched to
+    `<Link className={buttonVariants(…)}>`; the re-check shows a plain `<a>`. Recorded as a
+    DESIGN.md rule.
+  - The `(app)` group layout's only generated route key is `"/"` (route groups aren't in
+    paths), so it uses `LayoutProps<"/">` like the root layout.
+  - Your running dev server still serves the pre-P1.6 stylesheet. Restart it to see the
+    palette.
+- **Commits:** `feat(shell): add app shell with sidebar and bottom tab bar (P1.7)` and
+  `feat(pages): add placeholder screens and redirect / to /home (P1.8)`
+- **Next:** P1.9.
 
 ### 2026-11-03 — Session 2 (cont.): design tokens
 
