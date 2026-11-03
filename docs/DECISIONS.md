@@ -11,20 +11,20 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 ## Summary
 
-| ID    | Topic                        | Status             | Needed before                                    |
-| ----- | ---------------------------- | ------------------ | ------------------------------------------------ |
-| D-001 | Product name                 | Accepted           | P6.1 (manifest). Working name is fine until then |
-| D-002 | Visual direction             | Accepted           | P1.6 (design tokens)                             |
-| D-003 | Accounts                     | Accepted           | Phase 2                                          |
-| D-004 | Scope and build order        | Accepted           | Phase 1                                          |
-| D-005 | Technology stack             | Accepted           | P1.1 (scaffold)                                  |
-| D-006 | Onion Architecture           | Accepted           | —                                                |
-| D-007 | Sign-in method               | Accepted           | P2.6                                             |
-| D-008 | Reminders in the MVP         | Accepted           | Phase 4                                          |
-| D-009 | Hosting                      | Accepted           | P1.10 (deployment previews)                      |
-| D-010 | Package manager              | Accepted           | P1.1                                             |
-| D-011 | Local database and tests     | Accepted           | Phase 2                                          |
-| D-012 | shadcn/ui library and preset | Proposed (applied) | Before more components are added                 |
+| ID    | Topic                        | Status   | Needed before                                    |
+| ----- | ---------------------------- | -------- | ------------------------------------------------ |
+| D-001 | Product name                 | Accepted | P6.1 (manifest). Working name is fine until then |
+| D-002 | Visual direction             | Accepted | P1.6 (design tokens)                             |
+| D-003 | Accounts                     | Accepted | Phase 2                                          |
+| D-004 | Scope and build order        | Accepted | Phase 1                                          |
+| D-005 | Technology stack             | Accepted | P1.1 (scaffold)                                  |
+| D-006 | Onion Architecture           | Accepted | —                                                |
+| D-007 | Sign-in method               | Accepted | P2.6                                             |
+| D-008 | Reminders in the MVP         | Accepted | Phase 4                                          |
+| D-009 | Hosting                      | Accepted | P1.10 (deployment previews)                      |
+| D-010 | Package manager              | Accepted | P1.1                                             |
+| D-011 | Local database and tests     | Accepted | Phase 2                                          |
+| D-012 | shadcn/ui library and preset | Accepted | Before more components are added                 |
 
 ---
 
@@ -199,9 +199,14 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   "soft and rounded, with generous spacing (40px+ controls, 12px+ card radius, generous padding,
   editorial pacing)", which fits D-002 better. Maia's preset defaults to Hugeicons (MIT) and the
   Figtree font.
-- **Status:** Proposed (applied). Waiting for your confirmation. Revisit the style before P1.6.
-- **Decision:**
-- **Date:**
+- **Status:** Accepted
+- **Decision:** Accepted: **Base UI with the Maia style (`base-maia`)**, applied with
+  `shadcn apply --preset maia` (CLI 4.23.0). This brings the **Figtree** font (`--font-sans`),
+  **Hugeicons** (`@hugeicons/react`, `@hugeicons/core-free-icons`; `lucide-react` removed as
+  unused), and a pill-shaped Button. The shadcn `cn` package stays. Measured in the generated
+  `button.tsx`: the default control height is **36px** (`h-9`), `lg` is **40px** (`h-10`), and
+  Nova's default was 32px. Decide in P1.6 whether to raise control heights for touch.
+- **Date:** 2026-11-03
 
 ---
 

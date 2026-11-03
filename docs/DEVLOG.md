@@ -2,20 +2,19 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                         |
-| ------------------ | --------------------------------------------- |
-| **Current phase**  | Phase 1 — Foundation                          |
-| **Phase progress** | 5 / 11 tasks done (P1.1–P1.5)                 |
-| **Last updated**   | 2026-11-03 (Session 2)                        |
-| **Blocked on**     | D-012 style choice (Nova vs Maia) before P1.6 |
+| Item               | Value                         |
+| ------------------ | ----------------------------- |
+| **Current phase**  | Phase 1 — Foundation          |
+| **Phase progress** | 5 / 11 tasks done (P1.1–P1.5) |
+| **Last updated**   | 2026-11-03 (Session 2)        |
+| **Blocked on**     | Nothing                       |
 
 **Next actions (in order)**
 
-1. Decide **D-012**: keep Nova (compact) or switch to Maia (soft, generous spacing). See D-012
-   "Finding".
-2. **P1.6**: design tokens (D-002), plus `next-themes` with the system default for dark mode
-   (see ROADMAP P1.6), and `docs/DESIGN.md`.
-3. Once it is published, upgrade to the Next.js security release (see Known issues).
+1. **P1.6**: design tokens (D-002). Propose a calm palette for your approval first. Add
+   `next-themes` with the system default for dark mode, decide control heights for touch, and
+   write `docs/DESIGN.md` (see ROADMAP P1.6).
+2. Once it is published, upgrade to the Next.js security release (see Known issues).
 
 **Known issues**
 
@@ -74,21 +73,21 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 
 **Project dependencies** (as of P1.5, 2026-11-03):
 
-| Package                                | Version        | Notes                                                                                         |
-| -------------------------------------- | -------------- | --------------------------------------------------------------------------------------------- |
-| next / eslint-config-next              | 16.4.4         | published 2026-11-02; the security release is pending (Known issues)                          |
-| react / react-dom                      | 19.3.0         | exact pin from the template                                                                   |
-| tailwindcss / @tailwindcss/turbopack   | 4.3.3          | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config`  |
-| typescript                             | 5.9.3          |                                                                                               |
-| eslint                                 | 9.39.5         | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9`                   |
-| @types/node                            | 20.19.43       | template default (`^20`), while local Node is 22                                              |
-| prettier / prettier-plugin-tailwindcss | 3.9.10 / 0.8.1 | exact pins (P1.3)                                                                             |
-| shadcn                                 | 4.23.0         | runtime dependency added by `init`; provides `shadcn/tailwind.css`, imported by `globals.css` |
-| @base-ui/react                         | 1.9.0          | component primitives (D-012)                                                                  |
-| cn                                     | 0.5.1          | shadcn's class merger, replacing clsx + tailwind-merge (D-012)                                |
-| class-variance-authority               | 0.7.1          | component variants (`cva`)                                                                    |
-| lucide-react                           | 1.66.0         | icons                                                                                         |
-| tw-animate-css                         | 1.4.0          | animation utilities imported by `globals.css`                                                 |
+| Package                                | Version        | Notes                                                                                           |
+| -------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
+| next / eslint-config-next              | 16.4.4         | published 2026-11-02; the security release is pending (Known issues)                            |
+| react / react-dom                      | 19.3.0         | exact pin from the template                                                                     |
+| tailwindcss / @tailwindcss/turbopack   | 4.3.3          | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config`    |
+| typescript                             | 5.9.3          |                                                                                                 |
+| eslint                                 | 9.39.5         | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9`                     |
+| @types/node                            | 20.19.43       | template default (`^20`), while local Node is 22                                                |
+| prettier / prettier-plugin-tailwindcss | 3.9.10 / 0.8.1 | exact pins (P1.3)                                                                               |
+| shadcn                                 | 4.23.0         | dev dependency (moved by `mcp init`); provides `shadcn/tailwind.css`, imported by `globals.css` |
+| @base-ui/react                         | 1.9.0          | component primitives (D-012)                                                                    |
+| cn                                     | 0.5.1          | shadcn's class merger, replacing clsx + tailwind-merge (D-012)                                  |
+| class-variance-authority               | 0.7.1          | component variants (`cva`)                                                                      |
+| @hugeicons/react / core-free-icons     | 1.1.10 / 4.4.0 | icons, from the Maia preset (D-012); `lucide-react` removed                                     |
+| tw-animate-css                         | 1.4.0          | animation utilities imported by `globals.css`                                                   |
 
 ## Personal-use observations
 
@@ -115,6 +114,28 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-03 — Session 2 (cont.): switch to the Maia style
+
+- **Phase:** 1 · **Tasks:** D-012 follow-up (no ROADMAP task)
+- **Done:**
+  - You chose Maia. Ran `shadcn apply --preset maia --yes` with the installed 4.23.0. Because
+    Button had no local changes, overwriting it was safe. `components.json` is now `base-maia`
+    with `hugeicons`, Button is regenerated (pill shape, roomier sizes), and `layout.tsx` uses
+    Figtree on `--font-sans`.
+  - Cleaned up after `apply`: removed the unused `Geist` import it left in `layout.tsx`, and
+    removed `lucide-react`, which nothing imports now.
+  - Verified: lint, typecheck, format and build pass. In the compiled CSS the next/font rule
+    `--font-sans: "Figtree"` sits at the top level (unlayered), and nothing references Geist
+    Sans.
+- **Decisions:** D-012 Accepted (Base UI with Maia).
+- **Problems / findings:**
+  - The skill's style table says Maia has "40px+ controls", but the generated Button defaults to
+    36px (`h-9`) with `lg` at 40px. Control height is now a P1.6 decision.
+  - This time `apply` recognised the font variable correctly, because we had renamed it to
+    `--font-sans` in P1.5. The P1.5 fix paid off.
+- **Commits:** `feat(ui): switch shadcn style to Maia (D-012)`
+- **Next:** P1.6.
 
 ### 2026-11-03 — Session 2 (cont.): shadcn skill and MCP config
 
