@@ -8,8 +8,21 @@ import {
 } from "@/application/encryption/user-keys";
 import { makeGetProfile } from "@/application/profiles/get-profile";
 import { makeUpdateTimezone } from "@/application/profiles/update-timezone";
+import {
+  makeCreateCategoryRecord,
+  makeCreateThoughtRecord,
+  makeDeleteCategoryRecord,
+  makeDeleteThoughtRecord,
+  makeGetThoughtRecord,
+  makeListCategoryRecords,
+  makeListThoughtRecords,
+  makeRenameCategoryRecord,
+  makeUpdateThoughtRecord,
+} from "@/application/thoughts/records";
 import { createSupabaseAuthService } from "@/infrastructure/auth/supabase-auth-service";
+import { createSupabaseCategoryRepository } from "@/infrastructure/repositories/supabase-category-repository";
 import { createSupabaseProfileRepository } from "@/infrastructure/repositories/supabase-profile-repository";
+import { createSupabaseThoughtRepository } from "@/infrastructure/repositories/supabase-thought-repository";
 import { createSupabaseUserKeysRepository } from "@/infrastructure/repositories/supabase-user-keys-repository";
 import { createSupabaseServerClient } from "@/infrastructure/supabase/server";
 
@@ -26,6 +39,8 @@ export async function getAppContext() {
 
   const profiles = createSupabaseProfileRepository(supabase);
   const userKeys = createSupabaseUserKeysRepository(supabase);
+  const thoughts = createSupabaseThoughtRepository(supabase);
+  const categories = createSupabaseCategoryRepository(supabase);
   return {
     user: { id: data.claims.sub, email: data.claims.email ?? null },
     useCases: {
@@ -34,6 +49,15 @@ export async function getAppContext() {
       getUserKeys: makeGetUserKeys({ userKeys }),
       createUserKeys: makeCreateUserKeys({ userKeys }),
       replaceUserKeys: makeReplaceUserKeys({ userKeys }),
+      listThoughtRecords: makeListThoughtRecords({ thoughts }),
+      getThoughtRecord: makeGetThoughtRecord({ thoughts }),
+      createThoughtRecord: makeCreateThoughtRecord({ thoughts }),
+      updateThoughtRecord: makeUpdateThoughtRecord({ thoughts }),
+      deleteThoughtRecord: makeDeleteThoughtRecord({ thoughts }),
+      listCategoryRecords: makeListCategoryRecords({ categories }),
+      createCategoryRecord: makeCreateCategoryRecord({ categories }),
+      renameCategoryRecord: makeRenameCategoryRecord({ categories }),
+      deleteCategoryRecord: makeDeleteCategoryRecord({ categories }),
     },
   };
 }

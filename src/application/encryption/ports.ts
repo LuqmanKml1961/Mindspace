@@ -17,6 +17,24 @@ export interface KeyCrypto {
   unwrapWithRecoveryCode(wrapped: WrappedKey, code: string): Promise<CryptoKey>;
 }
 
+// Binds a ciphertext to its owner and field (D-021), so it can't be moved to another field or
+// person and still decrypt.
+export type FieldContext = { table: string; column: string; userId: string };
+
+// Encrypts one text field with the data key. decrypt throws DecryptFailedError.
+export interface FieldCrypto {
+  encrypt(
+    key: CryptoKey,
+    plaintext: string,
+    field: FieldContext,
+  ): Promise<string>;
+  decrypt(
+    key: CryptoKey,
+    ciphertext: string,
+    field: FieldContext,
+  ): Promise<string>;
+}
+
 // The unlocked key on this device ("once per device"); cleared at sign-out.
 export interface DeviceKeyStore {
   save(userId: string, key: CryptoKey): Promise<void>;

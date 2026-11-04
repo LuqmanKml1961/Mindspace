@@ -308,10 +308,17 @@ auth (gap G-2).
   - Checked once against the local database as two real signed-in users (RLS applied), with
     real ciphertext. Three deliberate breakages were each caught.
   - The container wiring comes with the use cases in P3.7; nothing would use it before then.
-- [ ] P3.7 Application: use cases (capture; list newest first, filtered by category or status;
+- [x] P3.7 Application: use cases (capture; list newest first, filtered by category or status;
       get; update; delete; create, rename and delete a category; assign a category). Encryption
       and decryption happen in the browser; Server Actions receive ciphertext only. Zod schemas.
-      Unit tests with in-memory fakes.
+      Unit tests with in-memory fakes. **Done 2026-11-04:**
+  - **Browser** (`thoughts.ts`, `categories.ts`): rules, then encrypt with the device key, then
+    decrypt (`openThoughts`, `openCategories`). Duplicate names are caught on the device.
+  - **Server** (`records.ts`): ciphertext only, for the session's user. Reads serve Server
+    Components; writes serve the six Server Actions in `(app)/thoughts/actions.ts`, which check
+    input with Zod schemas that mirror the database.
+  - **Wiring:** the container and `createBrainDumpUseCases`.
+  - 91 unit tests, including real Web Crypto. Seven deliberate breakages were each caught.
 - [ ] P3.8 Capture UI: a single text area with autofocus. Save with a button or Ctrl/Cmd+Enter.
       After saving, the field clears and keeps focus for the next thought. Show a saving state.
       A failed save keeps the text.

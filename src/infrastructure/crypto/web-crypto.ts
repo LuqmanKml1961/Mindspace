@@ -5,7 +5,11 @@ import {
   DecryptFailedError,
   UnlockFailedError,
 } from "@/application/encryption/errors";
-import type { KeyCrypto } from "@/application/encryption/ports";
+import type {
+  FieldContext,
+  FieldCrypto,
+  KeyCrypto,
+} from "@/application/encryption/ports";
 import type { WrappedKey } from "@/domain/encryption/user-keys";
 
 const VERSION = "v1";
@@ -16,9 +20,6 @@ const RECOVERY_CODE_BYTES = 16; // 128 bits
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
-
-// Binds a ciphertext to its owner and field, so it can't be moved elsewhere.
-export type FieldContext = { table: string; column: string; userId: string };
 
 function toBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -198,6 +199,11 @@ export async function decryptField(
     throw new DecryptFailedError();
   }
 }
+
+export const webFieldCrypto: FieldCrypto = {
+  encrypt: encryptField,
+  decrypt: decryptField,
+};
 
 export const webKeyCrypto: KeyCrypto = {
   generateDataKey,

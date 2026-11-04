@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                            |
-| ------------------ | ---------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                           |
-| **Phase progress** | Phase 3: 6 / 13 tasks done (P3.1–P3.6); next is P3.7 (use cases) |
-| **Last updated**   | 2026-11-04 (Session 4)                                           |
-| **Blocked on**     | Nothing                                                          |
+| Item               | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                            |
+| **Phase progress** | Phase 3: 7 / 13 tasks done (P3.1–P3.7); next is P3.8 (capture UI) |
+| **Last updated**   | 2026-11-04 (Session 4)                                            |
+| **Blocked on**     | Nothing                                                           |
 
 **Next actions (in order)**
 
@@ -24,11 +24,14 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.7, the Brain Dump use cases:
-   - browser side: encrypt and decrypt, with the domain rules first;
-   - server side: store and list ciphertext;
-   - Zod schemas for the Server Actions;
-   - in-memory fakes, and wiring the repositories into the container.
+4. **Next task:** P3.8, the capture UI on Brain Dump. It needs:
+   - a presentation adapter turning `(app)/thoughts/actions.ts` into `ThoughtServer` and
+     `CategoryServer` (like `components/encryption/encryption.ts`);
+   - `createBrainDumpUseCases`;
+   - `captureThought`.
+
+   Decide then whether the actions refresh the page (`refresh()` / `revalidatePath`) or the list
+   updates on the client.
 
    In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
@@ -145,6 +148,58 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Brain Dump use cases (P3.7)
+
+- **Phase:** 3 · **Tasks:** P3.7
+- **Design**, following ARCHITECTURE §7 and the Next.js guidance that Server Functions are for
+  mutations: **reads** happen in Server Components (encrypted records, decrypted in the browser),
+  and **writes** go through Server Actions that receive only ciphertext. React's `use server`
+  reference lists `Date` as supported in both directions, so records keep their `Date`s.
+- **Done (onion):**
+  - **Domain:** `isSameCategoryName` (NFC, then lower case).
+  - **Application, encryption:**
+    - `FieldContext` moved into the ports (from infrastructure), plus a `FieldCrypto` port;
+    - `DeviceLockedError` and `requireDeviceKey`;
+    - `ciphertext.ts` (`CIPHERTEXT_PATTERN`, `ciphertextMaxLength`), the same as the database.
+  - **Application, thoughts:**
+    - `ports.ts`: `ThoughtServer`, `CategoryServer`, `EncryptedThoughtInput`.
+    - `thoughts.ts`: `openThoughts`, `captureThought`, `updateThought` (which also assigns a
+      category) and `deleteThought`.
+    - `categories.ts`: `openCategories` (sorted by name), and `createCategory` /
+      `renameCategory`, which check for duplicates against the decrypted list. Plus
+      `deleteCategory`.
+    - `records.ts`: nine server use cases; the user id always comes from the session.
+    - `schemas.ts`: Zod mirrors of the database checks. Unknown keys such as `userId` are
+      dropped.
+  - **Infrastructure:**
+    - `webFieldCrypto`;
+    - the container gains the nine record use cases;
+    - `createBrainDumpUseCases` in `browser.ts`.
+  - **Presentation:** `(app)/thoughts/actions.ts` with six write actions. Each calls
+    `getAppContext()`, validates with Zod, and returns `{ ok, data | error }`. Only
+    `NotFoundError` messages pass through.
+- **Tests:** 91 unit tests (29 new).
+  - Fakes cover: rules before encryption, a locked device, field and owner binding, sending only
+    the changed fields, duplicate names, and the session's user id winning.
+  - Schemas: the maximums equal the database's 53,376, 1,108 and 308.
+  - A real Web Crypto flow: what is sent passes the schema and contains no plaintext; it opens
+    again; it is refused in another field or for another user.
+- **Deliberate breakages:** seven, each caught:
+  - the title encrypted as the content field;
+  - additional data taken from the record instead of the signed-in user (my first version
+    changed only one line; the full version was caught);
+  - unvalidated changes;
+  - no duplicate check;
+  - a rename blocked by its own name;
+  - no ciphertext pattern;
+  - the client's user id winning.
+- **Timeout fix:** the existing real-crypto encryption flow test (about a dozen 600k PBKDF2
+  derivations) went over Vitest's 5 s default once the new files ran alongside it. It has an
+  explicit 30 s timeout now; three full runs were green.
+- typecheck, lint, format and build pass.
+- **Commits:** `feat(thoughts): add Brain Dump use cases and Server Actions (P3.7)`
+- **Next:** P3.8.
 
 ### 2026-11-04 — Session 4 (cont.): hosted P3.5 push and encrypted repositories (P3.6)
 

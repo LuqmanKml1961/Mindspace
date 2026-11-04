@@ -6,6 +6,14 @@ export class UnlockFailedError extends Error {
   }
 }
 
+// This device no longer holds the key, for example after signing out in another tab.
+export class DeviceLockedError extends Error {
+  constructor() {
+    super("This device is locked. Reload the page to unlock it.");
+    this.name = "DeviceLockedError";
+  }
+}
+
 // Tampered, moved or malformed ciphertext, or the wrong key.
 export class DecryptFailedError extends Error {
   constructor() {

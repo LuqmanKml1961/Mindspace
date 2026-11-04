@@ -80,7 +80,7 @@ mindspace/
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
     │   ├── encryption/         # ports, errors, schemas, lock-data-key; set-up, unlock, recover, device-key (browser); user-keys (server)
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
-    │   ├── thoughts/           # capture-thought.ts, search-thoughts.ts, schemas.ts, *.test.ts
+    │   ├── thoughts/           # thoughts.ts, categories.ts (browser: rules, encrypt, decrypt); records.ts (server: ciphertext only); ports, schemas, *.test.ts
     │   ├── tasks/
     │   └── check-ins/
     ├── infrastructure/
@@ -133,19 +133,33 @@ Limits of the rule (from the ESLint 9.39 source): it checks `import`, `export �
 `import x = require()`, but **not dynamic `import()`**. Do not use dynamic imports to cross
 layers. Package restrictions cover the listed frameworks only, not every UI library.
 
-## 5. Request flow example: capturing a thought
+## 5. Request flow example: capturing and reading thoughts (D-021)
+
+Writing: the text is checked and encrypted in the browser; the Server Action stores ciphertext.
 
 ```text
 CaptureBox (client component)
-  └─► server action captureThoughtAction(formData)        src/app/(app)/thoughts/actions.ts
-        ├─ parse input with captureThoughtSchema         src/application/thoughts/schemas.ts
-        ├─ { user, useCases } = await getAppContext()    src/infrastructure/container.ts
-        ├─ useCases.captureThought({ userId: user.id, content })
-        │     ├─ createThought(...)  → domain rules       src/domain/thoughts/thought.ts
-        │     └─ thoughts.create(thought) → port         src/domain/thoughts/thought-repository.ts
-        │           └─ SupabaseThoughtRepository (insert; RLS checks auth.uid() = user_id)
-        └─ revalidatePath('/thoughts') and return { ok: true } or { ok: false, error }
+  └─► captureThought({ userId, content, title })      src/application/thoughts/thoughts.ts
+        ├─ createThought(...) → domain rules           src/domain/thoughts/thought.ts
+        ├─ requireDeviceKey(device, userId)            src/application/encryption/device-key.ts
+        ├─ crypto.encrypt(key, text, field)            FieldCrypto port → infrastructure/crypto
+        └─ thoughts.create(ciphertext)                 ThoughtServer port (src/application/thoughts/ports.ts)
+              └─► createThoughtAction(input)           src/app/(app)/thoughts/actions.ts
+                    ├─ { user, useCases } = await getAppContext()     src/infrastructure/container.ts
+                    ├─ thoughtInputSchema.safeParse(input)             src/application/thoughts/schemas.ts
+                    └─ useCases.createThoughtRecord(user.id, data)     src/application/thoughts/records.ts
+                          └─ SupabaseThoughtRepository (insert; RLS; the DB checks the ciphertext)
 ```
+
+Reading: a Server Component loads the records and the browser decrypts them.
+
+```text
+page.tsx (Server Component) → useCases.listThoughtRecords(user.id, filter) → EncryptedThought[]
+  └─► client component → openThoughts({ userId, records }) → Thought[] (decrypted on the device)
+```
+
+The browser use cases are wired in `src/infrastructure/browser.ts` (`createBrainDumpUseCases`).
+The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.
 
 ## 6. Conventions
 
@@ -153,8 +167,8 @@ CaptureBox (client component)
   classes. Server Components can then pass them to Client Components without serialisation
   problems.
 - **Use cases are factory functions** that take their dependencies and return an async function:
-  `makeCaptureThought({ thoughts }) => (input) => Promise<Thought>`. They take `userId`
-  explicitly, which keeps them testable.
+  `makeCaptureThought({ crypto, device, thoughts }) => (input) => Promise<Thought>`. They take
+  `userId` explicitly, which keeps them testable.
 - **Auth** (D-019) goes through the `AuthService` port in `src/application/auth/`, which
   `getAuthService()` in the container provides. There are no use-case wrappers, because they would only
   forward the call. The adapter maps Supabase error codes to the port's `AuthFailure` values, so

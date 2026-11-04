@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { UnlockFailedError } from "@/application/encryption/errors";
-import type { DeviceKeyStore, KeyServer } from "@/application/encryption/ports";
+import type {
+  DeviceKeyStore,
+  FieldContext,
+  KeyServer,
+} from "@/application/encryption/ports";
 import { makeRecoverWithCode } from "@/application/encryption/recover-with-code";
 import { userKeysSchema } from "@/application/encryption/schemas";
 import { makeSetUpEncryption } from "@/application/encryption/set-up-encryption";
@@ -9,7 +13,6 @@ import type { UserKeys } from "@/domain/encryption/user-keys";
 import {
   decryptField,
   encryptField,
-  type FieldContext,
   webKeyCrypto,
 } from "@/infrastructure/crypto/web-crypto";
 
@@ -125,5 +128,7 @@ describe("encryption flow with real Web Crypto", () => {
     await expect(
       decryptField(watch.keys.get("user-a")!, stored, field),
     ).resolves.toBe("a private thought");
-  });
+    // About a dozen PBKDF2 derivations at 600,000 iterations: slower than the 5 s default
+    // when other test files run alongside.
+  }, 30_000);
 });

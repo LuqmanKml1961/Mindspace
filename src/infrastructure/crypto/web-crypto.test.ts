@@ -3,11 +3,11 @@ import {
   DecryptFailedError,
   UnlockFailedError,
 } from "@/application/encryption/errors";
+import type { FieldContext } from "@/application/encryption/ports";
 import {
   createRecoveryCode,
   decryptField,
   encryptField,
-  type FieldContext,
   generateDataKey,
   PBKDF2_ITERATIONS,
   toDeviceKey,

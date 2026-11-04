@@ -135,6 +135,15 @@ GCM tag: `3 + 16 + 1 + 4·⌈(4·chars + 16)/3⌉`. That gives 53,376 for conten
 and 308 for a category name. The database checks the format pattern and these maximums. The
 character limits themselves are enforced on the device by the P3.2 domain rules.
 
+Each ciphertext is bound (as AES-GCM additional data) to its owner and field. The field names
+are `thoughts.title`, `thoughts.content` and `categories.name`
+(`src/application/thoughts/`). The browser decrypts with the signed-in user's id, so a record
+moved to another field or person won't open. Category names are compared after NFC
+normalisation and lower-casing (`isSameCategoryName`).
+
+The Server Actions' Zod schemas (`src/application/thoughts/schemas.ts`) use the same pattern
+and maximums, from `src/application/encryption/ciphertext.ts`.
+
 The format check is
 `^v1\.[A-Za-z0-9+/]{16}\.([A-Za-z0-9+/]{4})+([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`.
 

@@ -27,6 +27,11 @@ export function toCategoryName(input: string): string {
   return name;
 }
 
+// Names are compared ignoring case, after the same Unicode normalisation on every device.
+export function isSameCategoryName(a: string, b: string): boolean {
+  return a.normalize("NFC").toLowerCase() === b.normalize("NFC").toLowerCase();
+}
+
 export function createCategory(props: {
   userId: string;
   name: string;
