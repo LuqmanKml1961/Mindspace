@@ -10,7 +10,11 @@ export type AuthFailure =
   | "session_missing"
   | "unavailable";
 
-export type AuthResult = { ok: true } | { ok: false; reason: AuthFailure };
+export type AuthFailed = { ok: false; reason: AuthFailure };
+
+export type AuthResult = { ok: true } | AuthFailed;
+
+export type RedirectResult = { ok: true; url: string } | AuthFailed;
 
 export type Credentials = { email: string; password: string };
 
@@ -25,4 +29,7 @@ export interface AuthService {
   // On success the user is signed in and may choose a new password.
   verifyPasswordResetCode(email: string, code: string): Promise<AuthResult>;
   updatePassword(password: string): Promise<AuthResult>;
+  // Returns Google's sign-in page; Google then returns the user to callbackUrl with a code.
+  startGoogleSignIn(callbackUrl: string): Promise<RedirectResult>;
+  completeOAuthSignIn(code: string): Promise<AuthResult>;
 }

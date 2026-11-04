@@ -9,6 +9,7 @@ import {
   FormMessages,
   SubmitButton,
 } from "@/components/auth/form-parts";
+import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import {
   Card,
   CardContent,
@@ -17,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FieldGroup } from "@/components/ui/field";
+import { FieldGroup, FieldSeparator } from "@/components/ui/field";
 
 export function SignUpForm() {
   // A new key remounts the steps, which clears the previous action state.
@@ -51,7 +52,11 @@ function SignUpSteps({ onRestart }: { onRestart: () => void }) {
           A calm place for everything on your mind.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
+        <GoogleSignIn />
+        <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+          or
+        </FieldSeparator>
         <form action={formAction}>
           <FieldGroup>
             <FormMessages error={state.error} />

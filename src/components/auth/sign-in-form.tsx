@@ -9,6 +9,7 @@ import {
   FormMessages,
   SubmitButton,
 } from "@/components/auth/form-parts";
+import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import {
   Card,
   CardContent,
@@ -17,18 +18,30 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FieldGroup } from "@/components/ui/field";
+import { FieldGroup, FieldSeparator } from "@/components/ui/field";
 
-export function SignInForm() {
+export function SignInForm({ initialError }: { initialError?: string }) {
   // A new key remounts the steps, which clears the previous action state.
   const [attempt, setAttempt] = useState(0);
   return (
-    <SignInSteps key={attempt} onRestart={() => setAttempt((n) => n + 1)} />
+    <SignInSteps
+      key={attempt}
+      initialError={attempt === 0 ? initialError : undefined}
+      onRestart={() => setAttempt((n) => n + 1)}
+    />
   );
 }
 
-function SignInSteps({ onRestart }: { onRestart: () => void }) {
-  const [state, formAction, pending] = useActionState(signInAction, {});
+function SignInSteps({
+  initialError,
+  onRestart,
+}: {
+  initialError?: string;
+  onRestart: () => void;
+}) {
+  const [state, formAction, pending] = useActionState(signInAction, {
+    error: initialError,
+  });
 
   if (state.awaitingCode && state.email) {
     return (
@@ -52,7 +65,11 @@ function SignInSteps({ onRestart }: { onRestart: () => void }) {
           Sign in to pick up where you left off.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-6">
+        <GoogleSignIn />
+        <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+          or
+        </FieldSeparator>
         <form action={formAction}>
           <FieldGroup>
             <FormMessages error={state.error} />

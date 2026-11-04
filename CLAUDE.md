@@ -79,8 +79,11 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
   `pnpm db:start`.
 - Route protection is in `src/proxy.ts` (the public auth pages are listed there). It is not a
   security boundary: every Server Action and data read must verify the user itself
-  (`getAppContext()`, RLS). Add any new public route, such as `/auth/callback` in P2.6c, to that
-  list.
+  (`getAppContext()`, RLS). `/auth/callback` is in its `publicRoutes`. Add any new public route
+  there.
+- Supabase CLI secrets for `env(...)` in `config.toml` (the Google client ID and secret) live in
+  the git-ignored **root `.env`** (Supabase docs). Next.js loads it too, so never prefix them
+  `NEXT_PUBLIC_`. Never print or paste their values.
 
 ## Commands
 

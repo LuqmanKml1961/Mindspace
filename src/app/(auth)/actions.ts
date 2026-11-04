@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import type { z } from "zod";
 import type { AuthFailure, AuthResult } from "@/application/auth/auth-service";
@@ -207,6 +208,17 @@ export async function updatePasswordAction(
   if (result.reason === "session_missing") redirect("/sign-in");
 
   return { error: failureMessages[result.reason] };
+}
+
+export async function signInWithGoogleAction() {
+  // Server Actions always carry Origin (Next.js checks it against Host).
+  const origin = (await headers()).get("origin");
+  const result = origin
+    ? await (
+        await getAuthService()
+      ).startGoogleSignIn(`${origin}/auth/callback`)
+    : null;
+  redirect(result?.ok ? result.url : "/sign-in?error=google");
 }
 
 export async function signOutAction() {

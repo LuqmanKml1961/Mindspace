@@ -5,7 +5,7 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 9 / 12 tasks done (P2.1–P2.5, P2.6a, P2.6b, P2.7, P2.8)         |
+| **Phase progress** | Phase 2: 10 / 12 tasks done (P2.1–P2.8)                                  |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
@@ -26,8 +26,8 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.6c (Google: you
-   create the Google Cloud OAuth client), P2.9 (settings) and P2.10 (hosted auth setup). Local
+4. **Next tasks:** P2.9 (settings: email, timezone, sign-out) and P2.10 (hosted auth setup,
+   then the installed-PWA sign-in test). Local
    dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). The
    `profiles` migration is **local only**. Push it to the hosted project with
    `pnpm supabase db push` before deploying any code that uses it. After every new migration,
@@ -140,6 +140,54 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Google sign-in (P2.6c)
+
+- **Phase:** 2 · **Tasks:** P2.6c
+- **Done:**
+  - **Sources checked:**
+    - Supabase Google guide: a Web application client, the local callback
+      `http://127.0.0.1:54321/auth/v1/callback`, and the `[auth.external.google]` keys.
+    - Supabase managing-config guide: `env(...)` values come from a **root `.env`**. The CLI
+      config reference returned 404, so the fallback for a redirect that is not allow-listed
+      is unconfirmed, and the exact callback URL is allow-listed instead.
+    - auth-js source: `signInWithOAuth` returns `{ url }` on the server and only redirects in
+      a browser.
+    - Next.js 16 docs: `redirect()` accepts external URLs, and `PageProps` gives
+      `searchParams` as a Promise.
+  - **Code:**
+    - **Port:** `startGoogleSignIn(callbackUrl)` returns a `RedirectResult`, plus
+      `completeOAuthSignIn(code)`. The adapter adds a `toFailure` helper and uses
+      `signInWithOAuth` (PKCE verifier cookie) and `exchangeCodeForSession`.
+    - **`signInWithGoogleAction`:** the callback URL comes from the action's `Origin` header
+      (always present: Next checks it).
+    - **`src/app/auth/callback/route.ts`:** exchanges the code and redirects to `/home`, or to
+      `/sign-in?error=google`. It uses the Supabase guide's `x-forwarded-host` handling. There
+      is no `next` parameter, so there is no open redirect.
+    - **Proxy:** a new `publicRoutes` list holds `/auth/callback`, reachable signed in or out.
+    - **UI:** a `GoogleSignIn` button (`useFormStatus` spinner, Hugeicons `GoogleIcon`) above an
+      "or" separator on sign-in and sign-up. The sign-in page shows the Google error from
+      `searchParams`.
+  - **Config:** `[auth.external.google]` with both values from `env(...)`. The local
+    `additional_redirect_urls` gains `http://localhost:3000/auth/callback`. A git-ignored root
+    `.env` holds your values (never printed: only length and shape were checked).
+    `.env.example`, README and CLAUDE.md document it.
+  - **Verified:**
+    - Before the Google client existed: `/auth/callback` with no code or a fake code →
+      `/sign-in?error=google`, and the message renders.
+    - After enabling: Auth settings show `google: true`, `/authorize` sends **your client ID**
+      (compared, not printed) and the registered `redirect_uri`.
+    - **You signed in with Google:** `/authorize` 302, then `/callback` 302, then `/token`
+      (PKCE) 200. The new user has a google identity, a verified email, a profile row and a
+      session.
+    - typecheck, lint, format:check and build pass.
+- **Decisions:** none. The roadmap's "error page" became a message on sign-in.
+- **Problems / findings:**
+  - Your Google account now exists in the **local** database. It's your data, so it's kept.
+  - Google's sign-in button branding guidelines should be reviewed before a public launch.
+  - The installed-PWA sign-in test needs the hosted setup, so it moved to P2.10.
+- **Commits:** `feat(auth): add Google sign-in with OAuth callback (P2.6c)`
+- **Next:** P2.9 (settings), or P2.10 (hosted setup) if you want the live site working sooner.
 
 ### 2026-11-04 — Session 4 (cont.): forgot password (P2.6b)
 

@@ -39,6 +39,12 @@ Open http://localhost:3000. It redirects to `/home`.
 git-ignored and read only by `pnpm dev`. Create it once: run `pnpm supabase status`, then set
 `NEXT_PUBLIC_SUPABASE_URL` to its `API_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to its
 `PUBLISHABLE_KEY`. Sign-up confirmation codes arrive in Mailpit at http://127.0.0.1:54324.
+
+Google sign-in also needs `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
+`SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET` in a git-ignored root `.env` (see `.env.example`).
+The Google OAuth client must allow `http://localhost:3000` and
+`http://127.0.0.1:54321/auth/v1/callback`. Run `pnpm db:stop` and then `pnpm db:start` after
+changing it.
 `pnpm build` and `pnpm start` use `.env.local`, which holds the hosted project.
 
 ## Scripts

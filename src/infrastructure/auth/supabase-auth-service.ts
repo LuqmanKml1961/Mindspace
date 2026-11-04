@@ -6,6 +6,7 @@ import {
   type SupabaseClient,
 } from "@supabase/supabase-js";
 import type {
+  AuthFailed,
   AuthFailure,
   AuthResult,
   AuthService,
@@ -35,8 +36,7 @@ function logFailure(action: string, error: AuthError) {
   });
 }
 
-function toResult(action: string, error: AuthError | null): AuthResult {
-  if (!error) return { ok: true };
+function toFailure(action: string, error: AuthError): AuthFailed {
   if (isAuthSessionMissingError(error)) {
     return { ok: false, reason: "session_missing" };
   }
@@ -47,6 +47,10 @@ function toResult(action: string, error: AuthError | null): AuthResult {
 
   logFailure(action, error);
   return { ok: false, reason: "unavailable" };
+}
+
+function toResult(action: string, error: AuthError | null): AuthResult {
+  return error ? toFailure(action, error) : { ok: true };
 }
 
 export function createSupabaseAuthService(
@@ -96,6 +100,21 @@ export function createSupabaseAuthService(
     async updatePassword(password) {
       const { error } = await supabase.auth.updateUser({ password });
       return toResult("password update", error);
+    },
+    async startGoogleSignIn(callbackUrl) {
+      // On the server this only builds the URL and stores the PKCE verifier cookie.
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callbackUrl },
+      });
+      if (error) return toFailure("google start", error);
+      return data.url
+        ? { ok: true, url: data.url }
+        : { ok: false, reason: "unavailable" };
+    },
+    async completeOAuthSignIn(code) {
+      const { error } = await supabase.auth.exchangeCodeForSession(code);
+      return toResult("oauth callback", error);
     },
   };
 }

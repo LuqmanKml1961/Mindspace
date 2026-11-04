@@ -87,6 +87,7 @@ mindspace/
     │   └── container.ts        # composition root: builds use cases for the current request
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
+    │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
     │   ├── (app)/home | thoughts | tasks | clarity | settings/
     │   └── layout.tsx
     ├── components/             # presentation

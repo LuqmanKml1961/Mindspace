@@ -212,9 +212,13 @@ auth (gap G-2).
       the code. The code step shares `EmailCodeForm` with sign-up and never reveals whether the
       email has an account. A valid code signs the user in and redirects to `/reset-password`
       (protected), which sets the new password. Verified in the browser and against the Auth API.
-- [ ] P2.6c Google sign-in: an OAuth button, an `auth/callback` route (`exchangeCodeForSession`)
+- [x] P2.6c Google sign-in: an OAuth button, an `auth/callback` route (`exchangeCodeForSession`)
       and an error page. You create the Google Cloud OAuth client. Test sign-in from the
-      installed PWA on Android and iOS.
+      installed PWA on Android and iOS. **Done 2026-11-04 (local):** a "Continue with Google"
+      button on sign-in and sign-up, `/auth/callback` (public in the proxy), and errors shown on
+      sign-in (`?error=google`) instead of a separate page. Verified with your Google account
+      against the local stack. **The installed-PWA test moves to P2.10**, because it needs the
+      hosted setup.
 - [x] P2.7 Protect routes: every route except sign-in and sign-up requires a session, and a
       signed-in user who visits sign-in or sign-up is sent to `/home`. **Done 2026-11-04:** in
       `src/proxy.ts`, not the layout. The Next.js 16 docs say layout checks do not re-run on
@@ -231,7 +235,9 @@ auth (gap G-2).
 - [ ] P2.10 Hosted auth setup (you, with steps from Claude), before auth is deployed:
       `pnpm supabase db push` for `profiles`; a custom SMTP provider; Confirm email on; the
       Confirm signup and Reset password templates showing `{{ .Token }}`; email code length 6;
-      minimum password length 8; the Google provider; Site URL and redirect URLs (D-019).
+      minimum password length 8; the Google provider (the same Google client); Site URL and
+      redirect URLs (D-019). Then test sign-in, including Google, from the installed PWA on
+      Android and iOS.
 
 **Acceptance**
 
