@@ -97,6 +97,7 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
 | `pnpm start`        | Serve the production build                                                                                                         |
 | `pnpm lint`         | ESLint                                                                                                                             |
 | `pnpm typecheck`    | Generate Next.js route types, then `tsc --noEmit`                                                                                  |
+| `pnpm test`         | Vitest unit tests for `src/domain` and `src/application` (`*.test.ts` next to the code)                                            |
 | `pnpm format`       | Format with Prettier (sorts Tailwind classes)                                                                                      |
 | `pnpm format:check` | Check formatting without writing                                                                                                   |
 | `pnpm db:start`     | Start local Supabase (Docker), skipping services not yet used. Studio at http://127.0.0.1:54323, Mailpit at http://127.0.0.1:54324 |

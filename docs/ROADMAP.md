@@ -259,7 +259,11 @@ auth (gap G-2).
 
 **Goal (spec deliverable):** users can capture and manage their thoughts securely.
 
-- [ ] P3.1 Set up Vitest for `src/domain` and `src/application`, with a `test` script.
+- [x] P3.1 Set up Vitest for `src/domain` and `src/application`, with a `test` script. **Done
+      2026-11-04:** - Vitest 5.0.5 and Vite 8.3.5, both pinned. `@types/node` is now 22, because Vitest needs
+      it. - `vitest.config.mts` sets the `@/` alias and runs `src/domain` and `src/application`
+      tests only. - The first tests cover the existing profile code: 9 tests. Two deliberate code breakages
+      each made tests fail.
 - [ ] P3.2 Domain: `Thought` and `Category`, their rules (trimmed content must not be empty;
       length limits match the database checks), and the `ThoughtRepository` and
       `CategoryRepository` interfaces. Unit tests.

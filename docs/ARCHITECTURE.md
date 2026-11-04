@@ -191,12 +191,12 @@ CaptureBox (client component)
 
 ## 8. Testing strategy
 
-| What                         | Tool                                                          | When                             |
-| ---------------------------- | ------------------------------------------------------------- | -------------------------------- |
-| Domain rules, use cases      | Vitest, with in-memory fake repositories                      | from Phase 3                     |
-| RLS and database constraints | pgTAP via `supabase test db`, using two users per table       | from Phase 2                     |
-| Critical user flows          | Playwright (optional)                                         | Phase 6, or once flows settle    |
-| Layouts and devices          | Manual: 360px and desktop; Chrome, Edge, Safari, Android, iOS | every UI task; full pass in P6.3 |
+| What                         | Tool                                                                                          | When                             |
+| ---------------------------- | --------------------------------------------------------------------------------------------- | -------------------------------- |
+| Domain rules, use cases      | Vitest (`pnpm test`, `vitest.config.mts`), with in-memory fakes; `*.test.ts` next to the code | from P3.1                        |
+| RLS and database constraints | pgTAP via `supabase test db`, using two users per table                                       | from Phase 2                     |
+| Critical user flows          | Playwright (optional)                                                                         | Phase 6, or once flows settle    |
+| Layouts and devices          | Manual: 360px and desktop; Chrome, Edge, Safari, Android, iOS                                 | every UI task; full pass in P6.3 |
 
 ## 9. PWA and offline
 

@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                        |
-| ------------------ | -------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)       |
-| **Phase progress** | Phase 3: 0 tasks done; next is P3.1 (Vitest) |
-| **Last updated**   | 2026-11-04 (Session 4)                       |
-| **Blocked on**     | Nothing                                      |
+| Item               | Value                                           |
+| ------------------ | ----------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)          |
+| **Phase progress** | Phase 3: 1 / 11 tasks done (P3.1); next is P3.2 |
+| **Last updated**   | 2026-11-04 (Session 4)                          |
+| **Blocked on**     | Nothing                                         |
 
 **Next actions (in order)**
 
@@ -19,7 +19,7 @@
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Next task:** Phase 3, starting with P3.1 (Vitest). In Settings, save your time zone (it is
+3. **Next task:** P3.2 (domain: `Thought` and `Category`). In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -98,7 +98,8 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 | tailwindcss / @tailwindcss/turbopack   | 4.3.3          | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config`    |
 | typescript                             | 5.9.3          |                                                                                                 |
 | eslint                                 | 9.39.5         | npm flags ESLint 9 as deprecated (10.x exists); kept on the template's `^9`                     |
-| @types/node                            | 20.19.43       | template default (`^20`), while local Node is 22                                                |
+| @types/node                            | 22.20.5        | moved from `^20` to `^22` on 2026-11-04: Vitest 5 needs it, and it matches local Node 22        |
+| vitest / vite                          | 5.0.5 / 8.3.5  | exact pins (P3.1). Vite is a peer of Vitest 5. 5.1.0 was 2 days old, so not used                |
 | prettier / prettier-plugin-tailwindcss | 3.9.10 / 0.8.1 | exact pins (P1.3)                                                                               |
 | shadcn                                 | 4.23.0         | dev dependency (moved by `mcp init`); provides `shadcn/tailwind.css`, imported by `globals.css` |
 | @base-ui/react                         | 1.9.0          | component primitives (D-012)                                                                    |
@@ -133,6 +134,40 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Vitest (P3.1)
+
+- **Phase:** 3 · **Tasks:** P3.1
+- **Done:**
+  - **Live check:** `X-Vercel-Id` is now `sin1::sin1::…`, so the functions run in Singapore.
+    You confirmed Settings is fast.
+  - **Versions:**
+    - Vitest 5.0.5 (5.1.0 was only 2 days old; D-010 says stable only);
+    - Vite 8.3.5, now a **peer** of Vitest 5, so it's installed explicitly;
+    - both are exact pins.
+    - `pnpm peers check` flagged `@types/node` 20 against Vitest's `^22 || >=24`. Moved to
+      `^22.20.5`, which matches local Node 22.23.1 (type definitions only).
+  - Next's Vitest guide adds React, jsdom and Testing Library for component tests. These layers
+    are pure TypeScript, so only Vitest is used.
+  - **`vitest.config.mts`:**
+    - the `@/` alias is a regex (`^@\/`), so it cannot catch `@supabase/…`;
+    - `include` covers `src/domain/**/*.test.ts` and `src/application/**/*.test.ts`;
+    - `.mts`, because Vite warned that ESM in a CommonJS-loaded `.ts` config won't work with its
+      future native loader. This avoids `"type": "module"` for the whole project.
+  - **First tests, on existing code (9):**
+    - `toTimezone` (canonical names; rejects unknown, empty and padded input);
+    - `timezoneOptions`;
+    - `getProfile` and `updateTimezone` with an in-memory fake repository.
+  - **Mutation checks** (each change temporary, restored from git):
+    - the first test version **missed** a changed default, because it compared against the
+      constant itself. It now asserts the `'UTC'` database contract.
+    - Changing the default → 2 failures. Removing canonicalisation → 2 failures (domain and
+      application).
+  - typecheck, lint, format:check and build pass. No test code is in the client bundles.
+    `pnpm test` is in the README, CLAUDE.md and ARCHITECTURE §8.
+- **Decisions:** none.
+- **Commits:** `test: set up Vitest for the domain and application layers (P3.1)`
+- **Next:** P3.2 (domain: `Thought` and `Category`).
 
 ### 2026-11-04 — Session 4 (cont.): slow Settings (region and loading state)
 
