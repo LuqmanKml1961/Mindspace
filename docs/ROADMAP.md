@@ -288,8 +288,8 @@ auth (gap G-2).
   - **Part 3:** one lock screen after sign-in for the whole app (`(app)/layout.tsx`), single-use
     recovery codes, and sign-out that forgets the device key.
   - 62 unit tests, and six deliberate breakages were each caught. Tested in Chrome locally.
-  - **Before deploying:** push the `user_keys` migration to the hosted database, then measure
-    PBKDF2 on a phone.
+  - The hosted database has `user_keys`: the dry run is up to date, and RLS, the policies and
+    the grants match local. PBKDF2 on a phone is measured after deploying.
 - [ ] P3.5 Migration: `categories` and `thoughts` storing ciphertext (format and maximum-size
       checks), indexes, composite ownership FKs, RLS, updated_at triggers, two-user pgTAP tests.
       Regenerate the types.

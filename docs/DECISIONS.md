@@ -432,7 +432,7 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - In Chrome on `localhost` (a secure context), a non-extractable key stored in IndexedDB reads
     back as `extractable: false`, `exportKey` and `wrapKey` are refused (`InvalidAccessError`),
     and it still decrypts. PBKDF2 at 600,000 iterations took 378 ms on the desktop; phones are
-    measured once `user_keys` is on the hosted database.
+    measured on the live site after the P3.4 deploy.
 - **Verified (P3.4, 2026-11-04, local, in Chrome):**
   - Unlocking and a wrong passphrase send nothing to the server.
   - A recovery sends one request with only the two wrapped keys, never the passphrase or a

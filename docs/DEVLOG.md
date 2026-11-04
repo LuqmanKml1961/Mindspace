@@ -11,11 +11,16 @@
 
 **Next actions (in order)**
 
-1. **Before the next `git push`: put `user_keys` on the hosted database.** Every signed-in
-   page now reads `user_keys` in `(app)/layout.tsx`, so deploying the P3.4 code first would
-   break the live app. Run `pnpm supabase db push --dry-run`; if it lists only
-   `20261104065744_create_user_keys.sql`, run the real push (you type the DB password). Then
-   push to git, and measure PBKDF2 on a phone on the live site.
+1. **The hosted database already has `user_keys`** (checked 2026-11-04):
+   - `db push --dry-run` reports it up to date;
+   - the migration history lists `20261104065744`;
+   - anon gets `42501` from the API;
+   - RLS, the three policies and the grants match local.
+
+   Every signed-in page now reads `user_keys` in `(app)/layout.tsx`, so that table must exist
+   before any deploy. After pushing, set up the passphrase on the live site and measure PBKDF2
+   on a phone.
+
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
    type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
@@ -195,7 +200,7 @@ Template — copy it above the newest entry:
   showing the code at setup, the code is lost. The passphrase still works. A later "new
   recovery code" option in Settings (asks for the passphrase) would cover it.
 - **Commits:** `feat(encryption): add the lock screen and single-use recovery codes (P3.4)`
-- **Next:** push `user_keys` to the hosted database, then P3.5.
+- **Next:** deploy (the hosted database already has `user_keys`), time a phone, then P3.5.
 
 ### 2026-11-04 — Session 4 (cont.): encryption use cases and wiring (P3.4 part 2)
 
