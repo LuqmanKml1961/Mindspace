@@ -76,6 +76,11 @@ invisible. Its variants now tint the box: `bg-primary/14 border-primary/45` for 
 dark mode, red text on the red tint is only 3.8:1, so the colour comes from the box, not the
 text.
 
+**Skeletons (2026-11-04):** `Skeleton` uses `bg-foreground/10` instead of `bg-muted`. Muted
+is only 1.13:1 against the dark page (1.11:1 light), so loading blocks were nearly invisible.
+The tint is 1.31:1 (dark) and 1.19:1 (light). `src/app/(app)/loading.tsx` shows them while a
+page that reads data loads.
+
 **Known dark-mode gaps, not visible today:**
 
 - Sage as text on a card is 3.68:1. This is the link-style Button, used only in the hidden email

@@ -153,6 +153,11 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 - **Decision:** Accepted: Vercel (Hobby plan) for development and personal use. Review the terms
   at P6.9 before the private beta.
 - **Date:** 2026-11-03
+- **Region (2026-11-04):** functions run in **`sin1` (Singapore)**, set with `vercel.json`
+  `"regions": ["sin1"]`. That's next to Supabase in `ap-southeast-1`. Vercel's default was
+  `iad1` (Washington DC), so every Settings load crossed the Pacific to reach the database.
+  Vercel's docs: "Functions should be executed in the same region as your database", and Hobby
+  allows a single region.
 
 ## D-010 — Package manager
 

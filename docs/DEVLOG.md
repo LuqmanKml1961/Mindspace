@@ -134,6 +134,37 @@ Template — copy it above the newest entry:
 - **Next:** <first task for the next session>
 -->
 
+### 2026-11-04 — Session 4 (cont.): slow Settings (region and loading state)
+
+- **Phase:** 3 (prep) · **Tasks:** your report that Settings takes a while to open
+- **Done:**
+  - **Measured, not guessed:**
+    - the live header `X-Vercel-Id: sin1::iad1::…` shows the request enters at the Singapore
+      edge but the function runs in **`iad1` (Washington DC)**;
+    - `supabase projects list` shows the database in **`ap-southeast-1` (Singapore)**;
+    - so each Settings load went Malaysia → Singapore edge → USA → Singapore database → USA →
+      back.
+  - **Ruled out:**
+    - the hosted JWKS has one ES256 key, so `getClaims()` verifies locally rather than calling
+      the Auth server;
+    - auth-js caches JWKS process-wide (`GLOBAL_JWKS` with `JWKS_TTL`).
+  - **Why only Settings:** it's the only dynamic (`ƒ`) app page, because it reads your profile.
+    The others are prerendered, and there was no loading state, so the click looked ignored.
+  - **Fix 1, region:** `vercel.json` sets `"regions": ["sin1"]`. Vercel docs: run functions in
+    the database's region; Hobby allows a single region; `sin1` = `ap-southeast-1`. D-009 is
+    updated.
+  - **Fix 2, instant feedback:** `src/app/(app)/loading.tsx` shows a skeleton. The Next 16
+    docs say the fallback is prefetched, so navigation is immediate and the sidebar stays
+    interactive. shadcn `skeleton` was added (dry run, file read) and recoloured to
+    `bg-foreground/10`, because `bg-muted` was 1.13:1 against the dark page.
+  - **Verified:**
+    - locally, with a throwaway user (deleted), `/settings` streams the "Loading…" fallback and
+      then the content;
+    - the build keeps `/home` and `/thoughts` static;
+    - typecheck and lint pass.
+- **To confirm after your push:** the live `X-Vercel-Id` should read `…::sin1::…`.
+- **Commits:** `perf: run Vercel functions in Singapore and add a loading state`
+
 ### 2026-11-04 — Session 4 (cont.): P2.10 done, readability and logo; Phases 1 and 2 done
 
 - **Phase:** 2 → 3 · **Tasks:** P2.10 (done), your design feedback
