@@ -340,9 +340,17 @@ auth (gap G-2).
   - **Components added:** shadcn `alert-dialog`, `empty` and `item`. `button.tsx` and
     `separator.tsx` were restored after the CLI overwrote them.
   - Tested in Chrome locally; the database shows encrypted edits and the deleted row gone.
-- [ ] P3.10 Categories UI: pick or create a category in place. Offer suggested names from spec
+- [x] P3.10 Categories UI: pick or create a category in place. Offer suggested names from spec
       §4.1 and §4.2, but create none in advance. Duplicate names (any case) are caught on the
-      device, since the server only sees ciphertext.
+      device, since the server only sees ciphertext. **Done 2026-11-04:**
+  - **On the thought page:** `CategoryPicker` lists your categories, the nine spec suggestions you
+    don't have yet, and "New category…". A choice is created at once (encrypted) and selected.
+    A duplicate is refused on the device, naming the existing category.
+  - **On the list:** a badge on each card, and a category filter (All, No category, or one
+    category) kept in the URL alongside the status.
+  - Tested in Chrome locally; the database holds only ciphertext names.
+  - **Not built:** renaming and deleting categories. The use cases exist (P3.7); the UI is a
+    follow-up.
 - [ ] P3.11 Search on the device: a case-insensitive match on the decrypted titles and contents.
 - [ ] P3.12 Loading, empty and error states on every Brain Dump screen. (The locked state is the
       app-wide lock screen from P3.4.)

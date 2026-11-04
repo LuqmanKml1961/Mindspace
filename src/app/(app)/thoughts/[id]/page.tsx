@@ -16,7 +16,10 @@ export default async function ThoughtPage({
   const id = idSchema.safeParse((await params).id);
   if (!id.success) notFound();
   const { user, useCases } = await getAppContext();
-  const record = await useCases.getThoughtRecord(user.id, id.data);
+  const [record, categoryRecords] = await Promise.all([
+    useCases.getThoughtRecord(user.id, id.data),
+    useCases.listCategoryRecords(user.id),
+  ]);
   if (!record) notFound();
 
   return (
@@ -33,7 +36,11 @@ export default async function ThoughtPage({
         </Link>
         <h1 className="text-3xl font-semibold tracking-tight">Your thought</h1>
       </header>
-      <ThoughtEditor userId={user.id} record={record} />
+      <ThoughtEditor
+        userId={user.id}
+        record={record}
+        categoryRecords={categoryRecords}
+      />
     </>
   );
 }

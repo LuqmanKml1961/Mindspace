@@ -6,9 +6,19 @@ export const statusLabels: Record<ThoughtStatus, string> = {
   archived: "Archived",
 };
 
-// The Brain Dump list for a status; the inbox is the default view.
-export function thoughtsHref(status: ThoughtStatus): string {
-  return status === "inbox" ? "/thoughts" : `/thoughts?status=${status}`;
+// A category filter: an id, "none" (no category), or undefined (all categories).
+export type CategoryFilter = string | null | undefined;
+
+// The Brain Dump list for a status (the inbox is the default) and, optionally, a category.
+export function thoughtsHref(
+  status: ThoughtStatus,
+  category?: CategoryFilter,
+): string {
+  const query = new URLSearchParams();
+  if (status !== "inbox") query.set("status", status);
+  if (category !== undefined) query.set("category", category ?? "none");
+  const search = query.toString();
+  return search ? `/thoughts?${search}` : "/thoughts";
 }
 
 const captured = new Intl.DateTimeFormat(undefined, {

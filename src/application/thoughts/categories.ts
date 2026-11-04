@@ -36,13 +36,14 @@ function withName(record: EncryptedCategory, name: string): Category {
 
 // Best effort: another device could add the same name before this list was loaded.
 function ensureUnique(name: string, existing: Category[], exceptId?: string) {
-  if (
-    existing.some(
-      (category) =>
-        category.id !== exceptId && isSameCategoryName(category.name, name),
-    )
-  ) {
-    throw new ConflictError(`You already have a category called “${name}”.`);
+  const duplicate = existing.find(
+    (category) =>
+      category.id !== exceptId && isSameCategoryName(category.name, name),
+  );
+  if (duplicate) {
+    throw new ConflictError(
+      `You already have a category called “${duplicate.name}”.`,
+    );
   }
 }
 

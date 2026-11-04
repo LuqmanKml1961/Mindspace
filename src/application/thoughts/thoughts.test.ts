@@ -306,7 +306,9 @@ describe("categories", () => {
 
     await expect(
       create({ userId: "user-a", name: "WORK", existing }),
-    ).rejects.toThrow(ConflictError);
+    ).rejects.toThrow(
+      new ConflictError("You already have a category called “Work”."),
+    );
     await expect(
       rename({ userId: "user-a", id: ideas.id, name: "work", existing }),
     ).rejects.toThrow(ConflictError);

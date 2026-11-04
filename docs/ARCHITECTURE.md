@@ -102,7 +102,7 @@ mindspace/
     │   ├── layout/             # app shell, navigation, brand-frame.tsx (sign-in and lock screen)
     │   ├── forms/              # shared form parts (field, messages, submit button)
     │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
-    │   ├── thoughts/           # capture-box, thought-list, thought-editor, status-nav; brain-dump.ts (Server Actions as ports)
+    │   ├── thoughts/           # capture-box, thought-list, thought-editor, category-picker, status-nav; brain-dump.ts (Server Actions as ports)
     │   └── auth | settings | tasks | clarity/   # feature UI components
     └── lib/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())

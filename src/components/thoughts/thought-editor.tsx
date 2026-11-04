@@ -8,6 +8,7 @@ import {
   SubmitButton,
 } from "@/components/forms/form-parts";
 import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
+import { CategoryPicker } from "@/components/thoughts/category-picker";
 import {
   formatCaptured,
   statusLabels,
@@ -35,6 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { Category } from "@/domain/thoughts/category";
+import type { EncryptedCategory } from "@/domain/thoughts/category-repository";
 import {
   isThoughtStatus,
   THOUGHT_STATUSES,
@@ -43,11 +46,17 @@ import {
 } from "@/domain/thoughts/thought";
 import type { EncryptedThought } from "@/domain/thoughts/thought-repository";
 
-type Draft = { title: string; content: string; status: ThoughtStatus };
+type Draft = {
+  title: string;
+  content: string;
+  categoryId: string | null;
+  status: ThoughtStatus;
+};
 
 const draftOf = (thought: Thought): Draft => ({
   title: thought.title ?? "",
   content: thought.content,
+  categoryId: thought.categoryId,
   status: thought.status,
 });
 
@@ -56,6 +65,9 @@ function changesBetween(saved: Thought, draft: Draft) {
   const changes: Partial<Draft> = {};
   if ((draft.title.trim() || null) !== saved.title) changes.title = draft.title;
   if (draft.content.trim() !== saved.content) changes.content = draft.content;
+  if (draft.categoryId !== saved.categoryId) {
+    changes.categoryId = draft.categoryId;
+  }
   if (draft.status !== saved.status) changes.status = draft.status;
   return changes;
 }
@@ -63,13 +75,16 @@ function changesBetween(saved: Thought, draft: Draft) {
 export function ThoughtEditor({
   userId,
   record,
+  categoryRecords,
 }: {
   userId: string;
   record: EncryptedThought;
+  categoryRecords: EncryptedCategory[];
 }) {
   const router = useRouter();
   const [saved, setSaved] = useState<Thought | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string>();
   const [notice, setNotice] = useState<string>();
   const [confirming, setConfirming] = useState(false);
@@ -77,11 +92,15 @@ export function ThoughtEditor({
 
   useEffect(() => {
     let current = true;
-    brainDump.openThoughts({ userId, records: [record] }).then(
-      ([thought]) => {
+    Promise.all([
+      brainDump.openThoughts({ userId, records: [record] }),
+      brainDump.openCategories({ userId, records: categoryRecords }),
+    ]).then(
+      ([[thought], opened]) => {
         if (!current) return;
         setSaved(thought);
         setDraft(draftOf(thought));
+        setCategories(opened);
       },
       (cause) => {
         if (current) setError(errorMessage(cause));
@@ -90,7 +109,7 @@ export function ThoughtEditor({
     return () => {
       current = false;
     };
-  }, [userId, record]);
+  }, [userId, record, categoryRecords]);
 
   if (!saved || !draft) {
     return error ? (
@@ -183,6 +202,21 @@ export function ThoughtEditor({
             }}
           />
         </Field>
+        <CategoryPicker
+          userId={userId}
+          categories={categories}
+          value={draft.categoryId}
+          disabled={pending}
+          onChange={(categoryId) => edit({ categoryId })}
+          onCreated={(category) => {
+            setCategories(
+              [...categories, category].sort((a, b) =>
+                a.name.localeCompare(b.name),
+              ),
+            );
+            edit({ categoryId: category.id });
+          }}
+        />
         <Field>
           <FieldTitle id="status-label">Where it lives</FieldTitle>
           <ToggleGroup

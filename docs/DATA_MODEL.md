@@ -105,9 +105,15 @@ sabotaged copy failed exactly the 7 targeted tests, and the advisors were clean.
 | `created_at`      | timestamptz | default `now()`                                                       |
 
 `unique (id, user_id)`; index `(user_id)`. **Name uniqueness (any case) is checked on the device**, because the
-server sees only ciphertext. Nothing is seeded: the UI offers suggested names (Work, Personal,
-Ideas, To investigate, To remember, Future plans) and creates a category the first time it is
-used.
+server sees only ciphertext. Nothing is seeded. The UI offers the spec's names and creates a
+category only when one is chosen:
+
+- **§4.1 examples:** Work, Personal, Learning, Communication.
+- **§4.2 Thought Parking:** Random thoughts, Ideas, Things to investigate, Things to remember,
+  Future plans.
+
+They live in `src/components/thoughts/category-suggestions.ts`. This list was corrected on
+2026-11-04 (P3.10): the earlier draft paraphrased the spec.
 
 ### thoughts (Phase 3)
 

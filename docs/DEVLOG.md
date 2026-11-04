@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                 |
-| ------------------ | --------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                |
-| **Phase progress** | Phase 3: 9 / 13 tasks done (P3.1–P3.9); next is P3.10 (categories UI) |
-| **Last updated**   | 2026-11-04 (Session 4)                                                |
-| **Blocked on**     | Nothing                                                               |
+| Item               | Value                                                                          |
+| ------------------ | ------------------------------------------------------------------------------ |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                         |
+| **Phase progress** | Phase 3: 10 / 13 tasks done (P3.1–P3.10); next is P3.11 (search on the device) |
+| **Last updated**   | 2026-11-04 (Session 4)                                                         |
+| **Blocked on**     | Nothing                                                                        |
 
 **Next actions (in order)**
 
@@ -24,14 +24,12 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.10, the categories UI.
-   - Pick or create a category in place, on the thought page. `listCategoryRecords` and
-     `openCategories` for the choices; `createCategory` / `renameCategory` check duplicates on
-     the device.
-   - Offer suggested names from spec §4.1 and §4.2, but create none in advance.
-   - A category filter on the list (`ThoughtFilter.categoryId` is ready).
-   - Your local account has two test thoughts: "Errands" (parked) and the landlord one (inbox).
-   - The 1,000-row API cap (DATA_MODEL) is still open, for P3.11 or later.
+4. **Next task:** P3.11, search on the device: a case-insensitive match on the decrypted titles
+   and contents. Decide its scope then: the current view, or all statuses. The 1,000-row API cap
+   (DATA_MODEL) matters here.
+   - Your local account has "Errands" (parked, no category) and the landlord thought (inbox,
+     Home admin); the categories are Personal and Home admin.
+   - Follow-up from P3.10: a UI to rename and delete categories (the use cases exist).
 
    In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
@@ -148,6 +146,51 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): categories UI (P3.10)
+
+- **Phase:** 3 · **Tasks:** P3.10
+- **Checked against the spec:**
+  - §4.1 examples: Work, Personal, Learning, Communication.
+  - §4.2 Thought Parking: Random thoughts, Ideas, Things to investigate, Things to remember,
+    Future plans.
+  - DATA_MODEL had paraphrased these ("To investigate", "To remember"); now corrected.
+- **Done:**
+  - **`category-suggestions.ts`:** the nine spec names.
+  - **`category-picker.tsx`** (in the thought editor):
+    - a NativeSelect with "No category", **Your categories** (sorted) and **Suggestions** (spec
+      names you don't have), then "New category…";
+    - a suggestion, or a typed name via Add or Enter, is created at once with `createCategory`
+      (encrypted) and selected. Enter is caught, so it doesn't submit the thought form;
+    - errors show under the field and the typed name stays.
+  - **`ThoughtEditor`:** decrypts the thought and categories together; `categoryId` is part of
+    the draft, so Save sends only it.
+  - **The list:**
+    - `ThoughtList` decrypts both and shows a `secondary` Badge with the category name.
+    - A category filter NativeSelect (All, No category, each category) navigates to
+      `thoughtsHref(status, category)`.
+    - The status links keep the category, and a filtered empty view says "Nothing here.".
+    - The page reads `?category=` (`none`, or an id checked with `idSchema`; anything else means
+      all).
+  - **`ensureUnique`** now names the existing category ("…called "Personal"") instead of
+    echoing the typed case; the unit test pins the message.
+  - The shadcn `badge` was added and read; it created only its own file.
+- **In Chrome (MYS231, local, your account, in a separate tab):**
+  - The suggestions show all nine.
+  - Choosing "Personal" sent one ciphertext and moved it to Your categories; Save sent only
+    `categoryId`.
+  - "personal" and "PERSONAL" were refused on the device with 0 requests, and Enter didn't
+    submit the form.
+  - "Home admin" was added, selected and sorted.
+  - On the list: a badge, the filter options, Personal → empty, Home admin → the landlord
+    thought, No category → none in the inbox; Parked + No category → "Errands". The status
+    links keep the filter, and a junk `?category=` means all.
+  - **Database:** 2 categories, both `v1.`, 0 readable; lengths 52 and 56 match the names.
+  - No console errors.
+- typecheck, lint, 91 unit tests and build pass.
+- **Not built:** renaming and deleting categories (the use cases exist since P3.7).
+- **Commits:** `feat(thoughts): add categories to Brain Dump (P3.10)`
+- **Next:** P3.11.
 
 ### 2026-11-04 — Session 4 (cont.): list and edit (P3.9)
 
