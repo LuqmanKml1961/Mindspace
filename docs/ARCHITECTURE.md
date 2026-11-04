@@ -88,7 +88,7 @@ mindspace/
     │   ├── crypto/             # web-crypto.ts, device-key-store.ts: browser-side E2E (D-021)
     │   ├── config/             # env.ts (validated environment variables)
     │   ├── supabase/           # server/browser clients, session refresh, database.types.ts
-    │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles: P2.9)
+    │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles, user keys, encrypted thoughts and categories)
     │   ├── container.ts        # server composition root: builds use cases for the current request
     │   └── browser.ts          # browser composition root: encryption use cases (P3.4)
     ├── app/                    # Next.js App Router (presentation)

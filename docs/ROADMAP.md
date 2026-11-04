@@ -298,9 +298,16 @@ auth (gap G-2).
   - 33 new pgTAP tests (57 in total); 13 sabotages were each caught by a named test.
   - Advisors are clean apart from "unused index" on the empty tables. `db diff` finds no
     changes.
-  - The hosted push needs your approval.
-- [ ] P3.6 Infrastructure: Supabase repositories for the encrypted records, wired into the
-      container. Revise the P3.2 ports to store ciphertext, not plaintext.
+  - Pushed to the hosted database with your approval (2026-11-04). The dry run listed only this
+    migration. RLS, policies, grants, constraints and indexes match local.
+- [x] P3.6 Infrastructure: Supabase repositories for the encrypted records, wired into the
+      container. Revise the P3.2 ports to store ciphertext, not plaintext. **Done 2026-11-04:**
+  - The ports now carry `EncryptedThought` and `EncryptedCategory`. The text query filter and the
+    duplicate-name `ConflictError` moved to the device.
+  - `supabase-thought-repository.ts` and `supabase-category-repository.ts`.
+  - Checked once against the local database as two real signed-in users (RLS applied), with
+    real ciphertext. Three deliberate breakages were each caught.
+  - The container wiring comes with the use cases in P3.7; nothing would use it before then.
 - [ ] P3.7 Application: use cases (capture; list newest first, filtered by category or status;
       get; update; delete; create, rename and delete a category; assign a category). Encryption
       and decryption happen in the browser; Server Actions receive ciphertext only. Zod schemas.
@@ -435,7 +442,8 @@ and then the private beta.
       Reset password templates show `{{ .Token }}`, and set the email code length to 6 and the
       minimum password length to 8. Turn the hosted Email provider back on, and set
       `emailSignInEnabled = true` in `src/lib/features.ts`. Then test email sign-up and password
-      reset on the live site.
+      reset on the live site. Also review the hosted security advisor "Leaked password protection
+      disabled" (an Auth setting; it only matters once passwords are used).
 
 **Acceptance**
 

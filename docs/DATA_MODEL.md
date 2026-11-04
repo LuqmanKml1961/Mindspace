@@ -7,16 +7,16 @@
 
 ## 1. Tables
 
-| Table              | Phase | Status                                                             | Purpose                                       |
-| ------------------ | ----- | ------------------------------------------------------------------ | --------------------------------------------- |
-| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`)                | Per-user preferences (timezone, display name) |
-| `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`)               | Wrapped encryption keys (D-021)               |
-| `categories`       | 3     | **Migrated** (`20261104083602_create_categories_and_thoughts.sql`) | User-owned thought categories (encrypted)     |
-| `thoughts`         | 3     | **Migrated** (same migration)                                      | Brain dumps and parked thoughts (encrypted)   |
-| `tasks`            | 4     | Draft                                                              | Tasks with due date and priority (encrypted)  |
-| `reminders`        | 4     | Draft                                                              | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | Draft                                                              | Daily Mind Clarity reflections (encrypted)    |
-| `voice_recordings` | 7+    | Deferred                                                           | Recording metadata and transcripts (post-MVP) |
+| Table              | Phase | Status                                                                         | Purpose                                       |
+| ------------------ | ----- | ------------------------------------------------------------------------------ | --------------------------------------------- |
+| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`)                            | Per-user preferences (timezone, display name) |
+| `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`)                           | Wrapped encryption keys (D-021)               |
+| `categories`       | 3     | **Migrated** (`20261104083602_create_categories_and_thoughts.sql`; hosted too) | User-owned thought categories (encrypted)     |
+| `thoughts`         | 3     | **Migrated** (same migration)                                                  | Brain dumps and parked thoughts (encrypted)   |
+| `tasks`            | 4     | Draft                                                                          | Tasks with due date and priority (encrypted)  |
+| `reminders`        | 4     | Draft                                                                          | In-app reminders attached to tasks (D-008)    |
+| `daily_checkins`   | 5     | Draft                                                                          | Daily Mind Clarity reflections (encrypted)    |
+| `voice_recordings` | 7+    | Deferred                                                                       | Recording metadata and transcripts (post-MVP) |
 
 "(encrypted)" means the table's free-text columns are encrypted (D-021). Its ids, dates, statuses
 and other non-text columns stay readable. Deferred voice transcripts are free text too, so they
@@ -125,7 +125,9 @@ used.
 Indexes: `(user_id, created_at desc)`; `(user_id, status, created_at desc)`, so a status view is
 already newest first; and `(category_id, user_id)`, which covers the whole foreign key for category
 deletes (the advisors flagged `(category_id)` alone). `unique (id, user_id)`.
-**Search runs on the device**, over decrypted text. The server cannot search ciphertext.
+**Search runs on the device**, over decrypted text. The server cannot search ciphertext. The
+Data API returns at most 1,000 rows per request (`max_rows` in `config.toml`), so a list longer
+than that needs paging. Decide this with the list UI (P3.9) and device search (P3.11).
 
 **Ciphertext format and limits (D-021):** `v1.<IV base64, 16 chars>.<ciphertext base64>`. The
 maximum is computed from the character limit at 4 UTF-8 bytes per character, plus the 16-byte

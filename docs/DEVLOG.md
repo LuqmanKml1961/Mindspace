@@ -2,23 +2,19 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                         |
-| ------------------ | ----------------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                        |
-| **Phase progress** | Phase 3: 5 / 13 tasks done (P3.1–P3.5); next is P3.6 (encrypted repositories) |
-| **Last updated**   | 2026-11-04 (Session 4)                                                        |
-| **Blocked on**     | Nothing                                                                       |
+| Item               | Value                                                            |
+| ------------------ | ---------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                           |
+| **Phase progress** | Phase 3: 6 / 13 tasks done (P3.1–P3.6); next is P3.7 (use cases) |
+| **Last updated**   | 2026-11-04 (Session 4)                                           |
+| **Blocked on**     | Nothing                                                          |
 
 **Next actions (in order)**
 
-1. **Hosted database:**
-   - It has `user_keys` (checked 2026-11-04). Every signed-in page reads it in
-     `(app)/layout.tsx`.
-   - The P3.5 migration (`categories`, `thoughts`) is **local only**. Push it with your approval:
-     `pnpm supabase db push --dry-run` should list only
-     `20261104083602_create_categories_and_thoughts.sql`, then run the real push. No deployed
-     code reads these tables yet.
-   - After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
+1. **Hosted database:** up to date with all three migrations (`profiles`, `user_keys`,
+   `categories` and `thoughts`). P3.5 was pushed with your approval on 2026-11-04, and RLS,
+   policies, grants, constraints and indexes match local. After deploying, set up the passphrase
+   on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -28,8 +24,13 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.6: Supabase repositories for the encrypted records, and revising the P3.2
-   ports to carry ciphertext. In Settings, save your time zone (it is
+4. **Next task:** P3.7, the Brain Dump use cases:
+   - browser side: encrypt and decrypt, with the domain rules first;
+   - server side: store and list ciphertext;
+   - Zod schemas for the Server Actions;
+   - in-memory fakes, and wiring the repositories into the container.
+
+   In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -144,6 +145,48 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): hosted P3.5 push and encrypted repositories (P3.6)
+
+- **Phase:** 3 · **Tasks:** P3.5 (hosted), P3.6
+- **Hosted push (your approval):**
+  - The dry run listed only `20261104083602_create_categories_and_thoughts.sql`.
+  - `db push --linked --yes` applied it. Like the dry run, it needed no DB password, because the
+    CLI uses a temporary login role.
+  - The history matches on both sides. RLS, 4 policies per table, grants (authenticated only;
+    anon none), constraints and indexes all match local.
+  - The hosted security advisors show only "Leaked password protection disabled". That is an
+    Auth setting for email sign-in, noted under P6.10, and nothing was changed.
+- **Done (P3.6):**
+  - **Domain ports:**
+    - `EncryptedThought` / `NewEncryptedThought` / `EncryptedThoughtChanges` and
+      `EncryptedCategory` / `NewEncryptedCategory`, with `*Ciphertext` text fields.
+    - The text `query` filter is gone (search runs on the device, P3.11), and so is the
+      duplicate-name `ConflictError` (D-021).
+    - A thought filed under a category that doesn't exist, or isn't yours, gives `NotFoundError`.
+  - **Infrastructure:** `supabase-thought-repository.ts` and `supabase-category-repository.ts`,
+    following the profile repository.
+    - Each query is filtered by `user_id` as well as RLS.
+    - `23503` becomes "That category no longer exists."; a missing row gives `NotFoundError`.
+    - Errors carry only the Postgres code.
+    - An empty change returns the current thought without writing.
+  - **The container wiring** comes with the P3.7 use cases.
+- **Checks:**
+  - **A one-off Vitest run against the local stack**, in git-ignored `supabase/.temp`, deleted
+    afterwards. It used two throwaway users signed in with the publishable key, so RLS applied,
+    and real `encryptField` ciphertext. It covered:
+    - create, list order and the status, category and no-category filters;
+    - findById, update (`updatedAt` moves), empty update, rename;
+    - category delete (thoughts kept), thought delete, and `NotFoundError` on every miss;
+    - B's rows: invisible, unchangeable, and impossible to file under.
+  - **Three deliberate breakages were each caught:** oldest-first order, the dropped
+    no-category filter, and the unmapped `23503`. The file was restored byte-for-byte.
+  - **Afterwards** the throwaway users were deleted. Local now holds 1 user, 0 thoughts and 0
+    categories.
+  - lint, typecheck and 62 unit tests pass.
+- **Noted:** the Data API caps a response at 1,000 rows (`max_rows`); see DATA_MODEL (thoughts).
+- **Commits:** `feat(thoughts): add encrypted thought and category repositories (P3.6)`
+- **Next:** P3.7.
 
 ### 2026-11-04 — Session 4 (cont.): encrypted `categories` and `thoughts` tables (P3.5)
 
