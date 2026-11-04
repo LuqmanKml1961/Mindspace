@@ -27,5 +27,5 @@ export interface DeviceKeyStore {
 // The signed-in user's wrapped keys on the server, reached from the browser.
 export interface KeyServer {
   create(keys: UserKeys): Promise<void>;
-  replacePassphraseKey(wrapped: WrappedKey): Promise<void>;
+  replace(keys: UserKeys): Promise<void>;
 }

@@ -2,27 +2,30 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                              |
-| ------------------ | ---------------------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                             |
-| **Phase progress** | Phase 3: 3 / 13 tasks done (P3.1–P3.3); P3.4 parts 1–2 done, part 3 (screens) next |
-| **Last updated**   | 2026-11-04 (Session 4)                                                             |
-| **Blocked on**     | Nothing                                                                            |
+| Item               | Value                                                                   |
+| ------------------ | ----------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                  |
+| **Phase progress** | Phase 3: 4 / 13 tasks done (P3.1–P3.4); next is P3.5 (encrypted tables) |
+| **Last updated**   | 2026-11-04 (Session 4)                                                  |
+| **Blocked on**     | Nothing                                                                 |
 
 **Next actions (in order)**
 
-1. **Push** the latest commit (`git push`; Claude never pushes). The live site signs in with Google
+1. **Before the next `git push`: put `user_keys` on the hosted database.** Every signed-in
+   page now reads `user_keys` in `(app)/layout.tsx`, so deploying the P3.4 code first would
+   break the live app. Run `pnpm supabase db push --dry-run`; if it lists only
+   `20261104065744_create_user_keys.sql`, run the real push (you type the DB password). Then
+   push to git, and measure PBKDF2 on a phone on the live site.
+2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
    type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
    Real secrets (service-role or secret key, DB password) must always be **Secret** and never
    `NEXT_PUBLIC_`.
-2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
+3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Next task:** P3.4 part 3: the passphrase setup, recovery-code, unlock and recovery screens,
-   and forgetting the device key at sign-out. The use cases and Server Actions are ready
-   (`src/infrastructure/browser.ts`, `src/app/(app)/encryption/actions.ts`). The hosted database
-   doesn't have `user_keys` yet; push it after part 3. In Settings, save your time zone (it is
+4. **Next task:** P3.5, the `categories` and `thoughts` migration storing ciphertext
+   (DATA_MODEL.md). In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -137,6 +140,62 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): lock screen and single-use recovery codes (P3.4 part 3)
+
+- **Phase:** 3 · **Tasks:** P3.4 (done)
+- **Your calls:**
+  - **One lock screen right after sign-in** for the whole app, not a lock per module. Sign-out
+    forgets the key.
+  - **Recovery codes work once.** Changing the passphrase doesn't change the data key, since
+    that would mean re-encrypting everything; it is kept for a suspected compromise only.
+  - **Encrypt every free-text field in Phases 4–5 too.** The `tasks` and `daily_checkins`
+    drafts in DATA_MODEL now use ciphertext columns. Q-6 (task notes, proposed 10,000) and Q-7
+    (check-in answers, proposed 2,000) are open.
+- **Done:**
+  - **Lock screen:** `EncryptionGate` in `src/app/(app)/layout.tsx`. It shows set up →
+    recovery code, or unlock ↔ recover, inside `BrandFrame` (the sign-in page's frame, now
+    shared), with a Sign out link. `src/components/encryption/` holds:
+    - the four cards;
+    - shared new-passphrase fields (rule first, then "type it again");
+    - `encryption.ts`, the `KeyServer` adapter over the Server Actions. Only wrapped keys are
+      sent.
+  - **The recovery code card:** Copy, an "I've saved my recovery code" checkbox (shadcn
+    `checkbox`, added with the CLI), and Continue, which stays disabled until it is ticked.
+  - **Single-use codes:**
+    - `lockDataKey` wraps the data key with the passphrase and a new code. Setup and recovery
+      share it.
+    - Recovery saves to the device first, then calls `replace` on the server. The data key
+      doesn't change, so if anything fails, the old code still works.
+    - `replacePassphraseKey` became `replace` / `replaceUserKeys` / `replaceUserKeysAction`,
+      which validates with `userKeysSchema`.
+  - **Sign out:** a client `SignOutButton` (now in `components/auth`) forgets the device key,
+    then signs out.
+  - **Brain Dump** is a plain page again.
+- **Tests:** 62 unit tests.
+  - New: the recovery code changes and the old one is refused; a device that can't save leaves
+    the server unchanged.
+  - The real-crypto flow test now recovers twice: the old code is refused, and the new code
+    still opens the same ciphertext.
+  - Two deliberate breakages were each caught, and the file was restored byte-for-byte:
+    server-before-device (1 test failed) and keeping the old code (3 failed).
+- **In Chrome (MYS231, local, your account with the test values you gave):**
+  - Wrong passphrase: an error, and nothing sent.
+  - Unlock, then Home → Brain Dump → Settings and a reload: asked once.
+  - Recovery: one request with two wrapped keys and no secrets. The new-code card works: Copy
+    shows "Copied"; the label, the box and Space all tick it; Continue is gated.
+  - The old code is refused.
+  - Sign out from the lock screen: the device key is gone.
+  - The unticked checkbox border measures 3.36:1 against the card.
+  - Your current local recovery code is in Claude's scratchpad
+    (`local-recovery-code.txt`), not in the repo. Your passphrase is unchanged.
+- typecheck, lint, format:check, 62 tests and build pass. ROADMAP, DECISIONS (D-021),
+  DATA_MODEL and ARCHITECTURE §3/§7 are updated.
+- **Known limitation:** if browser storage fails between saving the keys to the server and
+  showing the code at setup, the code is lost. The passphrase still works. A later "new
+  recovery code" option in Settings (asks for the passphrase) would cover it.
+- **Commits:** `feat(encryption): add the lock screen and single-use recovery codes (P3.4)`
+- **Next:** push `user_keys` to the hosted database, then P3.5.
 
 ### 2026-11-04 — Session 4 (cont.): encryption use cases and wiring (P3.4 part 2)
 

@@ -14,7 +14,11 @@ import { userKeysSchema } from "@/application/encryption/schemas";
 import { makeSetUpEncryption } from "@/application/encryption/set-up-encryption";
 import { makeUnlockDevice } from "@/application/encryption/unlock-device";
 import type { UserKeys } from "@/domain/encryption/user-keys";
-import { ConflictError, ValidationError } from "@/domain/shared/errors";
+import {
+  ConflictError,
+  NotFoundError,
+  ValidationError,
+} from "@/domain/shared/errors";
 
 // Fakes: a "key" is an id plus extractability; wrapping records which secret locks it.
 type FakeKey = { id: string; extractable: boolean };
@@ -23,6 +27,7 @@ const asFake = (key: CryptoKey) => key as unknown as FakeKey;
 
 function fakeCrypto(): KeyCrypto {
   let next = 0;
+  let codes = 0;
   const unwrap = (
     wrappedKey: string,
     expected: string,
@@ -45,7 +50,7 @@ function fakeCrypto(): KeyCrypto {
     wrapWithPassphrase: async (key, passphrase) => wrap(key, `p:${passphrase}`),
     unwrapWithPassphrase: async (wrapped, passphrase) =>
       unwrap(wrapped.wrappedKey, `p:${passphrase}`, false),
-    createRecoveryCode: () => "recovery-code",
+    createRecoveryCode: () => `recovery-code-${++codes}`,
     wrapWithRecoveryCode: async (key, code) => wrap(key, `r:${code}`),
     unwrapWithRecoveryCode: async (wrapped, code) =>
       unwrap(wrapped.wrappedKey, `r:${code}`, true),
@@ -69,8 +74,9 @@ function memoryServer(): KeyServer & { stored: UserKeys | null } {
       if (server.stored) throw new ConflictError("already set up");
       server.stored = keys;
     },
-    async replacePassphraseKey(wrapped: UserKeys["passphrase"]) {
-      server.stored = { ...server.stored!, passphrase: wrapped };
+    async replace(keys: UserKeys) {
+      if (!server.stored) throw new NotFoundError("not set up");
+      server.stored = keys;
     },
   };
   return server;
@@ -94,10 +100,10 @@ async function setUp() {
 describe("setUpEncryption", () => {
   it("stores both wrapped copies and keeps a non-extractable key on the device", async () => {
     const { server, device, recoveryCode } = await setUp();
-    expect(recoveryCode).toBe("recovery-code");
+    expect(recoveryCode).toBe("recovery-code-1");
     expect(server.stored?.version).toBe(1);
     expect(server.stored?.passphrase.wrappedKey).toBe(`key-1|p:${passphrase}`);
-    expect(server.stored?.recovery.wrappedKey).toBe("key-1|r:recovery-code");
+    expect(server.stored?.recovery.wrappedKey).toBe("key-1|r:recovery-code-1");
     expect(asFake(device.keys.get("user-a")!)).toEqual({
       id: "key-1",
       extractable: false,
@@ -125,7 +131,7 @@ describe("setUpEncryption", () => {
       create: async () => {
         throw new ConflictError("already set up");
       },
-      replacePassphraseKey: async () => {},
+      replace: async () => {},
     };
     await expect(
       makeSetUpEncryption({
@@ -171,20 +177,79 @@ describe("unlockDevice", () => {
 });
 
 describe("recoverWithCode", () => {
-  it("wraps the same key with a new passphrase and keeps it on the device", async () => {
+  it("wraps the same key with a new passphrase and a new code, and keeps it on the device", async () => {
     const { crypto, server, keys, recoveryCode } = await setUp();
     const newDevice = memoryDevice();
-    await makeRecoverWithCode({ crypto, server, device: newDevice })({
+    const result = await makeRecoverWithCode({
+      crypto,
+      server,
+      device: newDevice,
+    })({
       userId: "user-a",
       keys,
       recoveryCode,
       newPassphrase: "a brand new passphrase",
     });
+    expect(result.recoveryCode).toBe("recovery-code-2");
     expect(server.stored?.passphrase.wrappedKey).toBe(
       "key-1|p:a brand new passphrase",
     );
-    expect(server.stored?.recovery).toEqual(keys.recovery);
-    expect(asFake(newDevice.keys.get("user-a")!).extractable).toBe(false);
+    expect(server.stored?.recovery.wrappedKey).toBe("key-1|r:recovery-code-2");
+    expect(asFake(newDevice.keys.get("user-a")!)).toEqual({
+      id: "key-1",
+      extractable: false,
+    });
+  });
+
+  it("makes each recovery code work only once", async () => {
+    const { crypto, server, keys, recoveryCode } = await setUp();
+    const recover = makeRecoverWithCode({
+      crypto,
+      server,
+      device: memoryDevice(),
+    });
+    const { recoveryCode: newCode } = await recover({
+      userId: "user-a",
+      keys,
+      recoveryCode,
+      newPassphrase: "a brand new passphrase",
+    });
+
+    await expect(
+      recover({
+        userId: "user-a",
+        keys: server.stored!,
+        recoveryCode,
+        newPassphrase: "another new passphrase",
+      }),
+    ).rejects.toThrow(UnlockFailedError);
+    await expect(
+      recover({
+        userId: "user-a",
+        keys: server.stored!,
+        recoveryCode: newCode,
+        newPassphrase: "another new passphrase",
+      }),
+    ).resolves.toEqual({ recoveryCode: "recovery-code-3" });
+  });
+
+  it("keeps the old code working if this device can't keep the key", async () => {
+    const { crypto, server, keys, recoveryCode } = await setUp();
+    const brokenDevice: DeviceKeyStore = {
+      ...memoryDevice(),
+      save: async () => {
+        throw new Error("storage unavailable");
+      },
+    };
+    await expect(
+      makeRecoverWithCode({ crypto, server, device: brokenDevice })({
+        userId: "user-a",
+        keys,
+        recoveryCode,
+        newPassphrase: "a brand new passphrase",
+      }),
+    ).rejects.toThrow("storage unavailable");
+    expect(server.stored).toEqual(keys);
   });
 
   it("changes nothing with a wrong code or a short new passphrase", async () => {

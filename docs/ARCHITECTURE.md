@@ -78,7 +78,7 @@ mindspace/
     │   └── check-ins/
     ├── application/
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
-    │   ├── encryption/         # ports, errors, schemas; set-up, unlock, recover, device-key (browser); user-keys (server)
+    │   ├── encryption/         # ports, errors, schemas, lock-data-key; set-up, unlock, recover, device-key (browser); user-keys (server)
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # capture-thought.ts, search-thoughts.ts, schemas.ts, *.test.ts
     │   ├── tasks/
@@ -94,12 +94,14 @@ mindspace/
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
-    │   ├── (app)/home | thoughts | tasks | clarity | settings/
+    │   ├── (app)/home | thoughts | tasks | clarity | settings/, encryption/actions.ts
+    │   ├── (app)/layout.tsx    # the lock screen (EncryptionGate) around the whole signed-in app
     │   └── layout.tsx
     ├── components/             # presentation
     │   ├── ui/                 # shadcn/ui generated components
-    │   ├── layout/             # app shell, navigation
+    │   ├── layout/             # app shell, navigation, brand-frame.tsx (sign-in and lock screen)
     │   ├── forms/              # shared form parts (field, messages, submit button)
+    │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
     │   └── auth | settings | thoughts | tasks | clarity/   # feature UI components
     └── lib/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
@@ -194,6 +196,12 @@ CaptureBox (client component)
     store. The server is passed in as a `KeyServer` built from Server Actions, so infrastructure
     never imports presentation. The ESLint exception is now `container|browser`. A probe confirmed
     that `browser` and `container` are allowed and `infrastructure/crypto` is still blocked.
+  - **Lock screen (P3.4):** `src/app/(app)/layout.tsx` wraps the signed-in app in
+    `EncryptionGate`. After sign-in, the app opens only once this device holds the key: set
+    a passphrase the first time, otherwise unlock, or recover with the code. Layouts don't
+    re-render on navigation, so the device is checked once per page load. Sign-out (Settings or
+    the lock screen) clears the device key first. The gate is a convenience, not a security
+    boundary: without the key, the data is unreadable ciphertext anyway.
 - RLS is enabled on every user-owned table, with owner policies **and explicit grants** (DATA_MODEL.md
   §2). Supabase no longer exposes new tables to the API automatically. Database helper functions
   live in the unexposed `private` schema.

@@ -277,14 +277,19 @@ auth (gap G-2).
       `src/infrastructure/crypto/` (`web-crypto.ts`, `device-key-store.ts`). 10 crypto tests (37
       in total); six deliberate breakages were each caught. In Chrome, a key read back from
       IndexedDB is non-extractable, and export and wrap are both refused.
-- [ ] P3.4 Keys: a `user_keys` migration (salt, iterations, two wrapped keys; RLS, grants,
+- [x] P3.4 Keys: a `user_keys` migration (salt, iterations, two wrapped keys; RLS, grants,
       pgTAP). Screens to set a passphrase (12+ characters) and show the recovery code once, to
       unlock on a new device, and to reset the passphrase with the recovery code. Sign-out clears
-      the key from the device. **Progress 2026-11-04:** part 1 done: the `user_keys` migration
-      (applied locally), 13 pgTAP tests, regenerated types. Part 2 done: the encryption use cases
-      (set up, unlock, recover, device key), ports, Server Actions that store only wrapped keys,
-      the Supabase repository and the browser composition root. 60 unit tests, and four
-      deliberate breakages were each caught. Part 3 (screens) is next.
+      the key from the device. **Done 2026-11-04:**
+  - **Part 1:** the `user_keys` migration (applied locally), 13 pgTAP tests and regenerated
+    types.
+  - **Part 2:** the encryption use cases, ports, Server Actions that store only wrapped keys,
+    the repository and the browser composition root.
+  - **Part 3:** one lock screen after sign-in for the whole app (`(app)/layout.tsx`), single-use
+    recovery codes, and sign-out that forgets the device key.
+  - 62 unit tests, and six deliberate breakages were each caught. Tested in Chrome locally.
+  - **Before deploying:** push the `user_keys` migration to the hosted database, then measure
+    PBKDF2 on a phone.
 - [ ] P3.5 Migration: `categories` and `thoughts` storing ciphertext (format and maximum-size
       checks), indexes, composite ownership FKs, RLS, updated_at triggers, two-user pgTAP tests.
       Regenerate the types.
@@ -303,7 +308,8 @@ auth (gap G-2).
       §4.1 and §4.2, but create none in advance. Duplicate names (any case) are caught on the
       device, since the server only sees ciphertext.
 - [ ] P3.11 Search on the device: a case-insensitive match on the decrypted titles and contents.
-- [ ] P3.12 Loading, empty and error states on every Brain Dump screen, including "locked".
+- [ ] P3.12 Loading, empty and error states on every Brain Dump screen. (The locked state is the
+      app-wide lock screen from P3.4.)
 - [ ] P3.13 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
       with no urgency styling.
 

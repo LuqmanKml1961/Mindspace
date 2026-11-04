@@ -31,8 +31,8 @@ function memoryServer(): KeyServer & { stored: UserKeys | null } {
     async create(keys: UserKeys) {
       server.stored = keys;
     },
-    async replacePassphraseKey(wrapped: UserKeys["passphrase"]) {
-      server.stored = { ...server.stored!, passphrase: wrapped };
+    async replace(keys: UserKeys) {
+      server.stored = keys;
     },
   };
   return server;
@@ -74,14 +74,18 @@ describe("encryption flow with real Web Crypto", () => {
       decryptField(phone.keys.get("user-a")!, stored, field),
     ).resolves.toBe("a private thought");
 
-    // Forgotten passphrase: the recovery code sets a new one, and the same text still opens.
+    // Forgotten passphrase: the recovery code sets a new one and gives a new code, and the same
+    // text still opens.
     const tablet = memoryDevice();
-    await makeRecoverWithCode({ crypto, server, device: tablet })({
+    const recover = makeRecoverWithCode({ crypto, server, device: tablet });
+    const { recoveryCode: newCode } = await recover({
       userId: "user-a",
       keys: server.stored!,
       recoveryCode: recoveryCode.toUpperCase(),
       newPassphrase: "a brand new passphrase",
     });
+    expect(newCode).not.toBe(recoveryCode);
+    expect(userKeysSchema.safeParse(server.stored).success).toBe(true);
     expect(tablet.keys.get("user-a")!.extractable).toBe(false);
     await expect(
       decryptField(tablet.keys.get("user-a")!, stored, field),
@@ -101,5 +105,25 @@ describe("encryption flow with real Web Crypto", () => {
         passphrase: "a brand new passphrase",
       }),
     ).resolves.toBeUndefined();
+
+    // The used code no longer works; the new one does, and still opens the same text.
+    await expect(
+      recover({
+        userId: "user-a",
+        keys: server.stored!,
+        recoveryCode,
+        newPassphrase: "another new passphrase",
+      }),
+    ).rejects.toThrow(UnlockFailedError);
+    const watch = memoryDevice();
+    await makeRecoverWithCode({ crypto, server, device: watch })({
+      userId: "user-a",
+      keys: server.stored!,
+      recoveryCode: newCode,
+      newPassphrase: "another new passphrase",
+    });
+    await expect(
+      decryptField(watch.keys.get("user-a")!, stored, field),
+    ).resolves.toBe("a private thought");
   });
 });

@@ -4,7 +4,7 @@ import type { AuthService } from "@/application/auth/auth-service";
 import {
   makeCreateUserKeys,
   makeGetUserKeys,
-  makeReplacePassphraseKey,
+  makeReplaceUserKeys,
 } from "@/application/encryption/user-keys";
 import { makeGetProfile } from "@/application/profiles/get-profile";
 import { makeUpdateTimezone } from "@/application/profiles/update-timezone";
@@ -33,7 +33,7 @@ export async function getAppContext() {
       updateTimezone: makeUpdateTimezone({ profiles }),
       getUserKeys: makeGetUserKeys({ userKeys }),
       createUserKeys: makeCreateUserKeys({ userKeys }),
-      replacePassphraseKey: makeReplacePassphraseKey({ userKeys }),
+      replaceUserKeys: makeReplaceUserKeys({ userKeys }),
     },
   };
 }

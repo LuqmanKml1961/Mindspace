@@ -77,13 +77,17 @@ export function createSupabaseUserKeysRepository(
       }
       if (error) throw new Error(`Saving keys failed (${error.code})`);
     },
-    async replacePassphraseKey(userId, wrapped) {
+    async replace(userId, keys) {
       const { data, error } = await supabase
         .from("user_keys")
         .update({
-          passphrase_salt: wrapped.salt,
-          passphrase_iterations: wrapped.iterations,
-          passphrase_wrapped_key: wrapped.wrappedKey,
+          version: keys.version,
+          passphrase_salt: keys.passphrase.salt,
+          passphrase_iterations: keys.passphrase.iterations,
+          passphrase_wrapped_key: keys.passphrase.wrappedKey,
+          recovery_salt: keys.recovery.salt,
+          recovery_iterations: keys.recovery.iterations,
+          recovery_wrapped_key: keys.recovery.wrappedKey,
         })
         .eq("user_id", userId)
         .select("user_id");

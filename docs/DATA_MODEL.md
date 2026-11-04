@@ -88,8 +88,9 @@ by cascade.
 - salts `^[A-Za-z0-9+/]{22}==$` (16 bytes);
 - wrapped keys `^[A-Za-z0-9+/]{54}==$` (AES-KW of a 32-byte key is 40 bytes).
 
-These lengths were measured with Web Crypto. Changing the passphrase rewrites only this row;
-thoughts are never re-encrypted.
+These lengths were measured with Web Crypto. A recovery rewrites only this row: both wrapped
+copies are replaced in one update, with the new passphrase and a new recovery code, so each code
+works once. Thoughts are never re-encrypted.
 
 **Verified on 2026-11-04:** 13 pgTAP tests (`supabase/tests/user_keys_rls_test.sql`). A
 sabotaged copy failed exactly the 7 targeted tests, and the advisors were clean.

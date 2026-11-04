@@ -401,6 +401,13 @@ database, debugging, development`, following Supabase's MCP security guidance. S
     IndexedDB as a **non-extractable** `CryptoKey` (MDN: `CryptoKey` can be stored there) until
     sign-out.
   - **Passphrase:** you chose **at least 12 characters**. A few words works well.
+  - **Unlock once, for the whole app** (your call, 2026-11-04): right after sign-in, a lock
+    screen asks for the passphrase (or sets one up the first time) before any page opens. It
+    is not asked per module. Sign-out forgets the key on this device.
+  - **Recovery codes work once** (your call, 2026-11-04): a recovery replaces both wrapped
+    copies in one update, with the new passphrase and a new recovery code, which is shown once.
+    The data key never changes, so nothing is re-encrypted. Replacing the data key itself would
+    mean re-encrypting everything; that is only for a suspected compromise, and not planned.
   - The P3.2 domain rules run in the browser before encryption. The server checks only the
     ciphertext format and maximum size. Search runs on the device. Category-name uniqueness is
     checked on the device too, because the server can't compare ciphertexts.
@@ -425,7 +432,14 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - In Chrome on `localhost` (a secure context), a non-extractable key stored in IndexedDB reads
     back as `extractable: false`, `exportKey` and `wrapKey` are refused (`InvalidAccessError`),
     and it still decrypts. PBKDF2 at 600,000 iterations took 378 ms on the desktop; phones are
-    measured in P3.4.
+    measured once `user_keys` is on the hosted database.
+- **Verified (P3.4, 2026-11-04, local, in Chrome):**
+  - Unlocking and a wrong passphrase send nothing to the server.
+  - A recovery sends one request with only the two wrapped keys, never the passphrase or a
+    code. Afterwards the old passphrase and the old code are refused, and the new ones work.
+  - The lock screen covers every signed-in page; after one unlock, navigation and reloads
+    don't ask again.
+  - Sign-out, from Settings or the lock screen, empties the device-key store.
 
 ---
 

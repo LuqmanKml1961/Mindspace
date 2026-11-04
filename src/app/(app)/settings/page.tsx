@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { signOutAction } from "@/app/(auth)/actions";
 import { DEFAULT_TIMEZONE, timezoneOptions } from "@/domain/profiles/profile";
+import { SignOutButton } from "@/components/auth/sign-out-button";
 import { TimezoneForm } from "@/components/settings/timezone-form";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { getAppContext } from "@/infrastructure/container";
 
 export const metadata: Metadata = { title: "Settings" };
@@ -50,11 +49,9 @@ export default async function SettingsPage() {
             <span className="font-medium text-foreground">{user.email}</span>
           </p>
         )}
-        <form action={signOutAction}>
-          <Button type="submit" variant="outline">
-            Sign out
-          </Button>
-        </form>
+        <div>
+          <SignOutButton />
+        </div>
       </section>
       <p className="text-sm text-muted-foreground">
         More account, privacy and data settings are coming soon.

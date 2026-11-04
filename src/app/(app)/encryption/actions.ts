@@ -1,9 +1,6 @@
 "use server";
 
-import {
-  userKeysSchema,
-  wrappedKeySchema,
-} from "@/application/encryption/schemas";
+import { userKeysSchema } from "@/application/encryption/schemas";
 import { ConflictError, NotFoundError } from "@/domain/shared/errors";
 import { getAppContext } from "@/infrastructure/container";
 
@@ -37,15 +34,16 @@ export async function createUserKeysAction(
   }
 }
 
-export async function replacePassphraseKeyAction(
-  wrapped: unknown,
+// After a recovery: the new passphrase copy and the new recovery-code copy, replaced together.
+export async function replaceUserKeysAction(
+  keys: unknown,
 ): Promise<KeyActionResult> {
   const { user, useCases } = await getAppContext();
-  const parsed = wrappedKeySchema.safeParse(wrapped);
-  if (!parsed.success) return failure(new Error("Invalid wrapped key"));
+  const parsed = userKeysSchema.safeParse(keys);
+  if (!parsed.success) return failure(new Error("Invalid wrapped keys"));
 
   try {
-    await useCases.replacePassphraseKey(user.id, parsed.data);
+    await useCases.replaceUserKeys(user.id, parsed.data);
     return { ok: true };
   } catch (error) {
     return failure(error);
