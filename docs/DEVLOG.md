@@ -5,15 +5,17 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 7 / 12 tasks done (P2.1–P2.5, P2.6a, P2.8)                      |
+| **Phase progress** | Phase 2: 8 / 12 tasks done (P2.1–P2.5, P2.6a, P2.7, P2.8)                |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
-1. **Push** the unpushed commits (P2.4, P2.5, P2.8, D-019, P2.6a). The sign-in pages will deploy,
-   but nothing links to them yet. **Do not sign up on the live site until P2.10** (hosted SMTP,
-   templates and the `profiles` migration). The live site was last checked on 2026-11-04 after the
+1. **Push in two steps.** Once P2.7 is deployed, **every page on the live site redirects to sign-in**,
+   and hosted sign-in cannot work until P2.10 (hosted SMTP, templates and the `profiles`
+   migration). So first push up to P2.6a with `git push origin 4de63c0:main` and do the Android
+   retest (item 3). Then push the rest (`git push`). Or push everything now and retest after P2.10.
+   **Do not sign up on the live site until P2.10.** The live site was last checked on 2026-11-04 after the
    P2.2/P2.3 push: `/` redirects to `/home`, and the proxy clears a stale session cookie. The
    Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
    type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
@@ -24,7 +26,7 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.7 (route protection), then P2.6b (forgot password), P2.6c (Google: you
+4. **Next tasks:** P2.6b (forgot password), P2.6c (Google: you
    create the Google Cloud OAuth client), P2.9 (settings) and P2.10 (hosted auth setup). Local
    dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). Restart
    your dev server: the one still running is Next 16.4.4. The `profiles` migration is **local only**. Push it to the hosted project with
@@ -138,6 +140,40 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): route protection (P2.7)
+
+- **Phase:** 2 · **Tasks:** P2.7
+- **Done:**
+  - Read the bundled Next.js 16 docs first (`guides/authentication.md`, `proxy.md`):
+    - Layout auth checks don't re-run on navigation and don't stop child segments from
+      rendering.
+    - The proxy is the place for redirects. It runs on every route, including prefetches.
+    - Server Functions must verify auth themselves, never relying on the proxy alone.
+    - So the ROADMAP's "the `(app)` layout requires a session" became proxy redirects.
+  - `src/infrastructure/supabase/session.ts`: `updateSession()` now returns `signedIn` (from
+    `getClaims()`, which fails closed on an error), the response, and `redirect(path)`. The
+    redirect copies the refreshed session cookies and cache headers onto the new response; a
+    fresh `NextResponse.redirect` would drop them (`@supabase/ssr` warns about "random
+    logouts").
+  - `src/proxy.ts`: the auth pages `/sign-in` and `/sign-up` are public. Everything else
+    redirects to `/sign-in` when signed out. Signed-in users on an auth page go to `/home`.
+  - **Verified with a scratch HTTP probe** against the dev server. Its user was created through
+    `@supabase/ssr` itself, so the cookie format is real, and deleted afterwards:
+    - Signed out: `/`, `/home`, `/settings`, `/thoughts` → 307 `/sign-in`. The auth pages, the
+      manifest and the icons → 200. A garbage cookie → 307 `/sign-in`.
+    - Signed in: `/home`, `/settings` → 200. `/sign-in`, `/sign-up`, `/` → 307 `/home`.
+    - **Expired access token:** `/sign-in` → 307 `/home` with a refreshed `sb-127-auth-token`
+      cookie and `no-store`. `/home` → 200 with the refreshed cookie.
+  - Dev live reload is unaffected. WebSocket upgrades never reach the proxy: an upgrade to
+    `/home` got no 307. Your Chrome (LUQMAN) shows "[HMR] connected" on `/sign-in` while
+    signed out.
+  - typecheck, lint, format:check and build pass. ARCHITECTURE §3/§7 and CLAUDE.md are updated.
+- **Decisions:** none. This follows the Next.js docs; the ROADMAP wording is corrected.
+- **Problems / findings:** deploying P2.7 locks the live site behind sign-in until P2.10. See
+  the next actions for the two-step push.
+- **Commits:** `feat(auth): protect app routes in the proxy (P2.7)`
+- **Next:** P2.6b (forgot password).
 
 ### 2026-11-04 — Session 4 (cont.): sign-in methods (D-019) and email + password (P2.6a)
 

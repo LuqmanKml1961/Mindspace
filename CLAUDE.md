@@ -77,6 +77,10 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
   Local `config.toml` has confirmations on, a minimum password length of 8, and the code-only
   template `supabase/templates/confirmation.html`. Config changes need `pnpm db:stop` and then
   `pnpm db:start`.
+- Route protection is in `src/proxy.ts` (the public auth pages are listed there). It is not a
+  security boundary: every Server Action and data read must verify the user itself
+  (`getAppContext()`, RLS). Add any new public route, such as `/auth/callback` in P2.6c, to that
+  list.
 
 ## Commands
 

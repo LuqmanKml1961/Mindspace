@@ -97,9 +97,9 @@ mindspace/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
 ```
 
-Session refresh lives in `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`; it runs on
-the Node.js runtime), at the `src/` root where Next.js requires it. It only calls
-an infrastructure helper.
+Session refresh and route protection live in `src/proxy.ts` (Next.js 16 renamed `middleware` to
+`proxy`; it runs on the Node.js runtime), at the `src/` root where Next.js requires it. It calls
+`updateSession()` from infrastructure and owns the list of public auth pages (P2.7).
 
 ## 4. Dependency rules
 
@@ -177,6 +177,11 @@ CaptureBox (client component)
 - Server-only modules import `server-only`. Secret keys never use the `NEXT_PUBLIC_` prefix.
 - Auth sessions use cookie-based SSR auth through `@supabase/ssr`. Session refresh follows the
   current Supabase guide.
+- **Route protection (P2.7)** is in `src/proxy.ts`: signed-out users go to `/sign-in`, and
+  signed-in users on an auth page go to `/home`. Any redirect carries the refreshed session
+  cookies and cache headers. This is a convenience, not the security boundary. As the Next.js
+  docs say, **every Server Action and data read verifies the user itself** through
+  `getAppContext()` and RLS, never by relying on the proxy alone.
 - Collect only the data the app needs (spec §14). Do not log user content.
 - Account deletion and data export arrive in Phase 6, before anyone else uses the app.
 

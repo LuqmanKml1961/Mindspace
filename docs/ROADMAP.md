@@ -212,8 +212,12 @@ auth (gap G-2).
 - [ ] P2.6c Google sign-in: an OAuth button, an `auth/callback` route (`exchangeCodeForSession`)
       and an error page. You create the Google Cloud OAuth client. Test sign-in from the
       installed PWA on Android and iOS.
-- [ ] P2.7 Protect routes: the `(app)` layout requires a session (checked on the server), and a
-      signed-in user who visits sign-in is sent to `/home`.
+- [x] P2.7 Protect routes: every route except sign-in and sign-up requires a session, and a
+      signed-in user who visits sign-in or sign-up is sent to `/home`. **Done 2026-11-04:** in
+      `src/proxy.ts`, not the layout. The Next.js 16 docs say layout checks do not re-run on
+      navigation and do not stop child segments from rendering. The proxy verifies the token
+      with `getClaims()`, and its redirects carry any refreshed session cookies. Secure checks
+      next to the data (`getAppContext()`) arrive with the first data read (P2.9).
 - [x] P2.8 Set up the pgTAP harness in `supabase/tests/`. First test: user A cannot read or update
       user B's profile. Add a `db:test` script. **Done 2026-11-04:**
       `supabase/tests/profiles_rls_test.sql` (11 tests, created with `supabase test new`) and
