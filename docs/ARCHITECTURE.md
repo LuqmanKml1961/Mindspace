@@ -162,7 +162,9 @@ CaptureBox (client component)
 
 ## 7. Security
 
-- RLS is enabled on every user-owned table, with four owner policies (DATA_MODEL.md §2).
+- RLS is enabled on every user-owned table, with owner policies **and explicit grants** (DATA_MODEL.md
+  §2). Supabase no longer exposes new tables to the API automatically. Database helper functions
+  live in the unexposed `private` schema.
 - **Cross-row ownership:** foreign keys between user-owned tables are composite
   (`(x_id, user_id)` → `(id, user_id)`). Otherwise a user could link their row to someone else's.
   Postgres foreign-key checks bypass RLS.

@@ -5,7 +5,7 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 3 / 9 tasks done (P2.1, P2.2, P2.3)                             |
+| **Phase progress** | Phase 2: 4 / 9 tasks done (P2.1–P2.4)                                    |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
@@ -22,9 +22,10 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **P2.4:** the first migration: `set_updated_at()`, `profiles` with RLS, and the
-   `handle_new_user()` trigger. It follows the supabase-postgres-best-practices skill and is
-   tested on the local stack (`pnpm db:start`).
+4. **Next tasks:** P2.5 (generate DB types), then P2.8 (pgTAP RLS tests for `profiles`), then P2.6
+   and P2.7 (email one-time-code sign-in and route protection). The `profiles` migration is
+   **local only**. Push it to the hosted project with `pnpm supabase db push` before deploying
+   any code that uses it.
 
 **Open questions (yours to decide)**
 
@@ -132,6 +133,42 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): profiles migration
+
+- **Phase:** 2 · **Tasks:** P2.4, D-018
+- **Done:**
+  - Loaded the `supabase-postgres-best-practices` skill (index plus `security-rls-basics`,
+    `security-rls-performance` and `security-privileges`) and scanned Supabase's changelog.
+    Breaking change found: new `public` tables are no longer auto-exposed to the Data API (all
+    projects since 2026-10-30), while the local CLI's `auto_expose_new_tables` still defaults to
+    `true`.
+  - `supabase migration new create_profiles` produced
+    `supabase/migrations/20261104020325_create_profiles.sql`:
+    - Schema `private` holds `set_updated_at()` (invoker) and `handle_new_user()` (security
+      definer). Both use `search_path = ''`, with `execute` revoked from all API roles.
+    - `public.profiles`, with check constraints, an `updated_at` trigger, `revoke all` and then
+      `grant select, update to authenticated`, RLS, and select/update policies using
+      `(select auth.uid())` (update has `with check`).
+    - A trigger on `auth.users`.
+  - Set `auto_expose_new_tables = false` in `supabase/config.toml` to match hosted.
+  - `supabase db reset --local --no-seed` applied it. Verified:
+    - Structure: only `authenticated` holds `SELECT, UPDATE`; RLS is on; both policies are
+      correct; the functions sit in `private` with the ACL `{postgres=X}`; both triggers exist.
+    - Behaviour, through the real local Auth and REST APIs with two throwaway users (random
+      passwords, never printed): **10/10 checks pass**. The trigger creates the profile under
+      the auth role; cross-user reads and updates are blocked; reassigning `id` gives 403; anon
+      gives 401/42501; insert gives 403; `updated_at` moves.
+    - Cascade: deleting the test users dropped profiles from 2 to 0.
+    - `supabase db advisors --local --type all --level info`: no issues.
+  - Updated DATA_MODEL.md (profiles Migrated, the template now leads with explicit grants and the
+    `private` schema), ARCHITECTURE §7, CLAUDE.md rules, ROADMAP and D-018.
+- **Decisions:** D-018 Accepted.
+- **Problems / findings:** the migration is applied **locally only**. The hosted project needs
+  `pnpm supabase db push` (database password prompt) before deployed code uses `profiles`. The
+  behavioural check script lived in scratch; permanent pgTAP tests are P2.8.
+- **Commits:** `feat(db): add profiles table with RLS and sign-up trigger (P2.4)`
+- **Next:** P2.5 (types), P2.8 (pgTAP), then P2.6/P2.7 (auth).
 
 ### 2026-11-04 — Session 4 (cont.): local Supabase running
 

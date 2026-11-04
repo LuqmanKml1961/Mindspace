@@ -6,15 +6,15 @@
 
 ## 1. Tables
 
-| Table              | Phase | Status   | Purpose                                       |
-| ------------------ | ----- | -------- | --------------------------------------------- |
-| `profiles`         | 2     | Draft    | Per-user preferences (timezone, display name) |
-| `categories`       | 3     | Draft    | User-owned thought categories                 |
-| `thoughts`         | 3     | Draft    | Brain dumps and parked thoughts               |
-| `tasks`            | 4     | Draft    | Tasks with due date and priority              |
-| `reminders`        | 4     | Draft    | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | Draft    | Daily Mind Clarity reflections                |
-| `voice_recordings` | 7+    | Deferred | Recording metadata and transcripts (post-MVP) |
+| Table              | Phase | Status                                              | Purpose                                       |
+| ------------------ | ----- | --------------------------------------------------- | --------------------------------------------- |
+| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`) | Per-user preferences (timezone, display name) |
+| `categories`       | 3     | Draft                                               | User-owned thought categories                 |
+| `thoughts`         | 3     | Draft                                               | Brain dumps and parked thoughts               |
+| `tasks`            | 4     | Draft                                               | Tasks with due date and priority              |
+| `reminders`        | 4     | Draft                                               | In-app reminders attached to tasks (D-008)    |
+| `daily_checkins`   | 5     | Draft                                               | Daily Mind Clarity reflections                |
+| `voice_recordings` | 7+    | Deferred                                            | Recording metadata and transcripts (post-MVP) |
 
 Common rules:
 
@@ -28,18 +28,25 @@ Common rules:
 
 ### profiles (Phase 2)
 
-| Column         | Type        | Notes                                                                                  |
-| -------------- | ----------- | -------------------------------------------------------------------------------------- |
-| `id`           | uuid PK     | `references auth.users(id) on delete cascade`                                          |
-| `display_name` | text null   | optional                                                                               |
-| `timezone`     | text        | not null, default `'UTC'`. Set from the browser at first sign-in; editable in Settings |
-| `created_at`   | timestamptz | default `now()`                                                                        |
-| `updated_at`   | timestamptz | default `now()`                                                                        |
+| Column         | Type        | Notes                                                                                                                                                                                    |
+| -------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | uuid PK     | `references auth.users(id) on delete cascade`                                                                                                                                            |
+| `display_name` | text null   | optional; `check (char_length(btrim(display_name)) between 1 and 100)`                                                                                                                   |
+| `timezone`     | text        | not null, default `'UTC'`, `check (char_length(timezone) between 1 and 64)`. Set from the browser at first sign-in; editable in Settings. The IANA name is validated in the domain layer |
+| `created_at`   | timestamptz | not null, default `now()`                                                                                                                                                                |
+| `updated_at`   | timestamptz | not null, default `now()`; kept current by `private.set_updated_at()`                                                                                                                    |
 
-The row is created by the `handle_new_user()` trigger (AFTER INSERT ON `auth.users`,
+The row is created by the `private.handle_new_user()` trigger (AFTER INSERT ON `auth.users`,
 `security definer`, `set search_path = ''`). RLS allows select and update only where
 `id = (select auth.uid())`. There is no insert or delete policy: rows are created by the trigger
-and removed by the cascade.
+and removed by the cascade. **Grants:** `authenticated` has `select, update`; `anon` and
+`service_role` have nothing.
+
+Verified locally on 2026-11-04 through the real Auth and REST APIs, with two users: the
+sign-up trigger creates the profile; each user sees only their own row; cross-user updates
+change 0 rows; reassigning `id` gives 403; anonymous access gives 401/42501; direct insert
+gives 403; `updated_at` moves; deleting the auth user cascades. `supabase db advisors` reported
+no issues. Permanent pgTAP tests come in P2.8.
 
 ### categories (Phase 3)
 
@@ -122,6 +129,20 @@ Every prompt is optional (spec §4.6). Free-text columns are limited, e.g. to 20
 | `updated_at`          | timestamptz |                                                                                                 |
 
 ## 2. RLS template (applies to every user-owned table)
+
+**Grants first.** Since 2026-10-30, Supabase no longer exposes new `public` tables to the Data API
+automatically (changelog: "Tables not exposed to Data and GraphQL API automatically"). Locally,
+`auto_expose_new_tables = false` in `supabase/config.toml` matches that. Every migration states
+its privileges explicitly, granting only the operations the policies allow:
+
+```sql
+revoke all on public.thoughts from anon, authenticated, service_role;
+grant select, insert, update, delete on public.thoughts to authenticated;
+```
+
+**Helper functions** go in the unexposed `private` schema with `set search_path = ''`, and
+`execute` revoked from `public, anon, authenticated, service_role`. Use `security definer` only
+when a function must bypass RLS, and then give it an explicit `auth.uid()` check.
 
 ```sql
 alter table public.thoughts enable row level security;

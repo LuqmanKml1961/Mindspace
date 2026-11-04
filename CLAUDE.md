@@ -31,7 +31,9 @@ decisions or schema changes in DECISIONS.md and DATA_MODEL.md.
 
 - Onion Architecture: dependencies point inward (`domain` ← `application` ← `infrastructure` /
   presentation). See ARCHITECTURE.md §4.
-- Every user-owned table has RLS plus a two-user pgTAP test. No secret keys in client code.
+- Every user-owned table has RLS, explicit GRANTs (Supabase no longer auto-exposes tables) and a
+  two-user pgTAP test. Helper functions live in the `private` schema. No secret keys in client
+  code.
 - Small, reviewable changes. Do not overengineer, and do not add services before there is a need.
 - Commit only after the user confirms, using Conventional Commits (`feat:`, `fix:`, `docs:`,
   `chore:`, `refactor:`, `test:`). Never push. No co-authored-by trailers.

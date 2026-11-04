@@ -189,8 +189,12 @@ auth (gap G-2).
       via `setAll(cookies, headers)`), called from `src/proxy.ts`. Next 16 renamed `middleware`
       to `proxy`. No browser client yet, as nothing needs it. Verified: a fake session cookie is
       cleared, with `private, no-store` headers.
-- [ ] P2.4 Migration: the `set_updated_at()` trigger function, the `profiles` table and its RLS,
-      and the `handle_new_user()` trigger (DATA_MODEL.md).
+- [x] P2.4 Migration: the `set_updated_at()` trigger function, the `profiles` table and its RLS,
+      and the `handle_new_user()` trigger (DATA_MODEL.md). **Done 2026-11-04:**
+      `supabase/migrations/20261104020325_create_profiles.sql`, with functions in `private` and
+      explicit grants (D-018). Applied **locally only** and verified (DATA_MODEL.md §1 profiles).
+      Pushing it to the hosted project (`supabase db push`) is a separate step, before any
+      deployed code uses `profiles`.
 - [ ] P2.5 Generate the database types into `src/infrastructure/supabase/database.types.ts`. Add a
       `db:types` script.
 - [ ] P2.6 Build the auth flow for D-007: a `(auth)/sign-in` page, server actions for sign-in and

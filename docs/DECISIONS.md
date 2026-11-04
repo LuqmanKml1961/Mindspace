@@ -30,6 +30,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-015 | Appearance setting (theme toggle) | Accepted | —                                                |
 | D-016 | System bars always dark           | Accepted | —                                                |
 | D-017 | Supabase access path and tooling  | Accepted | Phase 2                                          |
+| D-018 | Database privileges convention    | Accepted | Every migration                                  |
 
 ---
 
@@ -285,6 +286,23 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - **Agent skills:** `supabase` and `supabase-postgres-best-practices`, reviewed before use.
   - Session refresh runs in `src/proxy.ts` with `getClaims()`, following Supabase's SSR guide and
     the installed `@supabase/ssr` types.
+- **Date:** 2026-11-04
+
+## D-018 — Database privileges convention
+
+- **Context:** Writing the first migration (P2.4), three things came up. Supabase's changelog
+  says new `public` tables are no longer exposed to the Data API automatically (all projects
+  since 2026-10-30). The local CLI still defaults to auto-expose. The best-practices skill warns
+  that `SECURITY DEFINER` functions in `public` can be executed by every role.
+- **Decision:** Accepted (follows the Supabase skills; applied in P2.4).
+  - Every migration starts with `revoke all … from anon, authenticated, service_role`, then
+    grants only what its RLS policies allow. Local `auto_expose_new_tables = false` matches
+    hosted.
+  - Helper functions live in an unexposed `private` schema, with `set search_path = ''` and
+    `execute` revoked from all API roles. `security definer` is used only when required (the
+    sign-up trigger).
+  - Every migration is verified locally (structure, behaviour with two users, and
+    `supabase db advisors`) before it is committed.
 - **Date:** 2026-11-04
 
 ---
