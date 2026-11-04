@@ -5,13 +5,13 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 5 / 9 tasks done (P2.1–P2.5)                                    |
+| **Phase progress** | Phase 2: 6 / 9 tasks done (P2.1–P2.5, P2.8)                              |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
-1. **Push** the P2.4 and P2.5 commits. The live site was last checked on 2026-11-04 after the
+1. **Push** the P2.4, P2.5 and P2.8 commits. The live site was last checked on 2026-11-04 after the
    P2.2/P2.3 push: `/` redirects to `/home`, and the proxy clears a stale session cookie. The
    Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
    type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
@@ -22,10 +22,10 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.8 (pgTAP RLS tests for `profiles`), then P2.6 and P2.7 (email
-   one-time-code sign-in and route protection). The `profiles` migration is **local only**. Push
-   it to the hosted project with `pnpm supabase db push` before deploying any code that uses it.
-   After every new migration, run `pnpm db:types` with the local stack running.
+4. **Next tasks:** P2.6 and P2.7 (email one-time-code sign-in and route protection), then P2.9
+   (settings). The `profiles` migration is **local only**. Push it to the hosted project with
+   `pnpm supabase db push` before deploying any code that uses it. After every new migration,
+   run `pnpm db:types` and `pnpm db:test` with the local stack running.
 
 **Open questions (yours to decide)**
 
@@ -133,6 +133,45 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): pgTAP RLS tests
+
+- **Phase:** 2 · **Tasks:** P2.8
+- **Done:**
+  - The installed skills don't cover pgTAP. The Supabase testing docs (`database/testing`,
+    `local-development/testing/overview` and `pgtap-extended`) cover the file layout and the
+    assertions only. They show user and claim setup through the optional basejump helper
+    package, which needs dbdev, `http` and `pg_tle`, and which we did not add.
+  - The rest was read from the local database itself:
+    - `auth.uid()` reads `sub` from `request.jwt.claims`.
+    - `id` is the only required column in `auth.users` without a default.
+    - `postgres` isn't a superuser, but it is a member of `anon` and `authenticated`, and it
+      can insert into and delete from `auth.users`.
+  - `supabase test new profiles_rls --template pgtap` created
+    `supabase/tests/profiles_rls_test.sql`. It holds 11 tests in one rolled-back transaction:
+    - the sign-up trigger creates the profile with timezone `UTC`;
+    - A sees only their own row and can update it;
+    - A's update of B's row returns no rows;
+    - changing the id gives 42501 (RLS);
+    - insert and delete give 42501 (no grant);
+    - B sees their own row, unchanged;
+    - anon gets permission denied;
+    - the `updated_at` trigger overrides an old value;
+    - deleting the auth user removes the profile.
+  - `pnpm db:test` (`supabase test db --local`) passed all 11. The CLI pulled
+    `supabase/pg_prove:3.36` and installed pgTAP for the run only; it was gone afterwards, and
+    so were the test users.
+  - Proved the tests can fail. A temporary copy that, inside its own transaction, added an
+    open select policy, opened the update policy, granted insert to `authenticated` and select
+    to `anon`, and disabled the `updated_at` trigger failed exactly the 7 expected tests (2,
+    4–6, 8–10). The copy was then deleted. Afterwards the database still had its 2 policies,
+    the trigger was enabled, and no extra grants were left.
+  - Documented the verified pattern in DATA_MODEL.md §4, the CLAUDE.md rule and commands
+    table, and the README.
+- **Decisions:** none.
+- **Problems / findings:** none.
+- **Commits:** `test(db): add pgTAP RLS tests for profiles and db:test script (P2.8)`
+- **Next:** P2.6 (email one-time-code sign-in), then P2.7 (route protection).
 
 ### 2026-11-04 — Session 4 (cont.): database types
 

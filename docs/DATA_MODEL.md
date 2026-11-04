@@ -47,7 +47,8 @@ Verified locally on 2026-11-04 through the real Auth and REST APIs, with two use
 sign-up trigger creates the profile; each user sees only their own row; cross-user updates
 change 0 rows; reassigning `id` gives 403; anonymous access gives 401/42501; direct insert
 gives 403; `updated_at` moves; deleting the auth user cascades. `supabase db advisors` reported
-no issues. Permanent pgTAP tests come in P2.8.
+no issues. The same behaviour is now covered permanently by
+`supabase/tests/profiles_rls_test.sql` (P2.8).
 
 ### categories (Phase 3)
 
@@ -188,6 +189,22 @@ before the Phase 3 migration. Without the column list, Postgres would also null 
 violates `not null`.
 
 ## 4. RLS tests (pgTAP, `supabase/tests/`)
+
+One file per table, `supabase/tests/<table>_rls_test.sql` (create it with
+`pnpm supabase test new <table>_rls --template pgtap`). Run them with `pnpm db:test`. Use
+`supabase/tests/profiles_rls_test.sql` as the pattern. It needs no helper packages, and each of
+the following was checked against the local database on 2026-11-04:
+
+- `supabase test db` installs pgTAP for the run and removes it afterwards, so the test files do
+  not create the extension.
+- The file wraps everything in `begin; select plan(n); … select * from finish(); rollback;`, so
+  nothing it creates is kept.
+- To create test users, `insert into auth.users (id, email)`. `id` is the only required column
+  without a default. The sign-up trigger then creates their profiles.
+- To act as a user, run `set local role authenticated;`, then
+  `select set_config('request.jwt.claims', '{"sub":"<uuid>","role":"authenticated"}', true);`.
+  `auth.uid()` reads `sub` from that setting. To act as a signed-out visitor, use
+  `set local role anon` with `{"role":"anon"}`. `reset role` returns to `postgres`.
 
 For every table, with two test users A and B:
 

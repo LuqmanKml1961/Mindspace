@@ -32,8 +32,8 @@ decisions or schema changes in DECISIONS.md and DATA_MODEL.md.
 - Onion Architecture: dependencies point inward (`domain` ← `application` ← `infrastructure` /
   presentation). See ARCHITECTURE.md §4.
 - Every user-owned table has RLS, explicit GRANTs (Supabase no longer auto-exposes tables) and a
-  two-user pgTAP test. Helper functions live in the `private` schema. No secret keys in client
-  code.
+  two-user pgTAP test (`supabase/tests/<table>_rls_test.sql`; pattern in DATA_MODEL.md §4).
+  Helper functions live in the `private` schema. No secret keys in client code.
 - Small, reviewable changes. Do not overengineer, and do not add services before there is a need.
 - Commit only after the user confirms, using Conventional Commits (`feat:`, `fix:`, `docs:`,
   `chore:`, `refactor:`, `test:`). Never push. No co-authored-by trailers.
@@ -84,4 +84,5 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
 | `pnpm format:check` | Check formatting without writing                                                                                                   |
 | `pnpm db:start`     | Start local Supabase (Docker), skipping services not yet used. Studio at http://127.0.0.1:54323, Mailpit at http://127.0.0.1:54324 |
 | `pnpm db:stop`      | Stop local Supabase                                                                                                                |
+| `pnpm db:test`      | Run the pgTAP tests in `supabase/tests/` on the local database (stack must be running)                                             |
 | `pnpm db:types`     | Regenerate `src/infrastructure/supabase/database.types.ts` from the local database (stack must be running)                         |

@@ -12,6 +12,7 @@
     "format:check": "prettier --check .",
     "db:start": "supabase start -x realtime,storage-api,imgproxy,edge-runtime,logflare,vector,supavisor",
     "db:stop": "supabase stop",
+    "db:test": "supabase test db --local",
     "db:types": "supabase gen types --local --lang typescript --schema public > src/infrastructure/supabase/database.types.ts && prettier --write src/infrastructure/supabase/database.types.ts"
   },
   "dependencies": {

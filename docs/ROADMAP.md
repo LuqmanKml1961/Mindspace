@@ -204,8 +204,11 @@ auth (gap G-2).
       sign-out, an `auth/callback` route if the method needs one, and friendly error states.
 - [ ] P2.7 Protect routes: the `(app)` layout requires a session (checked on the server), and a
       signed-in user who visits sign-in is sent to `/home`.
-- [ ] P2.8 Set up the pgTAP harness in `supabase/tests/`. First test: user A cannot read or update
-      user B's profile. Add a `db:test` script.
+- [x] P2.8 Set up the pgTAP harness in `supabase/tests/`. First test: user A cannot read or update
+      user B's profile. Add a `db:test` script. **Done 2026-11-04:**
+      `supabase/tests/profiles_rls_test.sql` (11 tests, created with `supabase test new`) and
+      `pnpm db:test`. A sabotaged copy (an open select policy, an open update policy, extra
+      grants, the trigger disabled) failed the 7 tests aimed at those breaks.
 - [ ] P2.9 Settings page: the signed-in email, a timezone setting (pre-filled from the browser,
       editable), and sign-out. (Settings → Appearance already exists: D-015.)
 

@@ -47,6 +47,7 @@ Open http://localhost:3000. It redirects to `/home`.
 | `pnpm format:check` | Check formatting without writing                  |
 | `pnpm db:start`     | Start local Supabase (needs Docker Desktop)       |
 | `pnpm db:stop`      | Stop local Supabase                               |
+| `pnpm db:test`      | Run the pgTAP database tests on local Supabase    |
 | `pnpm db:types`     | Regenerate the database types from local Supabase |
 
 Before committing, run `pnpm lint`, `pnpm typecheck`, `pnpm format:check` and `pnpm build`.
