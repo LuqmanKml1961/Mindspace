@@ -12,11 +12,15 @@
 | `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`)  | Per-user preferences (timezone, display name) |
 | `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`) | Wrapped encryption keys (D-021)               |
 | `categories`       | 3     | Draft                                                | User-owned thought categories (encrypted)     |
-| `thoughts`         | 3     | Draft                                                | Brain dumps and parked thoughts               |
-| `tasks`            | 4     | Draft                                                | Tasks with due date and priority              |
+| `thoughts`         | 3     | Draft                                                | Brain dumps and parked thoughts (encrypted)   |
+| `tasks`            | 4     | Draft                                                | Tasks with due date and priority (encrypted)  |
 | `reminders`        | 4     | Draft                                                | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | Draft                                                | Daily Mind Clarity reflections                |
+| `daily_checkins`   | 5     | Draft                                                | Daily Mind Clarity reflections (encrypted)    |
 | `voice_recordings` | 7+    | Deferred                                             | Recording metadata and transcripts (post-MVP) |
+
+"(encrypted)" means the table's free-text columns are encrypted (D-021). Its ids, dates, statuses
+and other non-text columns stay readable. Deferred voice transcripts are free text too, so they
+will be encrypted when that phase is planned.
 
 Common rules:
 
@@ -132,8 +136,8 @@ character limits themselves are enforced on the device by the P3.2 domain rules.
 | ------------------- | ---------------- | ---------------------------------------------------------------------------------------------------- |
 | `id`                | uuid PK          |                                                                                                      |
 | `user_id`           | uuid             | owner                                                                                                |
-| `title`             | text             | `check (char_length(btrim(title)) between 1 and 500)`                                                |
-| `notes`             | text null        |                                                                                                      |
+| `title_ciphertext`  | text             | encrypted title (1–500 characters before encryption); at most 2,708 chars                            |
+| `notes_ciphertext`  | text null        | encrypted notes (blank → null; limit Q-6, proposed 10,000 characters → at most 53,376 chars)         |
 | `due_date`          | date null        | the user's local date                                                                                |
 | `due_time`          | time null        | `check (due_time is null or due_date is not null)`                                                   |
 | `priority`          | text             | not null, default `'normal'`, `check (priority in ('low','normal','high'))`                          |
@@ -142,7 +146,9 @@ character limits themselves are enforced on the device by the P3.2 domain rules.
 | `created_at`        | timestamptz      |                                                                                                      |
 | `updated_at`        | timestamptz      |                                                                                                      |
 
-Index: `(user_id, completed_at, due_date)`. `unique (id, user_id)`.
+Index: `(user_id, completed_at, due_date)`. `unique (id, user_id)`. The title and notes are
+encrypted (D-021). The due date, time, priority and completion stay readable, so the Today,
+Upcoming and Completed views (P4.5) can be queried and sorted.
 
 ### reminders (Phase 4)
 
@@ -159,22 +165,24 @@ Partial index: `(user_id, remind_at) where dismissed_at is null`.
 
 ### daily_checkins (Phase 5)
 
-Every prompt is optional (spec §4.6). Free-text columns are limited, e.g. to 2000 characters.
+Every prompt is optional (spec §4.6). Every answer is free text, so each is encrypted (D-021) and
+null when skipped. Each answer's limit is Q-7, proposed 2,000 characters, which gives at most
+10,708 characters of ciphertext.
 
-| Column                | Type        | Notes                                                                                           |
-| --------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
-| `id`                  | uuid PK     |                                                                                                 |
-| `user_id`             | uuid        | owner                                                                                           |
-| `checkin_date`        | date        | the user's local date; `unique (user_id, checkin_date)`                                         |
-| `occupying_mind`      | text null   | "What is occupying your mind?"                                                                  |
-| `worries`             | text null   | "What are you worried about?"                                                                   |
-| `can_control`         | text null   | "What can you control?"                                                                         |
-| `can_wait`            | text null   | "What can wait until tomorrow?"                                                                 |
-| `small_helpful_thing` | text null   | "What is one small thing that would help?"                                                      |
-| `priority_task_id`    | uuid null   | FK `(priority_task_id, user_id)` → `tasks(id, user_id)` `on delete set null (priority_task_id)` |
-| `priority_text`       | text null   | a free-text priority when it is not a task                                                      |
-| `created_at`          | timestamptz |                                                                                                 |
-| `updated_at`          | timestamptz |                                                                                                 |
+| Column                           | Type        | Notes                                                                                           |
+| -------------------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| `id`                             | uuid PK     |                                                                                                 |
+| `user_id`                        | uuid        | owner                                                                                           |
+| `checkin_date`                   | date        | the user's local date; `unique (user_id, checkin_date)`                                         |
+| `occupying_mind_ciphertext`      | text null   | "What is occupying your mind?"                                                                  |
+| `worries_ciphertext`             | text null   | "What are you worried about?"                                                                   |
+| `can_control_ciphertext`         | text null   | "What can you control?"                                                                         |
+| `can_wait_ciphertext`            | text null   | "What can wait until tomorrow?"                                                                 |
+| `small_helpful_thing_ciphertext` | text null   | "What is one small thing that would help?"                                                      |
+| `priority_task_id`               | uuid null   | FK `(priority_task_id, user_id)` → `tasks(id, user_id)` `on delete set null (priority_task_id)` |
+| `priority_text_ciphertext`       | text null   | a free-text priority when it is not a task                                                      |
+| `created_at`                     | timestamptz |                                                                                                 |
+| `updated_at`                     | timestamptz |                                                                                                 |
 
 ## 2. RLS template (applies to every user-owned table)
 
@@ -269,3 +277,5 @@ For every table, with two test users A and B:
 | Q-3 | Can a thought have more than one category or tag?                 | One category for the MVP. Tags only if real use shows the need                                                                     | P3.3      |
 | Q-4 | Can a reminder exist without a task?                              | No. A standalone reminder is a task with a reminder (D-008)                                                                        | P4.1      |
 | Q-5 | Should `profiles.timezone` be set automatically at first sign-in? | Yes, before "today" is used: save the device zone once while the profile is still on `UTC` (Settings stays the place to change it) | P4.1      |
+| Q-6 | Maximum length for task notes?                                    | 10,000 characters, the same as a thought, so a converted thought's text fits                                                       | P4.1      |
+| Q-7 | Maximum length for each check-in answer?                          | 2,000 characters                                                                                                                   | P5.1      |

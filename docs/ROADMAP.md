@@ -335,7 +335,9 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
 - [ ] P4.2 Dates and timezones: compute "today" in the profile's timezone. Add a small date library
       only if `Intl` is not enough. Test the boundaries (late at night, timezone offsets).
 - [ ] P4.3 Migration: `tasks` and `reminders`, with indexes, ownership FKs and RLS. pgTAP tests,
-      including a cross-user FK attempt that must be rejected. Regenerate the types.
+      including a cross-user FK attempt that must be rejected. Regenerate the types. The task
+      title and notes are ciphertext (D-021, DATA_MODEL.md), encrypted and decrypted in the
+      browser as in P3.7.
 - [ ] P4.4 Infrastructure repositories, wired into the composition root.
 - [ ] P4.5 Use cases: create, edit, complete, reopen and delete a task; set due date and priority;
       add and dismiss a reminder; list Today (overdue plus today), Upcoming, No date and recently
@@ -365,7 +367,7 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
 - [ ] P5.1 Domain: `DailyCheckIn` (one per user per local date; every prompt optional), its
       repository interface, and tests.
 - [ ] P5.2 Migration: `daily_checkins`, with an ownership FK to tasks and RLS. pgTAP tests.
-      Regenerate the types.
+      Regenerate the types. Every answer is ciphertext (D-021, DATA_MODEL.md).
 - [ ] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing
       task or free text), and list past check-ins.
 - [ ] P5.4 Check-in flow UI: one prompt per step (spec §4.6). Every step can be skipped and the
