@@ -195,8 +195,11 @@ auth (gap G-2).
       explicit grants (D-018). Applied **locally only** and verified (DATA_MODEL.md §1 profiles).
       Pushing it to the hosted project (`supabase db push`) is a separate step, before any
       deployed code uses `profiles`.
-- [ ] P2.5 Generate the database types into `src/infrastructure/supabase/database.types.ts`. Add a
-      `db:types` script.
+- [x] P2.5 Generate the database types into `src/infrastructure/supabase/database.types.ts`. Add a
+      `db:types` script. **Done 2026-11-04:** `pnpm db:types` generates the `public` schema from
+      the local database, then formats it with Prettier. `createSupabaseServerClient()` is typed
+      with `<Database>`. A throwaway probe proved that wrong tables, unselected columns and
+      wrongly typed values are type errors.
 - [ ] P2.6 Build the auth flow for D-007: a `(auth)/sign-in` page, server actions for sign-in and
       sign-out, an `auth/callback` route if the method needs one, and friendly error states.
 - [ ] P2.7 Protect routes: the `(app)` layout requires a session (checked on the server), and a

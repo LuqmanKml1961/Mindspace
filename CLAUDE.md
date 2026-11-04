@@ -64,7 +64,10 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
   read-only**, with features `docs, database, debugging, development`. You authenticate once by
   running `claude /mcp` in a normal terminal, then selecting supabase → Authenticate.
 - Schema changes go through migration files in `supabase/migrations/` (D-011), never straight
-  into the hosted database.
+  into the hosted database. After applying a migration locally, run `pnpm db:types` and commit
+  `src/infrastructure/supabase/database.types.ts` with it. The script needs the local stack
+  running. If it fails, the file holds the error text: start the stack and rerun, or restore the
+  file with `git checkout`.
 - The app talks to Supabase only through `src/infrastructure/` (supabase-js plus
   `@supabase/ssr`, so RLS applies per user). No Prisma and no direct Postgres connection (D-017).
 
@@ -81,3 +84,4 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
 | `pnpm format:check` | Check formatting without writing                                                                                                   |
 | `pnpm db:start`     | Start local Supabase (Docker), skipping services not yet used. Studio at http://127.0.0.1:54323, Mailpit at http://127.0.0.1:54324 |
 | `pnpm db:stop`      | Stop local Supabase                                                                                                                |
+| `pnpm db:types`     | Regenerate `src/infrastructure/supabase/database.types.ts` from the local database (stack must be running)                         |

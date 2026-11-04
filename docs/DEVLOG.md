@@ -5,27 +5,27 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 4 / 9 tasks done (P2.1–P2.4)                                    |
+| **Phase progress** | Phase 2: 5 / 9 tasks done (P2.1–P2.5)                                    |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
-1. **Push**, then check that https://m1ndspace.vercel.app loads. The Vercel env vars
-   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` were added on
-   2026-11-04 as type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public
-   by design). If pages fail, check the deploy logs for the env error from
-   `src/infrastructure/config/env.ts`. Real secrets (service-role or secret key, DB password)
-   must always be **Secret** and never `NEXT_PUBLIC_`.
+1. **Push** the P2.4 and P2.5 commits. The live site was last checked on 2026-11-04 after the
+   P2.2/P2.3 push: `/` redirects to `/home`, and the proxy clears a stale session cookie. The
+   Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
+   type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
+   Real secrets (service-role or secret key, DB password) must always be **Secret** and never
+   `NEXT_PUBLIC_`.
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.5 (generate DB types), then P2.8 (pgTAP RLS tests for `profiles`), then P2.6
-   and P2.7 (email one-time-code sign-in and route protection). The `profiles` migration is
-   **local only**. Push it to the hosted project with `pnpm supabase db push` before deploying
-   any code that uses it.
+4. **Next tasks:** P2.8 (pgTAP RLS tests for `profiles`), then P2.6 and P2.7 (email
+   one-time-code sign-in and route protection). The `profiles` migration is **local only**. Push
+   it to the hosted project with `pnpm supabase db push` before deploying any code that uses it.
+   After every new migration, run `pnpm db:types` with the local stack running.
 
 **Open questions (yours to decide)**
 
@@ -133,6 +133,37 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): database types
+
+- **Phase:** 2 · **Tasks:** P2.5
+- **Done:**
+  - Flags checked with `supabase gen types --help`. Added
+    `db:types`: `supabase gen types --local --lang typescript --schema public` redirected into
+    `src/infrastructure/supabase/database.types.ts`, then `prettier --write` on that file. The
+    CLI prints unformatted TypeScript, which would fail `format:check` and give unreadable
+    diffs.
+  - The generated `profiles` types match the migration: `id` is required on insert, the
+    defaulted columns are optional, and `display_name` is nullable.
+  - Ran the script through `pnpm db:types`, so the real shell was used. The file is plain UTF-8
+    without a BOM, and the CLI's progress messages go to stderr, not into the file.
+  - `createSupabaseServerClient()` now calls `createServerClient<Database>` (the generic in
+    `@supabase/ssr` 0.12.7). `session.ts` stays untyped because it only calls the auth API.
+  - A throwaway probe with three `@ts-expect-error` lines (unknown table, unselected column,
+    number for `timezone`) passed `tsc`, so all three are real type errors. The probe was then
+    deleted.
+  - lint, typecheck, format:check and build all pass.
+  - Documented the command in the README, the CLAUDE.md commands table and Supabase tooling
+    (run after each migration), and the DATA_MODEL.md header.
+- **Decisions:** none.
+- **Problems / findings:**
+  - A failed run (local stack down) exits 1 and leaves the CLI's JSON error in the types file,
+    because the shell truncates the target first. The CLI has no output-file flag (`--output`
+    sets the status format). This was tested against an unreachable port in scratch. The
+    failure is loud (typecheck breaks). Fix it by starting the stack and rerunning, or with
+    `git checkout` on the file.
+- **Commits:** `feat(supabase): generate database types and add db:types script (P2.5)`
+- **Next:** P2.8 (pgTAP RLS tests for `profiles`), then P2.6/P2.7.
 
 ### 2026-11-04 — Session 4 (cont.): profiles migration
 

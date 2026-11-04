@@ -1,8 +1,9 @@
 # Mindspace — Data Model
 
 > Status: **Draft.** Each table is finalised when its migration is written (phase noted). After
-> a migration, update the table's status here. The migrations in `supabase/migrations/` are the
-> source of truth once they exist.
+> a migration, update the table's status here and regenerate the TypeScript types with
+> `pnpm db:types`. The migrations in `supabase/migrations/` are the source of truth once they
+> exist.
 
 ## 1. Tables
 
