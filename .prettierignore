@@ -3,5 +3,6 @@ pnpm-workspace.yaml
 AGENTS.md
 .vscode/mcp.json
 .mcp.json
+supabase/.temp/
 mindspace_product_and_development_plan.md
 .claude/

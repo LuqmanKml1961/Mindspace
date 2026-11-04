@@ -5,26 +5,26 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 2 / 9 tasks done (P2.2, P2.3)                                   |
+| **Phase progress** | Phase 2: 3 / 9 tasks done (P2.1, P2.2, P2.3)                             |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
-| **Blocked on**     | Your Vercel env vars before pushing the Supabase commit                  |
+| **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
-1. **Before pushing, in Vercel → Project → Settings → Environment Variables,** add
-   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (values in your
-   `.env.local`) for Production, Preview and Development. Without them `src/proxy.ts` throws and
-   every page fails. Then push (the Next.js 16.4.5 security fix is in the same push).
+1. **Push**, then check that https://m1ndspace.vercel.app loads. The Vercel env vars
+   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` were added on
+   2026-11-04 as type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public
+   by design). If pages fail, check the deploy logs for the env error from
+   `src/infrastructure/config/env.ts`. Real secrets (service-role or secret key, DB password)
+   must always be **Secret** and never `NEXT_PUBLIC_`.
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **P2.1, finish:** the CLI is installed and initialised. You run
-   `! pnpm supabase login` (browser sign-in), then
-   `! pnpm supabase link --project-ref ftsksqfnjocgilmunljx` (it asks for the **database**
-   password; type it into the prompt, not the chat). Then **start Docker Desktop**, and Claude
-   runs `pnpm supabase start` (first run downloads several GB of images).
+4. **P2.4:** the first migration: `set_updated_at()`, `profiles` with RLS, and the
+   `handle_new_user()` trigger. It follows the supabase-postgres-best-practices skill and is
+   tested on the local stack (`pnpm db:start`).
 
 **Open questions (yours to decide)**
 
@@ -132,6 +132,30 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): local Supabase running
+
+- **Phase:** 2 · **Tasks:** P2.1 (completed)
+- **Done:**
+  - You ran `supabase login` and `link` in your terminal; `supabase status` shows
+    `linked_project` `ftsksqfnjocgilmunljx` ("mindspace").
+  - Started the local stack with `supabase start -x
+realtime,storage-api,imgproxy,edge-runtime,logflare,vector,supavisor`. Flags came from
+    `start --help`.
+  - Running and healthy: db (Postgres), auth, kong, rest, studio, pg_meta and inbucket/Mailpit.
+    The seven excluded services are stopped (the storage image was pulled but not started).
+  - Added `db:start` / `db:stop` scripts so the trimmed stack is reproducible, and documented
+    them in CLAUDE.md and the README.
+- **Problems / findings:**
+  - The linked org is `vercel_icfg_…`, so the project was created via Vercel's Supabase
+    integration, which may inject its own env vars into Vercel. Check that
+    `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` exist under exactly
+    those names before pushing.
+  - Local keys and URLs printed by `status` are the standard local development defaults.
+    Secrets were redacted in the transcript anyway.
+  - `status` warns that `INBUCKET_URL` is deprecated in favour of `MAILPIT_URL`.
+- **Commits:** `chore(supabase): add db:start and db:stop scripts (P2.1)`
+- **Next:** P2.4 (profiles migration).
 
 ### 2026-11-04 — Session 4 (cont.): Supabase CLI
 

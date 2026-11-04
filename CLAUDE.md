@@ -68,12 +68,14 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
 
 ## Commands
 
-| Command             | Purpose                                                   |
-| ------------------- | --------------------------------------------------------- |
-| `pnpm dev`          | Start the dev server (Turbopack) at http://localhost:3000 |
-| `pnpm build`        | Production build                                          |
-| `pnpm start`        | Serve the production build                                |
-| `pnpm lint`         | ESLint                                                    |
-| `pnpm typecheck`    | Generate Next.js route types, then `tsc --noEmit`         |
-| `pnpm format`       | Format with Prettier (sorts Tailwind classes)             |
-| `pnpm format:check` | Check formatting without writing                          |
+| Command             | Purpose                                                                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`          | Start the dev server (Turbopack) at http://localhost:3000                                                                          |
+| `pnpm build`        | Production build                                                                                                                   |
+| `pnpm start`        | Serve the production build                                                                                                         |
+| `pnpm lint`         | ESLint                                                                                                                             |
+| `pnpm typecheck`    | Generate Next.js route types, then `tsc --noEmit`                                                                                  |
+| `pnpm format`       | Format with Prettier (sorts Tailwind classes)                                                                                      |
+| `pnpm format:check` | Check formatting without writing                                                                                                   |
+| `pnpm db:start`     | Start local Supabase (Docker), skipping services not yet used. Studio at http://127.0.0.1:54323, Mailpit at http://127.0.0.1:54324 |
+| `pnpm db:stop`      | Stop local Supabase                                                                                                                |

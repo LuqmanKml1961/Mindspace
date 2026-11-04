@@ -45,6 +45,8 @@ Open http://localhost:3000. It redirects to `/home`.
 | `pnpm typecheck`    | Generate Next.js route types, then `tsc --noEmit` |
 | `pnpm format`       | Format with Prettier (sorts Tailwind classes)     |
 | `pnpm format:check` | Check formatting without writing                  |
+| `pnpm db:start`     | Start local Supabase (needs Docker Desktop)       |
+| `pnpm db:stop`      | Stop local Supabase                               |
 
 Before committing, run `pnpm lint`, `pnpm typecheck`, `pnpm format:check` and `pnpm build`.
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org) (`feat:`,

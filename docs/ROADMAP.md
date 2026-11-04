@@ -166,12 +166,13 @@ is in place. This phase is separate because RLS needs auth and the spec has no m
 auth (gap G-2).
 **Needs:** D-003, D-007, D-011.
 
-- [ ] P2.1 Add the Supabase CLI as a dev dependency and run `supabase init`. The local stack runs on
+- [x] P2.1 Add the Supabase CLI as a dev dependency and run `supabase init`. The local stack runs on
       Docker (`supabase start`). You create a hosted free-tier project for preview and production.
       **Progress 2026-11-04:** done: the CLI (`supabase` 2.122.0, pinned; v3.0.0 deferred),
       `supabase init` (Postgres 17, imperative migrations) and the hosted project
-      `ftsksqfnjocgilmunljx`. Remaining: you run `pnpm supabase login` and `link`, then start
-      Docker Desktop and run `supabase start`.
+      `ftsksqfnjocgilmunljx`. You ran `login` and `link` (status shows the linked project), and
+      the local stack runs via `pnpm db:start`, skipping services not used yet. Done
+      2026-11-04.
 - [x] P2.2 Environment config: put the Supabase URL and public key in `.env.local` and the host
       settings. Create `.env.example` listing the variable names with no values (moved from P1.9;
       `.gitignore` already allows it). Add a typed, validated env module in `src/infrastructure/config/`. Take the variable
