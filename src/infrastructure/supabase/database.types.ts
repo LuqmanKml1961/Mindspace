@@ -9,6 +9,28 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string;
+          id: string;
+          name_ciphertext: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name_ciphertext: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name_ciphertext?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       profiles: {
         Row: {
           created_at: string;
@@ -33,6 +55,48 @@ export type Database = {
           updated_at?: string;
         };
         Relationships: [];
+      };
+      thoughts: {
+        Row: {
+          category_id: string | null;
+          content_ciphertext: string;
+          created_at: string;
+          id: string;
+          status: string;
+          title_ciphertext: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id?: string | null;
+          content_ciphertext: string;
+          created_at?: string;
+          id?: string;
+          status?: string;
+          title_ciphertext?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          category_id?: string | null;
+          content_ciphertext?: string;
+          created_at?: string;
+          id?: string;
+          status?: string;
+          title_ciphertext?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "thoughts_category_fk";
+            columns: ["category_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id", "user_id"];
+          },
+        ];
       };
       user_keys: {
         Row: {

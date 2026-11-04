@@ -7,16 +7,16 @@
 
 ## 1. Tables
 
-| Table              | Phase | Status                                               | Purpose                                       |
-| ------------------ | ----- | ---------------------------------------------------- | --------------------------------------------- |
-| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`)  | Per-user preferences (timezone, display name) |
-| `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`) | Wrapped encryption keys (D-021)               |
-| `categories`       | 3     | Draft                                                | User-owned thought categories (encrypted)     |
-| `thoughts`         | 3     | Draft                                                | Brain dumps and parked thoughts (encrypted)   |
-| `tasks`            | 4     | Draft                                                | Tasks with due date and priority (encrypted)  |
-| `reminders`        | 4     | Draft                                                | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | Draft                                                | Daily Mind Clarity reflections (encrypted)    |
-| `voice_recordings` | 7+    | Deferred                                             | Recording metadata and transcripts (post-MVP) |
+| Table              | Phase | Status                                                             | Purpose                                       |
+| ------------------ | ----- | ------------------------------------------------------------------ | --------------------------------------------- |
+| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`)                | Per-user preferences (timezone, display name) |
+| `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`)               | Wrapped encryption keys (D-021)               |
+| `categories`       | 3     | **Migrated** (`20261104083602_create_categories_and_thoughts.sql`) | User-owned thought categories (encrypted)     |
+| `thoughts`         | 3     | **Migrated** (same migration)                                      | Brain dumps and parked thoughts (encrypted)   |
+| `tasks`            | 4     | Draft                                                              | Tasks with due date and priority (encrypted)  |
+| `reminders`        | 4     | Draft                                                              | In-app reminders attached to tasks (D-008)    |
+| `daily_checkins`   | 5     | Draft                                                              | Daily Mind Clarity reflections (encrypted)    |
+| `voice_recordings` | 7+    | Deferred                                                           | Recording metadata and transcripts (post-MVP) |
 
 "(encrypted)" means the table's free-text columns are encrypted (D-021). Its ids, dates, statuses
 and other non-text columns stay readable. Deferred voice transcripts are free text too, so they
@@ -104,7 +104,7 @@ sabotaged copy failed exactly the 7 targeted tests, and the advisors were clean.
 | `name_ciphertext` | text        | encrypted name (1–50 characters before encryption); at most 308 chars |
 | `created_at`      | timestamptz | default `now()`                                                       |
 
-`unique (id, user_id)`. **Name uniqueness (any case) is checked on the device**, because the
+`unique (id, user_id)`; index `(user_id)`. **Name uniqueness (any case) is checked on the device**, because the
 server sees only ciphertext. Nothing is seeded: the UI offers suggested names (Work, Personal,
 Ideas, To investigate, To remember, Future plans) and creates a category the first time it is
 used.
@@ -122,7 +122,9 @@ used.
 | `created_at`         | timestamptz | default `now()`                                                                            |
 | `updated_at`         | timestamptz | default `now()`                                                                            |
 
-Indexes: `(user_id, created_at desc)` and `(user_id, status)`. `unique (id, user_id)`.
+Indexes: `(user_id, created_at desc)`; `(user_id, status, created_at desc)`, so a status view is
+already newest first; and `(category_id, user_id)`, which covers the whole foreign key for category
+deletes (the advisors flagged `(category_id)` alone). `unique (id, user_id)`.
 **Search runs on the device**, over decrypted text. The server cannot search ciphertext.
 
 **Ciphertext format and limits (D-021):** `v1.<IV base64, 16 chars>.<ciphertext base64>`. The
@@ -130,6 +132,22 @@ maximum is computed from the character limit at 4 UTF-8 bytes per character, plu
 GCM tag: `3 + 16 + 1 + 4·⌈(4·chars + 16)/3⌉`. That gives 53,376 for content, 1,108 for a title
 and 308 for a category name. The database checks the format pattern and these maximums. The
 character limits themselves are enforced on the device by the P3.2 domain rules.
+
+The format check is
+`^v1\.[A-Za-z0-9+/]{16}\.([A-Za-z0-9+/]{4})+([A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`.
+
+**Verified on 2026-11-04 (P3.5):**
+
+- **The pattern matches real Web Crypto output.** 180 ciphertexts were tested: 1–60 characters
+  of ASCII, accented letters and emoji, covering every padding case. 10,000, 200 and 50 emoji
+  produce exactly 53,376, 1,108 and 308 characters. Plaintext, a wrong version, an empty body
+  and a trailing newline are all rejected.
+- **pgTAP:** 13 tests for categories and 20 for thoughts (57 in total).
+- **Sabotage:** 13 sabotaged copies each failed a named test. They covered the composite FK, the
+  content, title and name checks, every UPDATE and DELETE policy, the SELECT policy, an anon
+  grant and the trigger.
+- **Advisors and diff:** the advisors show only "unused index" on the new, empty tables.
+  `db diff` against a fresh replay of the migrations finds no changes.
 
 ### tasks (Phase 4)
 
@@ -239,8 +257,8 @@ alter table public.tasks
   on delete set null (source_thought_id);
 ```
 
-`set null (column_list)` needs PostgreSQL 15+. Check the Supabase project's Postgres version
-before the Phase 3 migration. Without the column list, Postgres would also null `user_id`, which
+`set null (column_list)` needs PostgreSQL 15+. Local and hosted both run 17.11 (checked
+2026-11-04). Without the column list, Postgres would also null `user_id`, which
 violates `not null`.
 
 ## 4. RLS tests (pgTAP, `supabase/tests/`)
@@ -268,6 +286,17 @@ For every table, with two test users A and B:
 - A cannot insert a row with `user_id = B`.
 - A cannot point a foreign key at B's row (the composite FK rejects it).
 - An anonymous user sees nothing.
+
+**Test each policy on its own (learned in P3.5).**
+
+- When an UPDATE or DELETE has a `WHERE` or `RETURNING` that reads columns, Postgres applies
+  the SELECT policy too. A test like `update … where id = <B's row>` therefore passes even if
+  the UPDATE policy is broken.
+- To guard B's rows, run the statement as A **without** `WHERE` or `RETURNING`, then
+  `reset role` and check that B's row is unchanged.
+- Wrap the unfiltered UPDATE in `lives_ok`, so a policy that reaches B's row fails as a named
+  test.
+- The P2/P3.4 tests (`profiles`, `user_keys`) still use the old form.
 
 ## 5. Open questions
 

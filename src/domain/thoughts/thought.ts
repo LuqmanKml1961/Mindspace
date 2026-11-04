@@ -1,7 +1,8 @@
 import { ValidationError } from "@/domain/shared/errors";
 import { characterCount } from "@/domain/shared/text";
 
-// Limits match the database checks (DATA_MODEL.md, thoughts).
+// Enforced here, on the device; the database checks the ciphertext sizes derived from them
+// (DATA_MODEL.md, thoughts).
 export const THOUGHT_CONTENT_MAX = 10_000;
 export const THOUGHT_TITLE_MAX = 200;
 
@@ -33,7 +34,7 @@ export function isThoughtStatus(value: unknown): value is ThoughtStatus {
   return THOUGHT_STATUSES.includes(value as ThoughtStatus);
 }
 
-// Trimmed; never empty. Stored trimmed, so the database check always holds.
+// Trimmed; never empty. Trimmed before encryption, since the server can't check the text.
 export function toThoughtContent(input: string): string {
   const content = input.trim();
   if (content.length === 0) throw new ValidationError("Write something first.");

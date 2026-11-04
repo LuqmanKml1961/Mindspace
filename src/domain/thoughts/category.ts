@@ -1,7 +1,8 @@
 import { ValidationError } from "@/domain/shared/errors";
 import { characterCount } from "@/domain/shared/text";
 
-// Matches the database check (DATA_MODEL.md, categories).
+// Enforced here, on the device; the database checks the ciphertext size derived from it
+// (DATA_MODEL.md, categories).
 export const CATEGORY_NAME_MAX = 50;
 
 export type Category = {
@@ -13,7 +14,8 @@ export type Category = {
 
 export type NewCategory = Pick<Category, "userId" | "name">;
 
-// Trimmed; 1–50 characters. Names are unique per user, ignoring case (enforced by the database).
+// Trimmed; 1–50 characters. Names are unique per user, ignoring case, checked on the device:
+// the database holds only ciphertext (D-021).
 export function toCategoryName(input: string): string {
   const name = input.trim();
   if (name.length === 0) throw new ValidationError("Give the category a name.");

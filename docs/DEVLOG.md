@@ -2,24 +2,23 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                   |
-| ------------------ | ----------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                  |
-| **Phase progress** | Phase 3: 4 / 13 tasks done (P3.1–P3.4); next is P3.5 (encrypted tables) |
-| **Last updated**   | 2026-11-04 (Session 4)                                                  |
-| **Blocked on**     | Nothing                                                                 |
+| Item               | Value                                                                         |
+| ------------------ | ----------------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                        |
+| **Phase progress** | Phase 3: 5 / 13 tasks done (P3.1–P3.5); next is P3.6 (encrypted repositories) |
+| **Last updated**   | 2026-11-04 (Session 4)                                                        |
+| **Blocked on**     | Nothing                                                                       |
 
 **Next actions (in order)**
 
-1. **The hosted database already has `user_keys`** (checked 2026-11-04):
-   - `db push --dry-run` reports it up to date;
-   - the migration history lists `20261104065744`;
-   - anon gets `42501` from the API;
-   - RLS, the three policies and the grants match local.
-
-   Every signed-in page now reads `user_keys` in `(app)/layout.tsx`, so that table must exist
-   before any deploy. After pushing, set up the passphrase on the live site and measure PBKDF2
-   on a phone.
+1. **Hosted database:**
+   - It has `user_keys` (checked 2026-11-04). Every signed-in page reads it in
+     `(app)/layout.tsx`.
+   - The P3.5 migration (`categories`, `thoughts`) is **local only**. Push it with your approval:
+     `pnpm supabase db push --dry-run` should list only
+     `20261104083602_create_categories_and_thoughts.sql`, then run the real push. No deployed
+     code reads these tables yet.
+   - After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -29,8 +28,8 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.5, the `categories` and `thoughts` migration storing ciphertext
-   (DATA_MODEL.md). In Settings, save your time zone (it is
+4. **Next task:** P3.6: Supabase repositories for the encrypted records, and revising the P3.2
+   ports to carry ciphertext. In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -145,6 +144,42 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): encrypted `categories` and `thoughts` tables (P3.5)
+
+- **Phase:** 3 · **Tasks:** P3.5
+- **Done:**
+  - **The migration** `20261104083602_create_categories_and_thoughts.sql`, created with
+    `migration new` and applied with `migration up --local`. It has:
+    - `*_ciphertext` columns with a format pattern and the D-021 maximums (308, 1,108, 53,376);
+    - `unique (id, user_id)` on both tables;
+    - the composite FK `(category_id, user_id)` with `on delete set null (category_id)`. Postgres
+      is 17.11 locally and on the hosted project; this needs 15 or later.
+    - indexes;
+    - the `updated_at` trigger on thoughts;
+    - revoke-all plus the four grants, and four own-row policies per table.
+  - **Regenerated** `database.types.ts`.
+  - **Domain comments:** three in `thought.ts` and `category.ts` still said the database
+    checked the text (written before D-021). They now say the rules run on the device.
+- **Checks:**
+  - **The ciphertext pattern** was tested in Node against 180 real AES-GCM outputs, built
+    exactly as `encryptField` builds them, and the three maximums are exact.
+  - **pgTAP:** categories 13, thoughts 20; 57 in total, all passing.
+  - **Sabotage:** 13 sabotaged copies, each run inside its own rolled-back transaction, so the
+    local database was never changed. Each one failed a named test.
+  - **The first sabotage run found a weak test pattern.** `update … where id = <B's row>` is also
+    guarded by the SELECT policy, so a broken UPDATE or DELETE policy went unnoticed. The tests
+    now run unfiltered statements as A and check B's rows as the owner. The lesson is in
+    DATA_MODEL §4.
+  - **Advisors** flagged the FK index on `(category_id)` alone. It is now `(category_id, user_id)`.
+    It was fixed in the file and swapped locally with two statements; a migration reset would
+    have wiped your local account. Only "unused index" notes on the empty tables remain.
+  - **`db diff --local`** against a fresh replay of the migrations: "No schema changes found".
+- typecheck, lint, format, 62 unit tests and build pass.
+- **Follow-up (small):** the `profiles` and `user_keys` tests still check "A cannot update B"
+  with `WHERE`, which the SELECT policy also covers. Rewrite them in the unfiltered form.
+- **Commits:** `feat(db): add encrypted categories and thoughts tables (P3.5)`
+- **Next:** with your approval, push the migration to the hosted database. Then P3.6.
 
 ### 2026-11-04 — Session 4 (cont.): lock screen and single-use recovery codes (P3.4 part 3)
 

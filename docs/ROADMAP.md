@@ -290,9 +290,15 @@ auth (gap G-2).
   - 62 unit tests, and six deliberate breakages were each caught. Tested in Chrome locally.
   - The hosted database has `user_keys`: the dry run is up to date, and RLS, the policies and
     the grants match local. PBKDF2 on a phone is measured after deploying.
-- [ ] P3.5 Migration: `categories` and `thoughts` storing ciphertext (format and maximum-size
+- [x] P3.5 Migration: `categories` and `thoughts` storing ciphertext (format and maximum-size
       checks), indexes, composite ownership FKs, RLS, updated_at triggers, two-user pgTAP tests.
-      Regenerate the types.
+      Regenerate the types. **Done 2026-11-04:**
+  - `20261104083602_create_categories_and_thoughts.sql`, applied locally. Types regenerated.
+  - The ciphertext pattern was checked against 180 real Web Crypto outputs.
+  - 33 new pgTAP tests (57 in total); 13 sabotages were each caught by a named test.
+  - Advisors are clean apart from "unused index" on the empty tables. `db diff` finds no
+    changes.
+  - The hosted push needs your approval.
 - [ ] P3.6 Infrastructure: Supabase repositories for the encrypted records, wired into the
       container. Revise the P3.2 ports to store ciphertext, not plaintext.
 - [ ] P3.7 Application: use cases (capture; list newest first, filtered by category or status;
