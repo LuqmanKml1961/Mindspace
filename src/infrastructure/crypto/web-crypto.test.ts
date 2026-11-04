@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
+  DecryptFailedError,
+  UnlockFailedError,
+} from "@/application/encryption/errors";
+import {
   createRecoveryCode,
   decryptField,
-  DecryptFailedError,
   encryptField,
   type FieldContext,
   generateDataKey,
   PBKDF2_ITERATIONS,
-  UnlockFailedError,
+  toDeviceKey,
   unwrapWithPassphrase,
   unwrapWithRecoveryCode,
   wrapWithPassphrase,
@@ -116,7 +119,37 @@ describe("passphrase wrapping", () => {
   });
 });
 
+describe("device key", () => {
+  it("is a non-extractable copy that still decrypts", async () => {
+    const dataKey = await generateDataKey();
+    const stored = await encryptField(dataKey, "private", content);
+    const deviceKey = await toDeviceKey(dataKey);
+    expect(deviceKey.extractable).toBe(false);
+    await expect(crypto.subtle.exportKey("raw", deviceKey)).rejects.toThrow();
+    await expect(decryptField(deviceKey, stored, content)).resolves.toBe(
+      "private",
+    );
+  });
+});
+
 describe("recovery code", () => {
+  it("unwraps an extractable key, so a new passphrase can wrap it again", async () => {
+    const dataKey = await generateDataKey();
+    const code = createRecoveryCode();
+    const recovered = await unwrapWithRecoveryCode(
+      await wrapWithRecoveryCode(dataKey, code),
+      code,
+    );
+    expect(recovered.extractable).toBe(true);
+    const rewrapped = await wrapWithPassphrase(
+      recovered,
+      "a new calm passphrase",
+    );
+    await expect(
+      unwrapWithPassphrase(rewrapped, "a new calm passphrase"),
+    ).resolves.toBeDefined();
+  });
+
   it("is 32 hex digits in groups of 4, different each time", () => {
     const code = createRecoveryCode();
     expect(code).toMatch(/^([0-9a-f]{4}-){7}[0-9a-f]{4}$/);

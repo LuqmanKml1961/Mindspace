@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                          |
-| ------------------ | ------------------------------------------------------------------------------ |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                         |
-| **Phase progress** | Phase 3: 3 / 13 tasks done (P3.1–P3.3); next is P3.4 (keys and unlock screens) |
-| **Last updated**   | 2026-11-04 (Session 4)                                                         |
-| **Blocked on**     | Nothing                                                                        |
+| Item               | Value                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                             |
+| **Phase progress** | Phase 3: 3 / 13 tasks done (P3.1–P3.3); P3.4 parts 1–2 done, part 3 (screens) next |
+| **Last updated**   | 2026-11-04 (Session 4)                                                             |
+| **Blocked on**     | Nothing                                                                            |
 
 **Next actions (in order)**
 
@@ -19,7 +19,10 @@
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Next task:** P3.4 (`user_keys`, passphrase setup and unlock screens, recovery). In Settings, save your time zone (it is
+3. **Next task:** P3.4 part 3: the passphrase setup, recovery-code, unlock and recovery screens,
+   and forgetting the device key at sign-out. The use cases and Server Actions are ready
+   (`src/infrastructure/browser.ts`, `src/app/(app)/encryption/actions.ts`). The hosted database
+   doesn't have `user_keys` yet; push it after part 3. In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -134,6 +137,60 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): encryption use cases and wiring (P3.4 part 2)
+
+- **Phase:** 3 · **Tasks:** P3.4 (part 2 of 3)
+- **Done (onion):**
+  - **Domain:**
+    - `encryption/passphrase.ts`: `toPassphrase` requires 12 or more characters, counted after
+      NFC, not trimmed, not only spaces, at most 1024.
+    - `encryption/user-keys.ts`: `UserKeys`, `WrappedKey` (moved here from infrastructure) and
+      `ENCRYPTION_VERSION`.
+    - The `UserKeysRepository` port.
+  - **Application:**
+    - `encryption/ports.ts`: `KeyCrypto`, `DeviceKeyStore`, `KeyServer`.
+    - `errors.ts`: `UnlockFailedError` and `DecryptFailedError`, moved here so the application
+      doesn't depend on infrastructure.
+    - Browser use cases:
+      - `set-up-encryption` validates first, then writes to the **server before the device**,
+        and returns the recovery code;
+      - `unlock-device`;
+      - `recover-with-code`: the recovery code unwraps the same data key, which is wrapped
+        again with a new passphrase. The recovery copy stays, and no thought is re-encrypted.
+      - `device-key`: get, and forget at sign-out.
+    - Server use cases in `user-keys.ts`.
+    - `schemas.ts`: Zod mirrors of the `user_keys` checks.
+  - **Infrastructure:**
+    - `web-crypto.ts` now implements `KeyCrypto` (`webKeyCrypto`) and adds `toDeviceKey` (a
+      non-extractable copy). **Recovery unwraps an extractable key, because it must be wrapped
+      again**; the passphrase unwrap stays non-extractable.
+    - `indexedDbKeyStore`.
+    - `supabase-user-keys-repository.ts`: 23505 → `ConflictError`, no rows → `NotFoundError`,
+      and errors carry only the Postgres code.
+    - The container gets `getUserKeys`, `createUserKeys` and `replacePassphraseKey`.
+    - **`browser.ts`**, the browser composition root: `deviceKeys`, and
+      `createEncryptionUseCases(server)`. The server is passed in, so infrastructure never
+      imports presentation.
+  - **Presentation:** `src/app/(app)/encryption/actions.ts` has `createUserKeysAction` and
+    `replacePassphraseKeyAction`. Each calls `getAppContext()` and Zod-validates before storing.
+  - **ESLint:** the presentation exception is widened to `container|browser`. A probe showed
+    `browser` and `container` allowed and `infrastructure/crypto` blocked.
+- **Tests:** 60 unit tests (23 new) in 2.35 s.
+  - Passphrase rule.
+  - Each use case with fakes: validation before work, server before device, nothing kept on
+    failure, wrong code or passphrase changes nothing.
+  - Schema rejections.
+  - **An end-to-end flow with real Web Crypto:** set up, unlock a new device, recover with the
+    code. After recovery the old passphrase fails, the new one works, and earlier ciphertext
+    still decrypts.
+  - Four mutations were each caught: device before server, an extractable device key, skipping
+    the new-passphrase rule, and a non-extractable recovery unwrap. Edits used `split`/`join`
+    (see the memory) and files were restored byte-for-byte.
+- typecheck, lint, format:check and build pass. ARCHITECTURE §3/§4/§7 and ROADMAP are updated.
+- **Later improvement (not now):** after a recovery, offer to create a new recovery code.
+- **Commits:** `feat(crypto): add encryption use cases and browser composition root (P3.4)`
+- **Next:** P3.4 part 3 (screens).
 
 ### 2026-11-04 — Session 4 (cont.): `user_keys` table (P3.4 part 1)
 

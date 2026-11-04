@@ -62,9 +62,9 @@ const eslintConfig = defineConfig([
           "Presentation must not use Supabase directly; go through src/infrastructure/container.",
       },
       {
-        regex: "^(@/|(\\.\\./)+)infrastructure(/(?!container$).*)?$",
+        regex: "^(@/|(\\.\\./)+)infrastructure(/(?!(container|browser)$).*)?$",
         message:
-          "Presentation may only import infrastructure through src/infrastructure/container.",
+          "Presentation may only import infrastructure through src/infrastructure/container (server) or src/infrastructure/browser (client).",
       },
     ),
   },

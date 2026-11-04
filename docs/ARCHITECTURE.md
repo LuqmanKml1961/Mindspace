@@ -71,12 +71,14 @@ mindspace/
 └── src/
     ├── domain/
     │   ├── shared/             # errors.ts (Validation, NotFound, Conflict), text.ts (characterCount)
+    │   ├── encryption/         # passphrase.ts, user-keys.ts, user-keys-repository.ts (D-021)
     │   ├── profiles/           # profile.ts (Profile, toTimezone), profile-repository.ts
     │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts (ports), *.test.ts (P3.2)
     │   ├── tasks/              # task.ts, reminder.ts, repositories
     │   └── check-ins/
     ├── application/
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
+    │   ├── encryption/         # ports, errors, schemas; set-up, unlock, recover, device-key (browser); user-keys (server)
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # capture-thought.ts, search-thoughts.ts, schemas.ts, *.test.ts
     │   ├── tasks/
@@ -87,7 +89,8 @@ mindspace/
     │   ├── config/             # env.ts (validated environment variables)
     │   ├── supabase/           # server/browser clients, session refresh, database.types.ts
     │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles: P2.9)
-    │   └── container.ts        # composition root: builds use cases for the current request
+    │   ├── container.ts        # server composition root: builds use cases for the current request
+    │   └── browser.ts          # browser composition root: encryption use cases (P3.4)
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
@@ -108,12 +111,12 @@ Session refresh and route protection live in `src/proxy.ts` (Next.js 16 renamed 
 
 ## 4. Dependency rules
 
-| Layer (files)                                   | May import                                                   | Must not import                                                                                       |
-| ----------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `src/domain/**`                                 | other domain files                                           | application, infrastructure, app, components, lib; `react`, `react-dom`, `next`, `@supabase/*`, `zod` |
-| `src/application/**`                            | domain, `zod`                                                | infrastructure, app, components, lib; `react`, `react-dom`, `next`, `@supabase/*`                     |
-| `src/infrastructure/**`                         | domain, application, `@supabase/*`, `server-only`            | app, components                                                                                       |
-| `src/app/**`, `src/components/**`, `src/lib/**` | application, domain (types), `infrastructure/container`, lib | `@supabase/*` directly; any other `infrastructure/*` module (always go through the container)         |
+| Layer (files)                                   | May import                                                                                               | Must not import                                                                                       |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `src/domain/**`                                 | other domain files                                                                                       | application, infrastructure, app, components, lib; `react`, `react-dom`, `next`, `@supabase/*`, `zod` |
+| `src/application/**`                            | domain, `zod`                                                                                            | infrastructure, app, components, lib; `react`, `react-dom`, `next`, `@supabase/*`                     |
+| `src/infrastructure/**`                         | domain, application, `@supabase/*`, `server-only`                                                        | app, components                                                                                       |
+| `src/app/**`, `src/components/**`, `src/lib/**` | application, domain (types), `infrastructure/container` (server), `infrastructure/browser` (client), lib | `@supabase/*` directly; any other `infrastructure/*` module                                           |
 
 **Enforcement (P1.4, done):** `no-restricted-imports` overrides per layer in `eslint.config.mjs`,
 which is the source of truth for the exact patterns. They use `regex` patterns matched against the
@@ -184,10 +187,13 @@ CaptureBox (client component)
   - **Search and uniqueness checks** on encrypted fields run on the device.
   - **Where the crypto code lives (settled in P3.3):** `src/infrastructure/crypto/`
     (`web-crypto.ts` for keys and fields, `device-key-store.ts` for IndexedDB). It is browser
-    code, so it never imports `server-only`. Presentation cannot import it directly; the ESLint
-    rule allows only `container`, verified with a probe import. Client Components will reach it
-    through a **browser composition root**, `src/infrastructure/browser.ts`, added with the first
-    client use case (P3.4), and the ESLint exception is widened to `container|browser` then.
+    code, so it never imports `server-only`. Presentation cannot import it directly.
+  - **Browser composition root (P3.4):** Client Components reach it through
+    `src/infrastructure/browser.ts`, the client-side twin of `container.ts`. It wires the
+    encryption use cases (`application/encryption/`) with `webKeyCrypto` and the IndexedDB
+    store. The server is passed in as a `KeyServer` built from Server Actions, so infrastructure
+    never imports presentation. The ESLint exception is now `container|browser`. A probe confirmed
+    that `browser` and `container` are allowed and `infrastructure/crypto` is still blocked.
 - RLS is enabled on every user-owned table, with owner policies **and explicit grants** (DATA_MODEL.md
   §2). Supabase no longer exposes new tables to the API automatically. Database helper functions
   live in the unexposed `private` schema.

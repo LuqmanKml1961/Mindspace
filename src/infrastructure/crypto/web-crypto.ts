@@ -1,6 +1,13 @@
 // End-to-end encryption primitives (D-021). Runs in the browser; Node 22 has the same Web Crypto
 // API, so the unit tests exercise this exact code. Parameters come from D-021's sources.
 
+import {
+  DecryptFailedError,
+  UnlockFailedError,
+} from "@/application/encryption/errors";
+import type { KeyCrypto } from "@/application/encryption/ports";
+import type { WrappedKey } from "@/domain/encryption/user-keys";
+
 const VERSION = "v1";
 export const PBKDF2_ITERATIONS = 600_000; // OWASP Password Storage Cheat Sheet
 const SALT_BYTES = 16; // MDN Pbkdf2Params: at least 16 bytes
@@ -9,27 +16,6 @@ const RECOVERY_CODE_BYTES = 16; // 128 bits
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
-
-export class UnlockFailedError extends Error {
-  constructor() {
-    super("That didn’t unlock your thoughts. Check it and try again.");
-    this.name = "UnlockFailedError";
-  }
-}
-
-export class DecryptFailedError extends Error {
-  constructor() {
-    super("This text couldn’t be decrypted.");
-    this.name = "DecryptFailedError";
-  }
-}
-
-// What the server stores per secret (user_keys): never the secret or the raw data key.
-export type WrappedKey = {
-  salt: string;
-  iterations: number;
-  wrappedKey: string;
-};
 
 // Binds a ciphertext to its owner and field, so it can't be moved elsewhere.
 export type FieldContext = { table: string; column: string; userId: string };
@@ -55,6 +41,16 @@ function fieldAad({
 // Extractable only so it can be wrapped during setup; devices keep a non-extractable copy.
 export function generateDataKey(): Promise<CryptoKey> {
   return crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, [
+    "encrypt",
+    "decrypt",
+  ]);
+}
+
+// The copy a device keeps: usable for encrypting and decrypting, never exportable.
+export async function toDeviceKey(key: CryptoKey): Promise<CryptoKey> {
+  if (!key.extractable) return key;
+  const raw = await crypto.subtle.exportKey("raw", key);
+  return crypto.subtle.importKey("raw", raw, { name: "AES-GCM" }, false, [
     "encrypt",
     "decrypt",
   ]);
@@ -100,10 +96,11 @@ async function wrapWithSecret(
   };
 }
 
-// Returns a non-extractable key: usable for encrypting and decrypting, never exportable.
+// Non-extractable unless it must be wrapped again (recovery with a new passphrase).
 async function unwrapWithSecret(
   wrapped: WrappedKey,
   secret: string,
+  extractable: boolean,
 ): Promise<CryptoKey> {
   try {
     const wrappingKey = await deriveWrappingKey(
@@ -117,7 +114,7 @@ async function unwrapWithSecret(
       wrappingKey,
       "AES-KW",
       { name: "AES-GCM" },
-      false,
+      extractable,
       ["encrypt", "decrypt"],
     );
   } catch {
@@ -133,7 +130,7 @@ export function wrapWithPassphrase(dataKey: CryptoKey, passphrase: string) {
 }
 
 export function unwrapWithPassphrase(wrapped: WrappedKey, passphrase: string) {
-  return unwrapWithSecret(wrapped, passphraseSecret(passphrase));
+  return unwrapWithSecret(wrapped, passphraseSecret(passphrase), false);
 }
 
 // 128 random bits as 32 hex digits in groups of 4, e.g. "1f3a-9c2e-…".
@@ -156,11 +153,12 @@ export async function wrapWithRecoveryCode(dataKey: CryptoKey, code: string) {
   return wrapWithSecret(dataKey, recoveryCodeSecret(code));
 }
 
+// Extractable: recovery wraps the same data key again with a new passphrase.
 export async function unwrapWithRecoveryCode(
   wrapped: WrappedKey,
   code: string,
 ) {
-  return unwrapWithSecret(wrapped, recoveryCodeSecret(code));
+  return unwrapWithSecret(wrapped, recoveryCodeSecret(code), true);
 }
 
 // Stored as "v1.<IV base64>.<ciphertext base64>"; a fresh random IV every time.
@@ -200,3 +198,13 @@ export async function decryptField(
     throw new DecryptFailedError();
   }
 }
+
+export const webKeyCrypto: KeyCrypto = {
+  generateDataKey,
+  toDeviceKey,
+  wrapWithPassphrase,
+  unwrapWithPassphrase,
+  createRecoveryCode,
+  wrapWithRecoveryCode,
+  unwrapWithRecoveryCode,
+};

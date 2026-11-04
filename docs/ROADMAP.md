@@ -281,8 +281,10 @@ auth (gap G-2).
       pgTAP). Screens to set a passphrase (12+ characters) and show the recovery code once, to
       unlock on a new device, and to reset the passphrase with the recovery code. Sign-out clears
       the key from the device. **Progress 2026-11-04:** part 1 done: the `user_keys` migration
-      (applied locally), 13 pgTAP tests, regenerated types. Parts 2 (wiring and use cases) and 3
-      (screens) next.
+      (applied locally), 13 pgTAP tests, regenerated types. Part 2 done: the encryption use cases
+      (set up, unlock, recover, device key), ports, Server Actions that store only wrapped keys,
+      the Supabase repository and the browser composition root. 60 unit tests, and four
+      deliberate breakages were each caught. Part 3 (screens) is next.
 - [ ] P3.5 Migration: `categories` and `thoughts` storing ciphertext (format and maximum-size
       checks), indexes, composite ownership FKs, RLS, updated_at triggers, two-user pgTAP tests.
       Regenerate the types.

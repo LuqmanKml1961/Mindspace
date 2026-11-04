@@ -1,0 +1,105 @@
+import { describe, expect, it } from "vitest";
+import { UnlockFailedError } from "@/application/encryption/errors";
+import type { DeviceKeyStore, KeyServer } from "@/application/encryption/ports";
+import { makeRecoverWithCode } from "@/application/encryption/recover-with-code";
+import { userKeysSchema } from "@/application/encryption/schemas";
+import { makeSetUpEncryption } from "@/application/encryption/set-up-encryption";
+import { makeUnlockDevice } from "@/application/encryption/unlock-device";
+import type { UserKeys } from "@/domain/encryption/user-keys";
+import {
+  decryptField,
+  encryptField,
+  type FieldContext,
+  webKeyCrypto,
+} from "@/infrastructure/crypto/web-crypto";
+
+// The real Web Crypto module through the real use cases; only the stores are in memory.
+
+function memoryDevice(): DeviceKeyStore & { keys: Map<string, CryptoKey> } {
+  const keys = new Map<string, CryptoKey>();
+  return {
+    keys,
+    save: async (userId, key) => void keys.set(userId, key),
+    load: async (userId) => keys.get(userId) ?? null,
+    clear: async () => keys.clear(),
+  };
+}
+
+function memoryServer(): KeyServer & { stored: UserKeys | null } {
+  const server = {
+    stored: null as UserKeys | null,
+    async create(keys: UserKeys) {
+      server.stored = keys;
+    },
+    async replacePassphraseKey(wrapped: UserKeys["passphrase"]) {
+      server.stored = { ...server.stored!, passphrase: wrapped };
+    },
+  };
+  return server;
+}
+
+const field: FieldContext = {
+  table: "thoughts",
+  column: "content",
+  userId: "user-a",
+};
+
+describe("encryption flow with real Web Crypto", () => {
+  it("sets up, unlocks a new device, and recovers with the code", async () => {
+    const server = memoryServer();
+    const laptop = memoryDevice();
+    const crypto = webKeyCrypto;
+
+    const { recoveryCode } = await makeSetUpEncryption({
+      crypto,
+      server,
+      device: laptop,
+    })({ userId: "user-a", passphrase: "calm river morning" });
+
+    // What the server receives passes the same checks as the Server Action.
+    expect(userKeysSchema.safeParse(server.stored).success).toBe(true);
+    const laptopKey = laptop.keys.get("user-a")!;
+    expect(laptopKey.extractable).toBe(false);
+    const stored = await encryptField(laptopKey, "a private thought", field);
+
+    // A new phone unlocks with the passphrase and reads the same thought.
+    const phone = memoryDevice();
+    const unlock = makeUnlockDevice({ crypto, device: phone });
+    await unlock({
+      userId: "user-a",
+      keys: server.stored!,
+      passphrase: "calm river morning",
+    });
+    await expect(
+      decryptField(phone.keys.get("user-a")!, stored, field),
+    ).resolves.toBe("a private thought");
+
+    // Forgotten passphrase: the recovery code sets a new one, and the same text still opens.
+    const tablet = memoryDevice();
+    await makeRecoverWithCode({ crypto, server, device: tablet })({
+      userId: "user-a",
+      keys: server.stored!,
+      recoveryCode: recoveryCode.toUpperCase(),
+      newPassphrase: "a brand new passphrase",
+    });
+    expect(tablet.keys.get("user-a")!.extractable).toBe(false);
+    await expect(
+      decryptField(tablet.keys.get("user-a")!, stored, field),
+    ).resolves.toBe("a private thought");
+
+    await expect(
+      unlock({
+        userId: "user-a",
+        keys: server.stored!,
+        passphrase: "calm river morning",
+      }),
+    ).rejects.toThrow(UnlockFailedError);
+    await expect(
+      unlock({
+        userId: "user-a",
+        keys: server.stored!,
+        passphrase: "a brand new passphrase",
+      }),
+    ).resolves.toBeUndefined();
+  });
+});

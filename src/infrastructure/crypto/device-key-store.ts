@@ -1,3 +1,5 @@
+import type { DeviceKeyStore } from "@/application/encryption/ports";
+
 // Keeps the unlocked data key on this device until sign-out (D-021: "once per device").
 // IndexedDB can store CryptoKey objects (structured clone); only non-extractable keys are saved,
 // so scripts can use the key but never read its bytes.
@@ -51,3 +53,9 @@ export async function loadDeviceKey(userId: string): Promise<CryptoKey | null> {
 export async function clearDeviceKeys(): Promise<void> {
   await withStore("readwrite", (store) => store.clear());
 }
+
+export const indexedDbKeyStore: DeviceKeyStore = {
+  save: saveDeviceKey,
+  load: loadDeviceKey,
+  clear: clearDeviceKeys,
+};
