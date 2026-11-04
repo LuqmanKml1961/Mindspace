@@ -329,8 +329,17 @@ auth (gap G-2).
     read-only field and a spinner. The field clears and keeps focus, with "Saved.".
   - One request with ciphertext only; the database holds no readable words.
   - A locked device or text over 10,000 characters keeps the text and sends nothing.
-- [ ] P3.9 List and detail/edit UI. Delete through an in-app confirmation dialog (shadcn
-      AlertDialog), not the browser's `confirm()`.
+- [x] P3.9 List and detail/edit UI. Delete through an in-app confirmation dialog (shadcn
+      AlertDialog), not the browser's `confirm()`. **Done 2026-11-04:**
+  - **List:** `/thoughts` lists one status (Inbox by default, plus Parked and Archived) as link
+    views, decrypted on the device, newest first. A capture appears at once
+    (`refresh()` in `createThoughtAction`).
+  - **Edit:** `/thoughts/[id]` edits the title, content and status, sending only the changes.
+    Delete goes through an AlertDialog, then back to the list.
+  - **Not found:** a calm screen for a bad or missing id.
+  - **Components added:** shadcn `alert-dialog`, `empty` and `item`. `button.tsx` and
+    `separator.tsx` were restored after the CLI overwrote them.
+  - Tested in Chrome locally; the database shows encrypted edits and the deleted row gone.
 - [ ] P3.10 Categories UI: pick or create a category in place. Offer suggested names from spec
       §4.1 and §4.2, but create none in advance. Duplicate names (any case) are caught on the
       device, since the server only sees ciphertext.

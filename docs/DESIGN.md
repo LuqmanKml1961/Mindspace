@@ -178,6 +178,17 @@ darken `input`.
   Base UI's `<Button nativeButton={false} render={<Link />}>` for navigation. It renders
   `<a role="button">` (verified 2026-11-03), so screen readers announce a button for something
   that navigates.
+- **Brain Dump views (P3.9):** Inbox, Parked and Archived are links. The current one uses the
+  `default` (primary) button style with `aria-current="page"`, the others `ghost`. Primary
+  matches the pressed toggles.
+- **Lists of linked items:** a `<ul>` of `<li>`, each holding an `Item` with
+  `render={<Link />}`. `ItemGroup` sets `role="list"`, but its children would be links, not list
+  items, which isn't valid ARIA.
+- **Delete confirmation:** `AlertDialog` with `size="sm"`. Focus starts on the safe choice
+  ("Keep it"), and the confirm button is `variant="destructive"`. The copy is honest and calm:
+  "It will be gone for good, on every device."
+- **shadcn CLI caution:** adding `alert-dialog` or `item` wants to overwrite `button.tsx`
+  (dropping the 40px heights) and `separator.tsx`. Restore both from git after adding.
 
 ## 6a. App shell and navigation (P1.7)
 

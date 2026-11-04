@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                |
-| ------------------ | -------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                               |
-| **Phase progress** | Phase 3: 8 / 13 tasks done (P3.1–P3.8); next is P3.9 (list and edit) |
-| **Last updated**   | 2026-11-04 (Session 4)                                               |
-| **Blocked on**     | Nothing                                                              |
+| Item               | Value                                                                 |
+| ------------------ | --------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                |
+| **Phase progress** | Phase 3: 9 / 13 tasks done (P3.1–P3.9); next is P3.10 (categories UI) |
+| **Last updated**   | 2026-11-04 (Session 4)                                                |
+| **Blocked on**     | Nothing                                                               |
 
 **Next actions (in order)**
 
@@ -24,12 +24,14 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.9, the list and detail/edit UI.
-   - The Server Component loads `listThoughtRecords`; the browser runs `openThoughts`.
-   - Delete through a shadcn AlertDialog.
-   - Decide how a new capture reaches the list: `refresh()` / `revalidatePath` in the actions, or
-     the client adds it. Mind the 1,000-row API cap (DATA_MODEL).
-   - Your local account has two test thoughts from P3.8.
+4. **Next task:** P3.10, the categories UI.
+   - Pick or create a category in place, on the thought page. `listCategoryRecords` and
+     `openCategories` for the choices; `createCategory` / `renameCategory` check duplicates on
+     the device.
+   - Offer suggested names from spec §4.1 and §4.2, but create none in advance.
+   - A category filter on the list (`ThoughtFilter.categoryId` is ready).
+   - Your local account has two test thoughts: "Errands" (parked) and the landlord one (inbox).
+   - The 1,000-row API cap (DATA_MODEL) is still open, for P3.11 or later.
 
    In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
@@ -146,6 +148,56 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): list and edit (P3.9)
+
+- **Phase:** 3 · **Tasks:** P3.9
+- **Checked first (Next.js 16 docs):**
+  - `refresh()` (`next/cache`, Server Actions only) re-renders the current route.
+  - `staleTimes.dynamic` defaults to 0 s, so lists are always fetched fresh on navigation.
+  - Page `params` and `searchParams` are Promises.
+  - React's `use client` and `use server` references list `Date` as serializable.
+- **Done:**
+  - **`/thoughts`:**
+    - `StatusNav` gives Inbox, Parked and Archived as links with `aria-current`.
+    - `ThoughtList` decrypts the server's records in the browser. It shows a skeleton while
+      decrypting, a calm `Empty` per status, and a `<ul>` of linked `Item`s with the title (or
+      text), a preview and the capture time.
+    - `createThoughtAction` calls `refresh()`, so a capture appears at once.
+  - **`/thoughts/[id]`:**
+    - The id is checked with `idSchema`, then `getThoughtRecord`; anything else gives
+      `notFound()`.
+    - `ThoughtEditor` edits the title (optional), the text, and "Where it lives" (a ToggleGroup).
+    - Save sends only what changed, compared trimmed, and is disabled when nothing changed.
+      Ctrl/⌘+Enter saves.
+    - Delete: AlertDialog ("Delete this thought?" / "Keep it" / Delete), then back to the
+      thought's list.
+  - **`[id]/not-found.tsx`:** "This thought isn't here", inside the app.
+  - **shadcn:** `alert-dialog`, `empty` and `item` were added and read. The CLI overwrote
+    `button.tsx`; upstream would have dropped our 40px heights. `separator.tsx` changed only in
+    formatting. Both were restored from git (no diff); DESIGN.md notes it.
+- **In Chrome (MYS231, local, your account):**
+  - The list shows decrypted thoughts newest first, and a new capture appears at the top
+    immediately.
+  - The thought page shows the text and status, with Save disabled. Adding a title sent only
+    `titleCiphertext`; Parked sent only `status`. Both moved the thought between the views
+    correctly.
+  - Delete: focus starts on "Keep it", which cancels. Delete removes the thought and returns to
+    the inbox.
+  - A bad id, the deleted id and a random valid id all give the not-found page (checked by
+    fetching each). It returns 200 because the page streams behind `(app)/loading.tsx`.
+  - Archived shows its empty state.
+  - **Database:** "Errands" is parked with an encrypted title and edited; the deleted row is
+    gone.
+- **Noted:**
+  - One console exception, `Failed to execute 'measure' on 'Performance' … negative time
+stamp`, from React's `flushComponentPerformance`. That is in the development build only
+    (3 occurrences; 0 in production).
+  - You were using the same tab during part of the test, which explained one unexpected
+    navigation. Confirmed on the server.
+- lint, typecheck, 91 unit tests and build pass.
+- **Commits:** `feat(thoughts): add the thought list and editor (P3.9)`
+- **Next:** P3.10.
 
 ### 2026-11-04 — Session 4 (cont.): capture UI (P3.8)
 

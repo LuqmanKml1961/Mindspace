@@ -94,7 +94,7 @@ mindspace/
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
-    │   ├── (app)/home | thoughts | tasks | clarity | settings/, encryption/actions.ts
+    │   ├── (app)/home | thoughts (+ [id]) | tasks | clarity | settings/, encryption/actions.ts
     │   ├── (app)/layout.tsx    # the lock screen (EncryptionGate) around the whole signed-in app
     │   └── layout.tsx
     ├── components/             # presentation
@@ -102,7 +102,7 @@ mindspace/
     │   ├── layout/             # app shell, navigation, brand-frame.tsx (sign-in and lock screen)
     │   ├── forms/              # shared form parts (field, messages, submit button)
     │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
-    │   ├── thoughts/           # capture-box.tsx; brain-dump.ts (the Server Actions as ThoughtServer/CategoryServer)
+    │   ├── thoughts/           # capture-box, thought-list, thought-editor, status-nav; brain-dump.ts (Server Actions as ports)
     │   └── auth | settings | tasks | clarity/   # feature UI components
     └── lib/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
@@ -158,6 +158,16 @@ Reading: a Server Component loads the records and the browser decrypts them.
 page.tsx (Server Component) → useCases.listThoughtRecords(user.id, filter) → EncryptedThought[]
   └─► client component → openThoughts({ userId, records }) → Thought[] (decrypted on the device)
 ```
+
+**After a write (P3.9):**
+
+- `createThoughtAction` calls `refresh()` (`next/cache`), so the list under the capture box
+  re-renders with the new record.
+- Edits stay in the editor's own state.
+- A delete navigates back to the list instead of refreshing. Refreshing would re-render the
+  deleted thought's page as not-found first.
+- Dynamic pages aren't kept by the client router (`staleTimes.dynamic` is 0), so returning to a
+  list always fetches it fresh.
 
 The browser use cases are wired in `src/infrastructure/browser.ts` (`createBrainDumpUseCases`).
 The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.

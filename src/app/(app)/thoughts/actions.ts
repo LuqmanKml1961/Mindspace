@@ -1,5 +1,6 @@
 "use server";
 
+import { refresh } from "next/cache";
 import {
   categoryNameCiphertextSchema,
   idSchema,
@@ -43,7 +44,12 @@ export async function createThoughtAction(
   const { user, useCases } = await getAppContext();
   const parsed = thoughtInputSchema.safeParse(thought);
   if (!parsed.success) return failure(new Error("Invalid thought"));
-  return attempt(() => useCases.createThoughtRecord(user.id, parsed.data));
+  return attempt(async () => {
+    const record = await useCases.createThoughtRecord(user.id, parsed.data);
+    // The list under the capture box re-renders with the new thought.
+    refresh();
+    return record;
+  });
 }
 
 export async function updateThoughtAction(
