@@ -164,6 +164,10 @@ darken `input`.
   classes first; the shadcn skill's `design-system.md` lists where heights live. Done so far:
   `Input` (P2.6a) and `NativeSelect` (P2.9) moved from `h-9` to `h-10`. `NativeSelect` also uses
   `text-base md:text-sm`, like `Input`, so iOS does not zoom when it gets focus.
+  - **`Textarea`** (P3.8) is multi-line, so it has no fixed height. It grows with its content
+    (`field-sizing-content`) and already uses `text-base md:text-sm`, unchanged from the CLI.
+  - The capture box sets `min-h-32 max-h-[60svh]` for layout. Past 60% of the screen height
+    it scrolls.
 
 - **Toggle and ToggleGroup** (`src/components/ui/toggle.tsx`, added for D-015) follow the same
   heights: default `h-10` (40px) and `lg` `h-11`. The pressed state was restyled from `bg-muted`

@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                             |
-| ------------------ | ----------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                            |
-| **Phase progress** | Phase 3: 7 / 13 tasks done (P3.1–P3.7); next is P3.8 (capture UI) |
-| **Last updated**   | 2026-11-04 (Session 4)                                            |
-| **Blocked on**     | Nothing                                                           |
+| Item               | Value                                                                |
+| ------------------ | -------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                               |
+| **Phase progress** | Phase 3: 8 / 13 tasks done (P3.1–P3.8); next is P3.9 (list and edit) |
+| **Last updated**   | 2026-11-04 (Session 4)                                               |
+| **Blocked on**     | Nothing                                                              |
 
 **Next actions (in order)**
 
@@ -24,14 +24,12 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.8, the capture UI on Brain Dump. It needs:
-   - a presentation adapter turning `(app)/thoughts/actions.ts` into `ThoughtServer` and
-     `CategoryServer` (like `components/encryption/encryption.ts`);
-   - `createBrainDumpUseCases`;
-   - `captureThought`.
-
-   Decide then whether the actions refresh the page (`refresh()` / `revalidatePath`) or the list
-   updates on the client.
+4. **Next task:** P3.9, the list and detail/edit UI.
+   - The Server Component loads `listThoughtRecords`; the browser runs `openThoughts`.
+   - Delete through a shadcn AlertDialog.
+   - Decide how a new capture reaches the list: `refresh()` / `revalidatePath` in the actions, or
+     the client adds it. Mind the 1,000-row API cap (DATA_MODEL).
+   - Your local account has two test thoughts from P3.8.
 
    In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
@@ -148,6 +146,41 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): capture UI (P3.8)
+
+- **Phase:** 3 · **Tasks:** P3.8
+- **Done:**
+  - **The shadcn `textarea`**, added with the CLI and read. It grows with its content and uses
+    `text-base md:text-sm`; DESIGN.md notes it.
+  - **`components/thoughts/brain-dump.ts`:** the six Server Actions as `ThoughtServer` and
+    `CategoryServer`. A refused or failed action becomes `ServerActionError` with its safe
+    message. It also exports the `brainDump` use cases and an `errorMessage` mapper.
+  - **`components/thoughts/capture-box.tsx`:**
+    - one autofocused text area with a hidden "What's on your mind?" label;
+    - Save disabled while empty; Ctrl/⌘+Enter saves, and plain Enter adds a line;
+    - while saving, the field is **read-only, not disabled**, so it keeps focus and can't change
+      mid-save, and the spinner shows;
+    - on success it clears and refocuses, and a polite `role="status"` says "Saved.";
+    - on failure the text stays, with an `Alert`.
+  - **Brain Dump page:** the capture box replaces "Coming soon".
+- **In Chrome (MYS231, local, your account; unlocked with your test passphrase):**
+  - **Ctrl+Enter** on a two-line thought: it cleared, kept focus and showed "Saved.". One
+    request carried `v1.` ciphertext only, with no plaintext.
+  - **The button**, with the request slowed by 1.5 s: mid-save the field was read-only with the
+    text and the spinner showed; afterwards it was cleared, refocused and "Saved.". Typing
+    clears "Saved.".
+  - **Database:** 2 thoughts, both `v1.`, 0 readable words. Lengths 92 and 104, matching 37 and
+    46 characters.
+  - **Locked device** (key removed): "This device is locked. Reload the page to unlock it.", text
+    and focus kept, 0 requests.
+  - **10,001 characters:** "Thoughts can be up to 10,000 characters. Try splitting this
+    one.", text kept, 0 requests. The field stops growing at 60% of the screen.
+  - Unlocking again returns to Brain Dump with the capture box focused. No console errors.
+- typecheck, lint, 91 unit tests and build pass.
+- **Not decided yet:** how a capture reaches the list. That's P3.9, since there is no list yet.
+- **Commits:** `feat(thoughts): add the Brain Dump capture box (P3.8)`
+- **Next:** P3.9.
 
 ### 2026-11-04 — Session 4 (cont.): Brain Dump use cases (P3.7)
 

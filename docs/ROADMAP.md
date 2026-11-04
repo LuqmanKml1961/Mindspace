@@ -319,9 +319,16 @@ auth (gap G-2).
     input with Zod schemas that mirror the database.
   - **Wiring:** the container and `createBrainDumpUseCases`.
   - 91 unit tests, including real Web Crypto. Seven deliberate breakages were each caught.
-- [ ] P3.8 Capture UI: a single text area with autofocus. Save with a button or Ctrl/Cmd+Enter.
+- [x] P3.8 Capture UI: a single text area with autofocus. Save with a button or Ctrl/Cmd+Enter.
       After saving, the field clears and keeps focus for the next thought. Show a saving state.
-      A failed save keeps the text.
+      A failed save keeps the text. **Done 2026-11-04:**
+  - `components/thoughts/capture-box.tsx` on Brain Dump.
+  - `components/thoughts/brain-dump.ts` adapts the Server Actions into the ports.
+  - The shadcn `textarea` was added.
+  - **In Chrome (local):** Ctrl+Enter and the button both save. The saving state shows a
+    read-only field and a spinner. The field clears and keeps focus, with "Saved.".
+  - One request with ciphertext only; the database holds no readable words.
+  - A locked device or text over 10,000 characters keeps the text and sends nothing.
 - [ ] P3.9 List and detail/edit UI. Delete through an in-app confirmation dialog (shadcn
       AlertDialog), not the browser's `confirm()`.
 - [ ] P3.10 Categories UI: pick or create a category in place. Offer suggested names from spec
