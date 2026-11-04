@@ -7,16 +7,16 @@
 
 ## 1. Tables
 
-| Table              | Phase | Status                                              | Purpose                                       |
-| ------------------ | ----- | --------------------------------------------------- | --------------------------------------------- |
-| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`) | Per-user preferences (timezone, display name) |
-| `user_keys`        | 3     | Draft                                               | Wrapped encryption keys (D-021)               |
-| `categories`       | 3     | Draft                                               | User-owned thought categories (encrypted)     |
-| `thoughts`         | 3     | Draft                                               | Brain dumps and parked thoughts               |
-| `tasks`            | 4     | Draft                                               | Tasks with due date and priority              |
-| `reminders`        | 4     | Draft                                               | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | Draft                                               | Daily Mind Clarity reflections                |
-| `voice_recordings` | 7+    | Deferred                                            | Recording metadata and transcripts (post-MVP) |
+| Table              | Phase | Status                                               | Purpose                                       |
+| ------------------ | ----- | ---------------------------------------------------- | --------------------------------------------- |
+| `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`)  | Per-user preferences (timezone, display name) |
+| `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`) | Wrapped encryption keys (D-021)               |
+| `categories`       | 3     | Draft                                                | User-owned thought categories (encrypted)     |
+| `thoughts`         | 3     | Draft                                                | Brain dumps and parked thoughts               |
+| `tasks`            | 4     | Draft                                                | Tasks with due date and priority              |
+| `reminders`        | 4     | Draft                                                | In-app reminders attached to tasks (D-008)    |
+| `daily_checkins`   | 5     | Draft                                                | Daily Mind Clarity reflections                |
+| `voice_recordings` | 7+    | Deferred                                             | Recording metadata and transcripts (post-MVP) |
 
 Common rules:
 
@@ -69,11 +69,26 @@ One row per person: everything needed to unlock their data key, but never the ke
 | `passphrase_iterations`    | integer     | PBKDF2-SHA256 iterations, `600000` (OWASP)                  |
 | `passphrase_wrapped_key`   | text        | the data key wrapped (AES-KW) by the passphrase key, base64 |
 | `recovery_salt`            | text        | base64, 16 random bytes                                     |
+| `recovery_iterations`      | integer     | PBKDF2-SHA256 iterations for the recovery copy, `600000`    |
 | `recovery_wrapped_key`     | text        | the data key wrapped by the recovery-code key, base64       |
 | `created_at`, `updated_at` | timestamptz |                                                             |
 
-RLS: select, insert and update your own row only. Changing the passphrase rewrites only this
-row; thoughts are never re-encrypted.
+RLS: select, insert and update your own row only. There is **no delete grant**: losing the
+wrapped keys would make every encrypted thought unreadable, and the row goes with the account
+by cascade.
+
+**Checks:**
+
+- `version = 1`;
+- iterations `>= 600000`;
+- salts `^[A-Za-z0-9+/]{22}==$` (16 bytes);
+- wrapped keys `^[A-Za-z0-9+/]{54}==$` (AES-KW of a 32-byte key is 40 bytes).
+
+These lengths were measured with Web Crypto. Changing the passphrase rewrites only this row;
+thoughts are never re-encrypted.
+
+**Verified on 2026-11-04:** 13 pgTAP tests (`supabase/tests/user_keys_rls_test.sql`). A
+sabotaged copy failed exactly the 7 targeted tests, and the advisors were clean.
 
 ### categories (Phase 3)
 

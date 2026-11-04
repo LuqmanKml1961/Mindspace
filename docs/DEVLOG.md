@@ -135,6 +135,52 @@ Template — copy it above the newest entry:
 - **Next:** <first task for the next session>
 -->
 
+### 2026-11-04 — Session 4 (cont.): `user_keys` table (P3.4 part 1)
+
+- **Phase:** 3 · **Tasks:** P3.4 (part 1 of 3)
+- **Done:**
+  - Your choice: the recovery code is shown with a Copy button and an "I've saved it"
+    confirmation, with **no download**, because a file in Downloads is easy for others to find.
+  - **Skill rules re-read:** `text` with checks, not `varchar(n)`; `(select auth.uid())` in
+    policies. The profiles pattern already follows the privileges rules.
+  - **Lengths measured** with Web Crypto: a 16-byte salt is 24 base64 characters (22 + `==`),
+    and AES-KW of a 32-byte key is 40 bytes, so 56 characters (54 + `==`).
+  - **`supabase/migrations/20261104065744_create_user_keys.sql`** (via `migration new`):
+    - one row per user;
+    - `version = 1` check;
+    - iterations `>= 600000` for both copies (`recovery_iterations` was added to the
+      DATA_MODEL plan, so the recovery copy can still unwrap if the default changes);
+    - the salt and wrapped-key format checks;
+    - the `updated_at` trigger;
+    - `revoke all`, then grant select, insert and update to `authenticated`, with **no
+      delete**;
+    - three own-row policies.
+
+    Applied with `migration up --local`, which keeps local data, including your Google
+    account.
+
+  - **pgTAP** (`supabase/tests/user_keys_rls_test.sql`, 13 tests):
+    - storing your own keys works, storing someone else's is an RLS violation;
+    - you see only your own row;
+    - updating your own works, updating someone else's changes 0 rows;
+    - delete is denied;
+    - iterations 1000, version 2, a malformed salt and a short wrapped key are rejected
+      (23514);
+    - signed-out visitors are denied;
+    - the trigger works, and deleting the account cascades.
+  - **`pnpm db:test`:** 24 pass. A sabotaged copy (four checks dropped, open select and update
+    policies, a delete grant) failed exactly the 7 targeted tests. Afterwards the database
+    still had 7 checks, 3 policies and no delete grant.
+  - `pnpm db:types` regenerated. `supabase db advisors --local`: no issues. Typecheck passes.
+- **Problems / findings:** a `node -e` `String.replace` edit pasted the start of DATA_MODEL.md
+  into its middle. The replacement held `$` followed by a backtick, which is JavaScript's
+  "before the match" pattern. The file was restored from git and the edits redone with the
+  editor, and a memory was saved to avoid this.
+- **Not done yet:** the hosted push of this migration waits until the screens are ready, so the
+  live site never has a half-finished flow.
+- **Commits:** `feat(db): add user_keys table for wrapped encryption keys (P3.4)`
+- **Next:** P3.4 part 2 (browser composition root, key use cases, ESLint exception).
+
 ### 2026-11-04 — Session 4 (cont.): encryption core (P3.3)
 
 - **Phase:** 3 · **Tasks:** P3.3

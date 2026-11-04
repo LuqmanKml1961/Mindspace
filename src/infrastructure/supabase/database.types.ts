@@ -34,6 +34,46 @@ export type Database = {
         };
         Relationships: [];
       };
+      user_keys: {
+        Row: {
+          created_at: string;
+          passphrase_iterations: number;
+          passphrase_salt: string;
+          passphrase_wrapped_key: string;
+          recovery_iterations: number;
+          recovery_salt: string;
+          recovery_wrapped_key: string;
+          updated_at: string;
+          user_id: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          passphrase_iterations: number;
+          passphrase_salt: string;
+          passphrase_wrapped_key: string;
+          recovery_iterations: number;
+          recovery_salt: string;
+          recovery_wrapped_key: string;
+          updated_at?: string;
+          user_id: string;
+          version?: number;
+        };
+        Update: {
+          created_at?: string;
+          passphrase_iterations?: number;
+          passphrase_salt?: string;
+          passphrase_wrapped_key?: string;
+          recovery_iterations?: number;
+          recovery_salt?: string;
+          recovery_wrapped_key?: string;
+          updated_at?: string;
+          user_id?: string;
+          version?: number;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
