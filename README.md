@@ -29,10 +29,17 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 
 ```bash
 pnpm install
+pnpm db:start   # local Supabase (Docker Desktop must be running)
 pnpm dev
 ```
 
 Open http://localhost:3000. It redirects to `/home`.
+
+`pnpm dev` talks to the **local** Supabase through `.env.development.local`, which is
+git-ignored and read only by `pnpm dev`. Create it once: run `pnpm supabase status`, then set
+`NEXT_PUBLIC_SUPABASE_URL` to its `API_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to its
+`PUBLISHABLE_KEY`. Sign-up confirmation codes arrive in Mailpit at http://127.0.0.1:54324.
+`pnpm build` and `pnpm start` use `.env.local`, which holds the hosted project.
 
 ## Scripts
 

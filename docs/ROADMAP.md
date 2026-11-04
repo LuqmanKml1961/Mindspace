@@ -200,11 +200,13 @@ auth (gap G-2).
       the local database, then formats it with Prettier. `createSupabaseServerClient()` is typed
       with `<Database>`. A throwaway probe proved that wrong tables, unselected columns and
       wrongly typed values are type errors.
-- [ ] P2.6a Email and password (D-019): a `(auth)` route group with sign-up and sign-in pages.
+- [x] P2.6a Email and password (D-019): a `(auth)` route group with sign-up and sign-in pages.
       Sign-up sends a 6-digit confirmation code, which the user types in, with a resend option.
       Add server actions for sign-up, confirm, sign-in and sign-out, an application-layer auth
       port with a Supabase adapter behind the container, zod input schemas, and calm error
       states. Local config: confirmations on, and a code-only Confirm signup template.
+      **Done 2026-11-04:** verified end to end in the browser against the local stack (see
+      DEVLOG). Sign-out has a minimal Settings → Account button; P2.9 completes that section.
 - [ ] P2.6b Forgot password: request a reset code by email, type it in, then set a new password
       (a code-only Reset password template).
 - [ ] P2.6c Google sign-in: an OAuth button, an `auth/callback` route (`exchangeCodeForSession`)

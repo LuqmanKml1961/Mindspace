@@ -75,22 +75,24 @@ mindspace/
     │   ├── tasks/              # task.ts, reminder.ts, repositories
     │   └── check-ins/
     ├── application/
+    │   ├── auth/               # auth-service.ts (port: sign-up, confirm, sign-in, sign-out), schemas.ts
     │   ├── thoughts/           # capture-thought.ts, search-thoughts.ts, schemas.ts, *.test.ts
     │   ├── tasks/
     │   └── check-ins/
     ├── infrastructure/
+    │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
     │   ├── config/             # env.ts (validated environment variables)
     │   ├── supabase/           # server/browser clients, session refresh, database.types.ts
     │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers
     │   └── container.ts        # composition root: builds use cases for the current request
     ├── app/                    # Next.js App Router (presentation)
-    │   ├── (auth)/sign-in/
+    │   ├── (auth)/sign-in | sign-up/, actions.ts   # server actions for the auth forms
     │   ├── (app)/home | thoughts | tasks | clarity | settings/
     │   └── layout.tsx
     ├── components/             # presentation
     │   ├── ui/                 # shadcn/ui generated components
     │   ├── layout/             # app shell, navigation
-    │   └── thoughts | tasks | clarity/   # feature UI components
+    │   └── auth | thoughts | tasks | clarity/   # feature UI components
     └── lib/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
 ```
@@ -143,6 +145,10 @@ CaptureBox (client component)
 - **Use cases are factory functions** that take their dependencies and return an async function:
   `makeCaptureThought({ thoughts }) => (input) => Promise<Thought>`. They take `userId`
   explicitly, which keeps them testable.
+- **Auth** (D-019) goes through the `AuthService` port in `src/application/auth/`, which
+  `getAuthService()` in the container provides. There are no use-case wrappers, because they would only
+  forward the call. The adapter maps Supabase error codes to the port's `AuthFailure` values, so
+  presentation never sees Supabase errors.
 - **Composition root:** `getAppContext()` in `src/infrastructure/container.ts` creates the
   request-scoped Supabase client, resolves the signed-in user (redirecting if there is none), and
   returns `{ user, useCases }`.

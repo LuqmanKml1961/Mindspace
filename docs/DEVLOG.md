@@ -5,13 +5,15 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 6 / 9 tasks done (P2.1–P2.5, P2.8)                              |
+| **Phase progress** | Phase 2: 7 / 12 tasks done (P2.1–P2.5, P2.6a, P2.8)                      |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
-1. **Push** the P2.4, P2.5 and P2.8 commits. The live site was last checked on 2026-11-04 after the
+1. **Push** the unpushed commits (P2.4, P2.5, P2.8, D-019, P2.6a). The sign-in pages will deploy,
+   but nothing links to them yet. **Do not sign up on the live site until P2.10** (hosted SMTP,
+   templates and the `profiles` migration). The live site was last checked on 2026-11-04 after the
    P2.2/P2.3 push: `/` redirects to `/home`, and the proxy clears a stale session cookie. The
    Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
    type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
@@ -22,8 +24,10 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.6 and P2.7 (email one-time-code sign-in and route protection), then P2.9
-   (settings). The `profiles` migration is **local only**. Push it to the hosted project with
+4. **Next tasks:** P2.7 (route protection), then P2.6b (forgot password), P2.6c (Google: you
+   create the Google Cloud OAuth client), P2.9 (settings) and P2.10 (hosted auth setup). Local
+   dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). Restart
+   your dev server: the one still running is Next 16.4.4. The `profiles` migration is **local only**. Push it to the hosted project with
    `pnpm supabase db push` before deploying any code that uses it. After every new migration,
    run `pnpm db:types` and `pnpm db:test` with the local stack running.
 
@@ -107,6 +111,7 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 | class-variance-authority               | 0.7.1          | component variants (`cva`)                                                                      |
 | @hugeicons/react / core-free-icons     | 1.1.10 / 4.4.0 | icons, from the Maia preset (D-012); `lucide-react` removed                                     |
 | tw-animate-css                         | 1.4.0          | animation utilities imported by `globals.css`                                                   |
+| zod                                    | 4.6.7          | input schemas in the application layer (P2.6a), exact pin                                       |
 
 ## Personal-use observations
 
@@ -133,6 +138,78 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): sign-in methods (D-019) and email + password (P2.6a)
+
+- **Phase:** 2 · **Tasks:** D-019, P2.6a
+- **Done:**
+  - **D-019 replaces D-007.** You chose email + password confirmed with a typed 6-digit code,
+    then Google. Apple goes to the backlog, and the emailed sign-in code is dropped. Sources:
+    - Supabase changelog: since 2026-06-03, new Free projects on the default SMTP can't edit
+      email templates.
+    - Supabase SMTP docs: the built-in sender only delivers to team members, at 2 emails an
+      hour. Custom SMTP gets 30 an hour to start.
+    - Apple docs page: a new secret every 6 months, and no name in the web flow.
+  - ROADMAP: P2.6 is split into a, b and c. P2.10 is the hosted auth setup. Apple is in the
+    backlog.
+  - **Probed the local Auth server before writing code**, using scratch scripts with throwaway
+    users that were deleted afterwards:
+    - The default local email holds only a link.
+    - With `enable_confirmations = true` and a code-only template, the email holds a 6-digit
+      code and no link.
+    - Exact error codes: `email_not_confirmed`, `otp_expired` (wrong code),
+      `invalid_credentials` (the same for a wrong password and an unknown email),
+      `user_already_exists`, `weak_password` (< 8), `validation_failed` (> 72 characters or a
+      bad email), `over_email_send_rate_limit`.
+    - `verifyOtp` accepts both `type: "email"` and `"signup"`.
+  - **Config:** in `supabase/config.toml`, confirmations are on, the minimum password length is
+    8 (the config itself recommends 8), and `[auth.email.template.confirmation]` points to
+    `supabase/templates/confirmation.html`. Restarted with `db:stop` then `db:start`.
+  - **Code (onion):**
+    - `src/application/auth/`: the `AuthService` port and zod schemas. Zod 4.6.7 is pinned; its
+      `z.email()` and `{ error }` behaviour was checked against the installed package.
+    - `src/infrastructure/auth/supabase-auth-service.ts`: maps error codes to `AuthFailure`.
+      It logs status and code only, never the email address. Sign-out uses `scope: "local"`,
+      as the auth-js docs recommend for a sign-out button.
+    - `src/infrastructure/container.ts`: `getAuthService()`.
+    - `src/app/(auth)/`: layout, sign-in and sign-up pages, and `actions.ts`, which validates
+      every input.
+    - `src/components/auth/`: the forms, the code step and shared form parts.
+    - Settings → Account has a Sign out button.
+  - **shadcn:** added field, input, card, alert and spinner (plus label and separator) with the
+    pinned CLI after a dry run, and read every file. `Input` is changed to `h-10` (D-013).
+    `Spinner` omits `strokeWidth`, because the generated props type clashed with Hugeicons'
+    `number` and failed typecheck.
+  - **Local dev env:** the git-ignored `.env.development.local` points `pnpm dev` at the local
+    stack (Next's load order was checked in the bundled docs). `.env.local` (hosted) is
+    untouched and still used by builds. README, CLAUDE.md and `.env.example` explain this.
+  - **Verified in the browser** (your Chrome on MYS231, each step confirmed in the local Auth
+    log):
+    - server-side validation messages;
+    - sign-up, then the code email in Mailpit, a wrong code, "Send a new code", and the right
+      code landing on Home;
+    - the profile is created and the session exists;
+    - signing in to an unconfirmed account opens the code step with a notice;
+    - sign-out ends the session;
+    - wrong password, right password;
+    - registering the same email again.
+    - lint, typecheck, format:check and build pass. Test users are deleted (local database
+      empty).
+- **Decisions:** D-019 Accepted, superseding D-007.
+- **Problems / findings:**
+  - **Bug found in testing and fixed:** after "Send a new code", the old "code didn't work"
+    error hid the resend notice. Both buttons now submit one form with an `intent`, so the
+    latest result is the one shown.
+  - **Browser mix-up:** your Claude account has several Chrome extensions connected (shared
+    with other people). I acted in the wrong one: I opened a tab on another person's laptop.
+    It failed, and nothing was typed or read there. Your Chrome on MYS231 is now connected as
+    "LUQMAN". Never pick a browser by its label; use the Connect prompt.
+  - Your dev server on :3000 is still the old Next 16.4.4 process. It reloaded the env file,
+    but restart it so it runs 16.4.5.
+  - Hosted sign-up won't work until P2.10.
+- **Commits:** `docs: record sign-in methods decision (D-019)`,
+  `feat(auth): add email and password sign-up with code confirmation (P2.6a)`
+- **Next:** P2.7 (route protection).
 
 ### 2026-11-04 — Session 4 (cont.): pgTAP RLS tests
 

@@ -70,6 +70,13 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
   file with `git checkout`.
 - The app talks to Supabase only through `src/infrastructure/` (supabase-js plus
   `@supabase/ssr`, so RLS applies per user). No Prisma and no direct Postgres connection (D-017).
+- `pnpm dev` uses the local stack via the git-ignored `.env.development.local` (see README).
+  `.env.local` holds the hosted project and is used by builds. Never test sign-up against the
+  hosted project. Local auth emails (confirmation codes) land in Mailpit.
+- Auth (D-019): email and password with a typed 6-digit confirmation code, then Google (P2.6c).
+  Local `config.toml` has confirmations on, a minimum password length of 8, and the code-only
+  template `supabase/templates/confirmation.html`. Config changes need `pnpm db:stop` and then
+  `pnpm db:start`.
 
 ## Commands
 
