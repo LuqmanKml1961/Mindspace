@@ -16,10 +16,12 @@
    should be Charcoal Blue in both themes. Then try Settings → Appearance: the pill should morph
    into a circle that fills the screen. After that, the Phase 1 acceptance check is done and
    Phase 1 can be marked Done.
-2. **Upgrade to the Next.js security release** as soon as it is on npm (see Known issues). This
-   is urgent, because the app is now public.
-3. **Phase 2 (P2.1):** create a hosted Supabase free-tier project (your action), then set up
-   the CLI and the local stack.
+2. **Push the Next.js 16.4.5 security upgrade** (done 2026-11-04, see the session log), so the
+   live site gets the patch.
+3. **Phase 2:** the hosted Supabase project exists (ref `ftsksqfnjocgilmunljx`). Next: Supabase
+   packages, env and clients (P2.2, P2.3), then the CLI and local stack (P2.1). Add
+   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in Vercel **before**
+   pushing Supabase code.
 
 **Open questions (yours to decide)**
 
@@ -33,12 +35,8 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 
 **Known issues**
 
-- **The Next.js security release is pending and the app is now live on 16.4.4.** Next.js
-  announced seven medium vulnerabilities for 2026-11-03; affected versions are not yet stated
-  (source: nextjs.org/blog/upcoming-nextjs-security-release-november-2026). It was not on npm
-  at the last check (`latest` = 16.4.4). You deployed to https://m1ndspace.vercel.app on
-  2026-11-03. There is no sign-in and no user data yet, so exposure is low, but upgrade `next`
-  and `eslint-config-next` to the patched version as soon as it is published, then redeploy.
+- None open. (Resolved 2026-11-04: the Next.js November security release. The upgrade to 16.4.5
+  is done locally and must be pushed to reach the live site.)
 
 ## How to resume (for you or Claude)
 
@@ -92,7 +90,7 @@ Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 
 | Package                                | Version        | Notes                                                                                           |
 | -------------------------------------- | -------------- | ----------------------------------------------------------------------------------------------- |
-| next / eslint-config-next              | 16.4.4         | published 2026-11-02; the security release is pending (Known issues)                            |
+| next / eslint-config-next              | 16.4.5         | November 2026 security release, upgraded 2026-11-04                                             |
 | react / react-dom                      | 19.3.0         | exact pin from the template                                                                     |
 | tailwindcss / @tailwindcss/turbopack   | 4.3.3          | Tailwind runs through the Turbopack loader in `next.config.ts`; there is no `postcss.config`    |
 | typescript                             | 5.9.3          |                                                                                                 |
@@ -131,6 +129,29 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4: Next.js security upgrade
+
+- **Phase:** 1 → 2 · **Tasks:** security upgrade (Known issue)
+- **Done:**
+  - `next` 16.4.5 (published 2026-11-03T18:01Z) is the November security release. Its release
+    page lists seven advisories: GHSA-mfr8, GHSA-vc7v, GHSA-vvgp, GHSA-rhh4, GHSA-pc58,
+    GHSA-7qx7 and GHSA-f3mh. All are Moderate (CVSS v4 6.0–6.9) and published 2026-11-03.
+    - Most involve `'use cache'` / Cache Components (off here), self-hosting (we're on Vercel),
+      or SVG image optimisation (not used).
+    - GHSA-f3mh (HttpOnly cookies on Edge routes) becomes relevant once auth cookies exist.
+  - Upgraded `next` and `eslint-config-next` to 16.4.5 (exact pins). pnpm auto-added
+    release-age exclusions. I narrowed them from `16.4.4 || 16.4.5` to exactly `16.4.5`, and
+    `pnpm install --frozen-lockfile` passes the supply-chain policies.
+  - Verified: lint, typecheck, format and build pass on Next.js 16.4.5. Lint took 46s once and
+    timed out at 120s in one run, which is slower than before, probably a cold cache after the
+    dependency change.
+- **Decisions:** none.
+- **Problems / findings:** you shared the Supabase account password in chat. I didn't use or
+  store it, and recommended changing it. The project URL and publishable key are public by
+  design.
+- **Commits:** `fix(deps): upgrade Next.js to the 16.4.5 security release`
+- **Next:** push, then Phase 2 (Supabase wiring).
 
 ### 2026-11-03 — Session 3: always-dark system bars, fluid theme animation
 
