@@ -136,7 +136,9 @@ darken `input`.
 
   **Rule:** control heights move together. When adding Input, Select, Textarea, Toggle, Tabs and
   similar components, set their default height to 40px (`h-10`) to match. Check the generated
-  classes first; the shadcn skill's `design-system.md` lists where heights live.
+  classes first; the shadcn skill's `design-system.md` lists where heights live. Done so far:
+  `Input` (P2.6a) and `NativeSelect` (P2.9) moved from `h-9` to `h-10`. `NativeSelect` also uses
+  `text-base md:text-sm`, like `Input`, so iOS does not zoom when it gets focus.
 
 - **Toggle and ToggleGroup** (`src/components/ui/toggle.tsx`, added for D-015) follow the same
   heights: default `h-10` (40px) and `lg` `h-11`. The pressed state was restyled from `bg-muted`

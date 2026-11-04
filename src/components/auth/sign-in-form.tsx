@@ -8,7 +8,7 @@ import {
   FormField,
   FormMessages,
   SubmitButton,
-} from "@/components/auth/form-parts";
+} from "@/components/forms/form-parts";
 import { GoogleSignIn } from "@/components/auth/google-sign-in";
 import {
   Card,

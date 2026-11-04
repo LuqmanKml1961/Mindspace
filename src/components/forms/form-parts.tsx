@@ -70,11 +70,12 @@ type SubmitButtonProps = ComponentProps<typeof Button> & {
 export function SubmitButton({
   pending,
   spinner = true,
+  disabled,
   children,
   ...buttonProps
 }: SubmitButtonProps) {
   return (
-    <Button type="submit" disabled={pending} {...buttonProps}>
+    <Button type="submit" disabled={pending || disabled} {...buttonProps}>
       {pending && spinner && <Spinner data-icon="inline-start" />}
       {children}
     </Button>

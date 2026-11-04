@@ -70,12 +70,14 @@ mindspace/
 │   └── tests/                  # pgTAP RLS tests
 └── src/
     ├── domain/
-    │   ├── shared/             # base domain errors, shared helpers
+    │   ├── shared/             # errors.ts (ValidationError), shared helpers
+    │   ├── profiles/           # profile.ts (Profile, toTimezone), profile-repository.ts
     │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts, *.test.ts
     │   ├── tasks/              # task.ts, reminder.ts, repositories
     │   └── check-ins/
     ├── application/
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
+    │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # capture-thought.ts, search-thoughts.ts, schemas.ts, *.test.ts
     │   ├── tasks/
     │   └── check-ins/
@@ -83,7 +85,7 @@ mindspace/
     │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
     │   ├── config/             # env.ts (validated environment variables)
     │   ├── supabase/           # server/browser clients, session refresh, database.types.ts
-    │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers
+    │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles: P2.9)
     │   └── container.ts        # composition root: builds use cases for the current request
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
@@ -93,7 +95,8 @@ mindspace/
     ├── components/             # presentation
     │   ├── ui/                 # shadcn/ui generated components
     │   ├── layout/             # app shell, navigation
-    │   └── auth | thoughts | tasks | clarity/   # feature UI components
+    │   ├── forms/              # shared form parts (field, messages, submit button)
+    │   └── auth | settings | thoughts | tasks | clarity/   # feature UI components
     └── lib/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
 ```

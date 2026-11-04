@@ -29,13 +29,13 @@ Common rules:
 
 ### profiles (Phase 2)
 
-| Column         | Type        | Notes                                                                                                                                                                                    |
-| -------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`           | uuid PK     | `references auth.users(id) on delete cascade`                                                                                                                                            |
-| `display_name` | text null   | optional; `check (char_length(btrim(display_name)) between 1 and 100)`                                                                                                                   |
-| `timezone`     | text        | not null, default `'UTC'`, `check (char_length(timezone) between 1 and 64)`. Set from the browser at first sign-in; editable in Settings. The IANA name is validated in the domain layer |
-| `created_at`   | timestamptz | not null, default `now()`                                                                                                                                                                |
-| `updated_at`   | timestamptz | not null, default `now()`; kept current by `private.set_updated_at()`                                                                                                                    |
+| Column         | Type        | Notes                                                                                                                                                                                                                                                  |
+| -------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `id`           | uuid PK     | `references auth.users(id) on delete cascade`                                                                                                                                                                                                          |
+| `display_name` | text null   | optional; `check (char_length(btrim(display_name)) between 1 and 100)`                                                                                                                                                                                 |
+| `timezone`     | text        | not null, default `'UTC'`, `check (char_length(timezone) between 1 and 64)`. Settings pre-fills the device zone while it is still `UTC` (P2.9); automatic setting at first sign-in is Q-5. Validated and canonicalised by `toTimezone()` in the domain |
+| `created_at`   | timestamptz | not null, default `now()`                                                                                                                                                                                                                              |
+| `updated_at`   | timestamptz | not null, default `now()`; kept current by `private.set_updated_at()`                                                                                                                                                                                  |
 
 The row is created by the `private.handle_new_user()` trigger (AFTER INSERT ON `auth.users`,
 `security definer`, `set search_path = ''`). RLS allows select and update only where
@@ -216,9 +216,10 @@ For every table, with two test users A and B:
 
 ## 5. Open questions
 
-| ID  | Question                                                    | Proposed answer                                                                                                     | Settle by |
-| --- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | --------- |
-| Q-1 | Maximum length for thought content?                         | 10,000 characters                                                                                                   | P3.2      |
-| Q-2 | What happens to a thought once it is converted into a task? | It moves to `archived` and stays linked through `tasks.source_thought_id`, so it leaves the inbox but is never lost | P4.7      |
-| Q-3 | Can a thought have more than one category or tag?           | One category for the MVP. Tags only if real use shows the need                                                      | P3.3      |
-| Q-4 | Can a reminder exist without a task?                        | No. A standalone reminder is a task with a reminder (D-008)                                                         | P4.1      |
+| ID  | Question                                                          | Proposed answer                                                                                                                    | Settle by |
+| --- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Q-1 | Maximum length for thought content?                               | 10,000 characters                                                                                                                  | P3.2      |
+| Q-2 | What happens to a thought once it is converted into a task?       | It moves to `archived` and stays linked through `tasks.source_thought_id`, so it leaves the inbox but is never lost                | P4.7      |
+| Q-3 | Can a thought have more than one category or tag?                 | One category for the MVP. Tags only if real use shows the need                                                                     | P3.3      |
+| Q-4 | Can a reminder exist without a task?                              | No. A standalone reminder is a task with a reminder (D-008)                                                                        | P4.1      |
+| Q-5 | Should `profiles.timezone` be set automatically at first sign-in? | Yes, before "today" is used: save the device zone once while the profile is still on `UTC` (Settings stays the place to change it) | P4.1      |

@@ -230,8 +230,12 @@ auth (gap G-2).
       `supabase/tests/profiles_rls_test.sql` (11 tests, created with `supabase test new`) and
       `pnpm db:test`. A sabotaged copy (an open select policy, an open update policy, extra
       grants, the trigger disabled) failed the 7 tests aimed at those breaks.
-- [ ] P2.9 Settings page: the signed-in email, a timezone setting (pre-filled from the browser,
-      editable), and sign-out. (Settings → Appearance already exists: D-015.)
+- [x] P2.9 Settings page: the signed-in email, a timezone setting (pre-filled from the browser,
+      editable), and sign-out. (Settings → Appearance already exists: D-015.) **Done 2026-11-04:**
+      the first full onion slice: domain `Profile` and `toTimezone`, a `ProfileRepository` port,
+      use cases, a Supabase repository, and `getAppContext()` in the container. A profile still on
+      `UTC` is pre-filled with the device zone, which you save. Setting it automatically at first
+      sign-in is open (DATA_MODEL Q-5).
 - [ ] P2.10 Hosted auth setup (you, with steps from Claude), before auth is deployed:
       `pnpm supabase db push` for `profiles`; a custom SMTP provider; Confirm email on; the
       Confirm signup and Reset password templates showing `{{ .Token }}`; email code length 6;

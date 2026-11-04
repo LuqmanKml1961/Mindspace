@@ -5,7 +5,7 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 10 / 12 tasks done (P2.1–P2.8)                                  |
+| **Phase progress** | Phase 2: 11 / 12 tasks done (P2.1–P2.9); P2.10 (hosted setup) left       |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
@@ -26,8 +26,8 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.9 (settings: email, timezone, sign-out) and P2.10 (hosted auth setup,
-   then the installed-PWA sign-in test). Local
+4. **Next task:** P2.10 (hosted auth setup, then the installed-PWA sign-in test). Then Phase 3
+   starts with P3.1 (Vitest). In Settings, save your time zone (it is pre-filled from your device). Local
    dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). The
    `profiles` migration is **local only**. Push it to the hosted project with
    `pnpm supabase db push` before deploying any code that uses it. After every new migration,
@@ -140,6 +140,55 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Settings with email and time zone (P2.9)
+
+- **Phase:** 2 · **Tasks:** P2.9
+- **Done:**
+  - **The first full onion slice, the pattern for Phase 3:**
+    - **Domain:** `ValidationError`; `Profile`, `DEFAULT_TIMEZONE`, `toTimezone()` and
+      `timezoneOptions()`; the `ProfileRepository` port.
+    - **Application:** `makeGetProfile`, `makeUpdateTimezone` and a Zod form schema (shape only;
+      the domain checks the zone).
+    - **Infrastructure:** `createSupabaseProfileRepository`, with a row ↔ domain mapper. Its
+      errors carry only the Postgres code, because details can contain row values.
+      `getAppContext()` in the container verifies the token with `getClaims()`, redirects
+      without a session, and returns `{ user: { id, email }, useCases }`.
+    - **Presentation:** Settings is now async, with Time zone and Account sections (email,
+      sign-out). `updateTimezoneAction` calls `getAppContext()` itself, as the Next.js docs
+      require.
+  - **Intl, verified in Node** before writing the rule:
+    - `DateTimeFormat` throws `RangeError` for unknown zones and canonicalises
+      (`asia/kuala_lumpur` → `Asia/Kuala_Lumpur`, `Etc/UTC` → `UTC`). It does not trim.
+    - `supportedValuesOf` has 418 zones **without `UTC`**, and uses legacy names
+      (`Asia/Calcutta`).
+    - So the list is built on the server (consistent hydration), and the client adds a saved
+      or detected zone that is missing.
+  - **Pre-fill:** the device zone is read after hydration with `useSyncExternalStore` (no
+    effects). A profile still on `UTC` shows the device zone with "Detected from this device.
+    Save to use it." Nothing is saved automatically.
+  - **shadcn `native-select`** (dry run, then the file was read): `h-10` and
+    `text-base md:text-sm`, like `Input`.
+  - **`form-parts` moved** to `src/components/forms/` (`git mv`), because it is shared now.
+    **Fixed:** `SubmitButton` let a caller's `disabled` override `pending`, so it now combines
+    them.
+  - **Verified:**
+    - Scripted, with a throwaway user (deleted). `/settings` shows the email, "Saved: UTC" and
+      419 options. The timezone action posted as a no-JS form:
+      - `asia/kuala_lumpur` → "Time zone saved.", stored as `Asia/Kuala_Lumpur`;
+      - `Not/AZone` → the domain message, database unchanged;
+      - empty → the Zod message, database unchanged;
+      - `Asia/Tokyo` → saved.
+    - **Read-only in your Chrome (LUQMAN)**, signed in as you: the menu is pre-filled with
+      `Asia/Kuala_Lumpur` with the detected hint, and the reload produced no hydration warnings
+      or errors. **Nothing was saved to your profile.**
+    - typecheck, lint, format:check and build pass.
+- **Decisions:** none. DATA_MODEL Q-5 is open: set the time zone automatically at first sign-in?
+  The proposal is yes, by P4.1.
+- **Problems / findings:** the roadmap's "pre-filled" and the data model's "set at first sign-in"
+  differed. P2.9 implements the roadmap, and the rest is Q-5.
+- **Commits:** `feat(settings): show account email and edit time zone (P2.9)`
+- **Next:** P2.10 (hosted auth setup).
 
 ### 2026-11-04 — Session 4 (cont.): Google sign-in (P2.6c)
 
