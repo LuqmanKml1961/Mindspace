@@ -2,33 +2,25 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                    |
-| ------------------ | ------------------------------------------------------------------------ |
-| **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 11 / 12 tasks done (P2.1–P2.9); P2.10 (hosted setup) left       |
-| **Last updated**   | 2026-11-04 (Session 4)                                                   |
-| **Blocked on**     | Nothing                                                                  |
+| Item               | Value                                        |
+| ------------------ | -------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)       |
+| **Phase progress** | Phase 3: 0 tasks done; next is P3.1 (Vitest) |
+| **Last updated**   | 2026-11-04 (Session 4)                       |
+| **Blocked on**     | Nothing                                      |
 
 **Next actions (in order)**
 
-1. **Finish P2.10 in the dashboards** (steps in the latest session entry):
-   - Supabase: turn on the Google provider (the same client ID and secret as the root `.env`),
-     set the Site URL and redirect URL, and **turn off the Email provider** (D-020).
-   - Google Cloud: add the live origin and the Supabase callback URL.
-   - Then `git push`, sign in with Google on https://m1ndspace.vercel.app, and do the Android
-     retest (item 3) from the installed app.
-   - `origin/main` is at `427da10` (P2.6c), and P2.7 is live, so the site requires sign-in.
-     The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
-     type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
-     Real secrets (service-role or secret key, DB password) must always be **Secret** and never
-     `NEXT_PUBLIC_`.
+1. **Push** the latest commit (`git push`; Claude never pushes). The live site signs in with Google
+   only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
+   type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
+   Real secrets (service-role or secret key, DB password) must always be **Secret** and never
+   `NEXT_PUBLIC_`.
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
-   Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next task:** finish P2.10 (item 1). Then Phase 3 starts with P3.1 (Vitest). In Settings,
-   save your time zone (it is pre-filled from your device). Local dev needs `pnpm db:start`
+3. **Next task:** Phase 3, starting with P3.1 (Vitest). In Settings, save your time zone (it is
+   pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
    `pnpm db:types` and `pnpm db:test` with the local stack running, then
@@ -70,8 +62,8 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 | Phase | Name                            | Status      | Started    | Completed  |
 | ----- | ------------------------------- | ----------- | ---------- | ---------- |
 | 0     | Planning and decisions          | Done        | 2026-11-03 | 2026-11-03 |
-| 1     | Foundation                      | In progress | 2026-11-03 | —          |
-| 2     | Supabase and authentication     | In progress | 2026-11-04 | —          |
+| 1     | Foundation                      | Done        | 2026-11-03 | 2026-11-04 |
+| 2     | Supabase and authentication     | Done        | 2026-11-04 | 2026-11-04 |
 | 3     | Brain Dump                      | Not started | —          | —          |
 | —     | Checkpoint A: personal use      | Not started | —          | —          |
 | 4     | External Memory                 | Not started | —          | —          |
@@ -141,6 +133,67 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): P2.10 done, readability and logo; Phases 1 and 2 done
+
+- **Phase:** 2 → 3 · **Tasks:** P2.10 (done), your design feedback
+- **Done:**
+  - **P2.10 verified.**
+    - From here: the hosted Auth settings show `google: true` and `email: false`. The hosted
+      `/authorize` sends your client ID (compared, not printed) and the right callback.
+    - Live: `/`, `/home`, `/sign-up` and `/forgot-password` → `/sign-in`. `/auth/callback`
+      without a code → `https://m1ndspace.vercel.app/sign-in?error=google`. The page and logo
+      render.
+    - You tested Google sign-in on the live site and from the installed app, plus the Android
+      retest. You reported everything good, so **Phases 1 and 2 are done.**
+  - **Phase 2 acceptance:**
+    - no secret strings in tracked source or config;
+    - the only `NEXT_PUBLIC_` variables are the Supabase URL and the publishable key;
+    - the Google client secret is in **0 of 35** client bundle files (searched by value, never
+      printed).
+  - **Your feedback 1, text was dim (dark mode).** Measured first:
+    - muted text on a card was 4.60:1, the old passing minimum;
+    - body text on a card was 5.66:1.
+
+    The dark text tokens are now `#e6ece3` (7.31:1 on a card) and muted `#c3d1c3` (5.53:1).
+    `destructive` moved from `#e8aa9f` to `#eaaea5` (4.64:1 on a card, was 4.47:1).
+
+  - **Your feedback 2, the note box was invisible.** The Alert used the card's own colour
+    (1.00:1). The Alert variants are now tinted (`bg-primary/14 border-primary/45`, and
+    `bg-destructive/10 border-destructive/45` for errors) with `card-foreground` text:
+    - note box: 5.94 (dark) and 9.27 (light);
+    - error box: 6.21 and 9.60;
+    - borders: about 1.9:1 against the card.
+
+    Red text on the red tint would be 3.8:1 in dark mode, so the colour comes from the box.
+
+  - **Your feedback 3, the logo:**
+    - `White House with Sleeping Brain Icon.png` had **no alpha**: the checkerboard was baked
+      into the pixels, so it was rejected.
+    - `House-Shaped Brain Icon.png` (real alpha) was trimmed to 355×344. The master is
+      `docs/assets/mindspace-logo.png`, and the web copy is `public/brand/mindspace-logo.png`
+      (192px).
+    - Previews showed the white house vanishing on the light page, so light mode adds a soft
+      Charcoal Blue drop shadow. Dark mode has none.
+    - The app icon is unchanged.
+  - **Verified:**
+    - compiled CSS contains the new classes;
+    - the new logo is served (optimised, 2,952 bytes at 128px);
+    - a screenshot of the local sign-in page (dark) shows the logo, brighter text and the
+      framed note;
+    - typecheck, lint and build pass.
+  - DESIGN.md §2/§3/§7, ROADMAP (P2.10 ticked), DECISIONS (D-019: PWA sign-in works on
+    Android) and the phase tracker are updated.
+- **Decisions:** none new. D-013's dark text values changed (DESIGN.md §2).
+- **Problems / findings:**
+  - Known dark-mode gaps, recorded in DESIGN.md §3 and not visible today:
+    - sage as text on a card is 3.68:1 (link buttons, hidden email step only; fix before
+      P6.10);
+    - the destructive Button is 3.3–4.0:1 (none exist yet; P6.4).
+  - iOS is still untested.
+  - I can't push: project rule and settings deny `git push`.
+- **Commits:** `fix(ui): raise dark text contrast, tint alerts and use the new logo`
+- **Next:** P3.1 (Vitest).
 
 ### 2026-11-04 — Session 4 (cont.): hosted setup, Google only (P2.10, in progress)
 

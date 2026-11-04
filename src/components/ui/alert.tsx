@@ -7,9 +7,11 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-card text-card-foreground",
+        // Tinted so the box stands out on a card (DESIGN.md §3); text keeps full contrast.
+        default:
+          "border-primary/45 bg-primary/14 text-card-foreground *:data-[slot=alert-description]:text-card-foreground",
         destructive:
-          "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
+          "border-destructive/45 bg-destructive/10 text-card-foreground *:data-[slot=alert-description]:text-card-foreground *:[svg]:text-destructive",
       },
     },
     defaultVariants: {

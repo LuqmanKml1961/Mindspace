@@ -27,18 +27,18 @@ The hex values are used as given (the shadcn skill's rule: keep hex when hex is 
 | Token                          | Light                                                    | Dark                                             |
 | ------------------------------ | -------------------------------------------------------- | ------------------------------------------------ |
 | `background`                   | `#f9faf8` derived: 12% Ash Grey + white                  | `#2f3e46` Charcoal Blue                          |
-| `foreground`                   | `#2f3e46` Charcoal Blue                                  | `#cad2c5` Ash Grey                               |
+| `foreground`                   | `#2f3e46` Charcoal Blue                                  | `#e6ece3` derived: Ash Grey lightened (raised)   |
 | `card`, `popover`              | `#ffffff`                                                | `#354f52` Dark Slate Grey                        |
-| `card-` / `popover-foreground` | `#2f3e46` Charcoal Blue                                  | `#cad2c5` Ash Grey                               |
+| `card-` / `popover-foreground` | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)                      |
 | `primary`                      | `#52796f` Deep Teal                                      | `#8eb095` derived: Muted Teal + 8% white         |
 | `primary-foreground`           | `#ffffff`                                                | `#1c252a` derived: 60% Charcoal Blue + black     |
 | `secondary`                    | `#cad2c5` Ash Grey                                       | `#354f52` Dark Slate Grey                        |
-| `secondary-foreground`         | `#2f3e46` Charcoal Blue                                  | `#cad2c5` Ash Grey                               |
+| `secondary-foreground`         | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)                      |
 | `muted`                        | `#ecefeb` derived: 35% Ash Grey + white                  | `#32474c` derived: Slate/Charcoal 50/50          |
-| `muted-foreground`             | `#354f52` Dark Slate Grey                                | `#adc1ad` derived: 58% Ash Grey + Muted Teal     |
+| `muted-foreground`             | `#354f52` Dark Slate Grey                                | `#c3d1c3` derived: light sage (raised)           |
 | `accent`                       | `#e0eae2` derived: 25% Muted Teal + white                | `#354f52` Dark Slate Grey                        |
-| `accent-foreground`            | `#2f3e46` Charcoal Blue                                  | `#cad2c5` Ash Grey                               |
-| `destructive`                  | `#a8463a` **added** soft terracotta (not in the palette) | `#e8aa9f` **added**: `#e08a7c` coral + 27% white |
+| `accent-foreground`            | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)                      |
+| `destructive`                  | `#a8463a` **added** soft terracotta (not in the palette) | `#eaaea5` **added**: `#e08a7c` coral + 31% white |
 | `border`                       | `#cad2c5` Ash Grey                                       | `#465459` derived: 15% Ash Grey + Charcoal Blue  |
 | `input`                        | `#cad2c5` Ash Grey                                       | `#4e5c5f` derived: 20% Ash Grey + Charcoal Blue  |
 | `ring` (focus)                 | `#52796f` Deep Teal                                      | `#84a98c` Muted Teal                             |
@@ -48,20 +48,40 @@ The hex values are used as given (the shadcn skill's rule: keep hex when hex is 
 
 - `destructive` is the only colour outside the palette. It is used **only** for deleting, never
   for overdue or "missed" items. Those stay neutral (spec §3: no guilt-based productivity).
-- The dark `primary` and dark `muted-foreground` were lifted just enough to pass contrast as text.
-  The minimal passing amounts were found by search rather than picked by eye.
+- The dark `primary` was lifted just enough to pass contrast as text (found by search).
+- **Dark text raised on 2026-11-04** (your feedback: text looked dim). The `#cad2c5` text tokens
+  are now `#e6ece3`, so body text on a card is 7.31:1 (was 5.66:1). Muted text is `#c3d1c3`,
+  5.53:1 on a card (was 4.60:1, the old passing minimum). `destructive` gained 4 points of
+  white to reach 4.64:1 on a card (was 4.47:1).
 
 ## 3. Contrast (WCAG 2.x)
 
 Checked 2026-11-03 with the WCAG relative-luminance formula. The method was validated against
 known values (21:1 for black on white; `#737373` on white is 4.74:1).
 
-| Check                                         | Target | Light (lowest) | Dark (lowest) |
-| --------------------------------------------- | ------ | -------------- | ------------- |
-| All text pairs (14 per theme)                 | 4.5:1  | 4.64:1         | 4.60:1        |
-| Destructive text on its own 10% tint (Button) | 4.5:1  | 4.83:1         | 4.65:1        |
-| Focus ring on background                      | 3:1    | 4.64:1         | 4.23:1        |
-| Border / input on background                  | 3:1    | 1.48:1         | 1.41 / 1.59:1 |
+| Check                                      | Target | Light (lowest) | Dark (lowest) |
+| ------------------------------------------ | ------ | -------------- | ------------- |
+| Text pairs (14 per theme, rechecked 11-04) | 4.5:1  | 4.64:1         | 4.63:1        |
+| Body text on a card                        | 4.5:1  | 10.57:1 (page) | 7.31:1        |
+| Muted text on a card                       | 4.5:1  | 8.78:1         | 5.53:1        |
+| Note box (tinted Alert) text               | 4.5:1  | 9.27:1         | 5.94:1        |
+| Error box (tinted Alert) text              | 4.5:1  | 9.60:1         | 6.21:1        |
+| Alert border against the card              | —      | 1.84:1         | 1.90:1        |
+| Focus ring on background                   | 3:1    | 4.64:1         | 4.23:1        |
+| Border / input on background               | 3:1    | 1.48:1         | 1.41 / 1.59:1 |
+
+**Alerts (2026-11-04):** an Alert used to share the card's colour (1.00:1), so it was
+invisible. Its variants now tint the box: `bg-primary/14 border-primary/45` for notes, and
+`bg-destructive/10 border-destructive/45` for errors. Text uses `card-foreground` in both. In
+dark mode, red text on the red tint is only 3.8:1, so the colour comes from the box, not the
+text.
+
+**Known dark-mode gaps, not visible today:**
+
+- Sage as text on a card is 3.68:1. This is the link-style Button, used only in the hidden email
+  code step. Fix it before P6.10 brings that screen back.
+- The destructive Button (text on its own 20% tint) is 3.3–4.0:1. No destructive buttons exist
+  yet; fix in P6.4.
 
 The border and input lines are decorative and below WCAG 1.4.11's 3:1, like shadcn's defaults.
 **Review in P6.4:** confirm that inputs are still identifiable (Maia inputs also have a fill), or
@@ -168,6 +188,13 @@ darken `input`.
 Hugeicons (`@hugeicons/react` with `@hugeicons/core-free-icons`, MIT), from the Maia preset.
 Inside a Button, mark icons with `data-icon="inline-start"` or `"inline-end"`. Don't add sizing
 classes to icons inside components (shadcn skill, `rules/icons.md`).
+
+**Logo (auth screens, 2026-11-04):** a white house with the sleeping brain on transparency,
+from your `House-Shaped Brain Icon.png`. The web copy is `public/brand/mindspace-logo.png`
+(192px, shown at 64px), and the master, trimmed to 355×344, is `docs/assets/mindspace-logo.png`.
+On the light page a white house nearly disappears, so light mode adds
+`drop-shadow-[0_2px_8px_rgb(47_62_70_/_0.3)]` (a Charcoal Blue shadow). Dark mode has none. The
+**app icon** (manifest, favicon) is unchanged: still the black tile, with the icon question open.
 
 ## 7a. Screen edges and the installed app (D-014)
 

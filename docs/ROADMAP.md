@@ -236,13 +236,14 @@ auth (gap G-2).
       use cases, a Supabase repository, and `getAppContext()` in the container. A profile still on
       `UTC` is pre-filled with the device zone, which you save. Setting it automatically at first
       sign-in is open (DATA_MODEL Q-5).
-- [ ] P2.10 Hosted auth setup, Google only (D-020): the `profiles` migration on the hosted
+- [x] P2.10 Hosted auth setup, Google only (D-020): the `profiles` migration on the hosted
       database, the Google provider (the same Google client), the Site URL and redirect URLs. Then
       test Google sign-in on the live site and from the installed PWA on Android and iOS. The
       hosted email setup moved to P6.10. **Progress 2026-11-04:** the hosted `profiles` schema is
       already applied and matches local (read-only checks), and the advisors report no issues.
       Email sign-in is hidden in the UI (`src/lib/features.ts`). The sign-in screen is Google-only,
-      with a note and the logo.
+      with a note and the logo. **Done 2026-11-04:** - the hosted settings were checked from here: Google on with your client ID, Email off; - live redirects and the callback error path work; - you tested Google sign-in on the live site and from the installed app, plus the Android
+      retest: all good.
 
 **Acceptance**
 

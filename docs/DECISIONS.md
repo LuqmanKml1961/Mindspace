@@ -335,7 +335,8 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - the Google provider configured;
   - Site URL and redirect URLs.
 - **Open:** sign-in from inside the installed PWA (OAuth redirects) is not covered by the docs.
-  Test it on Android and iOS in P2.6c.
+  Test it on Android and iOS in P2.6c. **Update 2026-11-04:** you tested Google sign-in from the
+  installed app on Android and reported it works. iOS is still untested.
 - **Date:** 2026-11-04
 
 ## D-020 — Email on the live site
