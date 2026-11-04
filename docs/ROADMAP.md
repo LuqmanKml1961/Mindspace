@@ -264,9 +264,10 @@ auth (gap G-2).
       it. - `vitest.config.mts` sets the `@/` alias and runs `src/domain` and `src/application`
       tests only. - The first tests cover the existing profile code: 9 tests. Two deliberate code breakages
       each made tests fail.
-- [ ] P3.2 Domain: `Thought` and `Category`, their rules (trimmed content must not be empty;
+- [x] P3.2 Domain: `Thought` and `Category`, their rules (trimmed content must not be empty;
       length limits match the database checks), and the `ThoughtRepository` and
-      `CategoryRepository` interfaces. Unit tests.
+      `CategoryRepository` interfaces. Unit tests. **Done 2026-11-04:** - limits: content 10,000 (Q-1), title 200, category name 50, counted in characters as
+      Postgres does; - `NotFoundError` and `ConflictError` added for the repository contracts; - 27 tests in total. Four deliberate code breakages were each caught.
 - [ ] P3.3 Migration: `categories` and `thoughts`, with indexes, composite ownership FKs, RLS and
       updated_at triggers. Two-user pgTAP tests for both tables. Regenerate the types.
 - [ ] P3.4 Infrastructure: the Supabase repositories and row ↔ domain mappers, wired into the

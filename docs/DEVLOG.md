@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                           |
-| ------------------ | ----------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)          |
-| **Phase progress** | Phase 3: 1 / 11 tasks done (P3.1); next is P3.2 |
-| **Last updated**   | 2026-11-04 (Session 4)                          |
-| **Blocked on**     | Nothing                                         |
+| Item               | Value                                                 |
+| ------------------ | ----------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                |
+| **Phase progress** | Phase 3: 2 / 11 tasks done (P3.1, P3.2); next is P3.3 |
+| **Last updated**   | 2026-11-04 (Session 4)                                |
+| **Blocked on**     | Nothing                                               |
 
 **Next actions (in order)**
 
@@ -19,7 +19,7 @@
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Next task:** P3.2 (domain: `Thought` and `Category`). In Settings, save your time zone (it is
+3. **Next task:** P3.3 (migration: `categories` and `thoughts` with RLS and pgTAP tests). In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -134,6 +134,40 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Brain Dump domain (P3.2)
+
+- **Phase:** 3 · **Tasks:** P3.2, Q-1
+- **Done:**
+  - **Q-1 settled** (your go): thought content up to 10,000 characters. Titles: 200.
+    Categories: 50 (already in the data model).
+  - **Checked against Postgres first:**
+    - `char_length('😀') = 1`, while JS `"😀".length` is 2, so `characterCount()` counts code
+      points (`src/domain/shared/text.ts`);
+    - `btrim()` removes only spaces, while JS `trim()` removes all whitespace, so text trimmed
+      in the domain always passes the database checks.
+  - **`src/domain/thoughts/thought.ts`:**
+    - `Thought`, `NewThought`, `ThoughtChanges` and `ThoughtStatus` (inbox, parked or
+      archived);
+    - `toThoughtContent` (trimmed, non-empty, within the limit), `toThoughtTitle` (blank →
+      null), `createThought` (defaults to the inbox), `toThoughtChanges` (validates only the
+      fields given) and `isThoughtStatus`.
+  - **`category.ts`:** `Category`, `NewCategory`, `toCategoryName` and `createCategory`.
+  - **Ports:**
+    - `ThoughtRepository`: create, findById, list (newest first, filtered by status, category
+      or query), update, delete;
+    - `CategoryRepository`: create, list, rename, delete;
+    - every method is scoped to `userId` on top of RLS.
+    - `NotFoundError` and `ConflictError` are in `src/domain/shared/errors.ts`.
+  - Messages are calm and built from the limit constants, so they cannot drift.
+  - **Tests:** 18 new, 27 in total. Four mutations were caught: UTF-16 counting (1 failure), no
+    trim (6), the content limit off by one (2) and the category limit off by one (1). The
+    files were restored byte-for-byte from backups.
+  - typecheck, lint (domain imports only domain), format:check and build pass. DATA_MODEL
+    (limits, Q-1, the counting and trimming rule) and ARCHITECTURE are updated.
+- **Decisions:** Q-1 settled (10,000). The title limit of 200 is recorded in DATA_MODEL.
+- **Commits:** `feat(domain): add Thought and Category rules and repository ports (P3.2)`
+- **Next:** P3.3 (migration: `categories` and `thoughts`, RLS, two-user pgTAP tests, types).
 
 ### 2026-11-04 — Session 4 (cont.): Vitest (P3.1)
 

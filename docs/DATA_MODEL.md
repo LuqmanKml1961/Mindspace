@@ -23,7 +23,11 @@ Common rules:
   Deleting the account removes the data.
 - Timestamps are `timestamptz` (UTC). "Today" is computed in `profiles.timezone`.
 - Tables that have `updated_at` use a shared `set_updated_at()` BEFORE UPDATE trigger.
-- Length limits are enforced with `check` constraints and mirrored in the domain rules.
+- Length limits are enforced with `check` constraints and mirrored in the domain rules. Lengths
+  count characters (code points), as Postgres `char_length` does: `"😀"` is 1, so the domain uses
+  `characterCount()`, not `.length`. The domain stores **trimmed** text. JS `trim()` removes all
+  whitespace, while `btrim()` removes only spaces, so anything the domain accepts passes the
+  `char_length(btrim(…))` checks.
 - Parents that other user-owned tables point at get `unique (id, user_id)`, so children can use
   composite ownership FKs (ARCHITECTURE.md §7).
 
@@ -65,16 +69,16 @@ creates a category the first time it is used.
 
 ### thoughts (Phase 3)
 
-| Column        | Type        | Notes                                                                                      |
-| ------------- | ----------- | ------------------------------------------------------------------------------------------ |
-| `id`          | uuid PK     | `default gen_random_uuid()`                                                                |
-| `user_id`     | uuid        | owner                                                                                      |
-| `title`       | text null   | optional (spec §9 example); capture does not ask for it                                    |
-| `content`     | text        | `check (char_length(btrim(content)) between 1 and 10000)`; limit to confirm                |
-| `category_id` | uuid null   | FK `(category_id, user_id)` → `categories(id, user_id)` `on delete set null (category_id)` |
-| `status`      | text        | not null, default `'inbox'`, `check (status in ('inbox','parked','archived'))`             |
-| `created_at`  | timestamptz | default `now()`                                                                            |
-| `updated_at`  | timestamptz | default `now()`                                                                            |
+| Column        | Type        | Notes                                                                                          |
+| ------------- | ----------- | ---------------------------------------------------------------------------------------------- |
+| `id`          | uuid PK     | `default gen_random_uuid()`                                                                    |
+| `user_id`     | uuid        | owner                                                                                          |
+| `title`       | text null   | optional; `check (title is null or char_length(btrim(title)) between 1 and 200)`; blank → null |
+| `content`     | text        | `check (char_length(btrim(content)) between 1 and 10000)` (Q-1, settled)                       |
+| `category_id` | uuid null   | FK `(category_id, user_id)` → `categories(id, user_id)` `on delete set null (category_id)`     |
+| `status`      | text        | not null, default `'inbox'`, `check (status in ('inbox','parked','archived'))`                 |
+| `created_at`  | timestamptz | default `now()`                                                                                |
+| `updated_at`  | timestamptz | default `now()`                                                                                |
 
 Indexes: `(user_id, created_at desc)` and `(user_id, status)`. `unique (id, user_id)`.
 Search starts as a case-insensitive match on `title` and `content`; add full-text search (a
@@ -218,7 +222,7 @@ For every table, with two test users A and B:
 
 | ID  | Question                                                          | Proposed answer                                                                                                                    | Settle by |
 | --- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| Q-1 | Maximum length for thought content?                               | 10,000 characters                                                                                                                  | P3.2      |
+| Q-1 | Maximum length for thought content?                               | **Settled 2026-11-04: 10,000 characters** (your go). Titles: 200                                                                   | P3.2      |
 | Q-2 | What happens to a thought once it is converted into a task?       | It moves to `archived` and stays linked through `tasks.source_thought_id`, so it leaves the inbox but is never lost                | P4.7      |
 | Q-3 | Can a thought have more than one category or tag?                 | One category for the MVP. Tags only if real use shows the need                                                                     | P3.3      |
 | Q-4 | Can a reminder exist without a task?                              | No. A standalone reminder is a task with a reminder (D-008)                                                                        | P4.1      |

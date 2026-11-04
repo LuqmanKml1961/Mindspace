@@ -70,9 +70,9 @@ mindspace/
 │   └── tests/                  # pgTAP RLS tests
 └── src/
     ├── domain/
-    │   ├── shared/             # errors.ts (ValidationError), shared helpers
+    │   ├── shared/             # errors.ts (Validation, NotFound, Conflict), text.ts (characterCount)
     │   ├── profiles/           # profile.ts (Profile, toTimezone), profile-repository.ts
-    │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts, *.test.ts
+    │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts (ports), *.test.ts (P3.2)
     │   ├── tasks/              # task.ts, reminder.ts, repositories
     │   └── check-ins/
     ├── application/
