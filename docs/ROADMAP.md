@@ -168,15 +168,22 @@ auth (gap G-2).
 
 - [ ] P2.1 Add the Supabase CLI as a dev dependency and run `supabase init`. The local stack runs on
       Docker (`supabase start`). You create a hosted free-tier project for preview and production.
-- [ ] P2.2 Environment config: put the Supabase URL and public key in `.env.local` and the host
+- [x] P2.2 Environment config: put the Supabase URL and public key in `.env.local` and the host
       settings. Create `.env.example` listing the variable names with no values (moved from P1.9;
       `.gitignore` already allows it). Add a typed, validated env module in `src/infrastructure/config/`. Take the variable
       names from the current Supabase Next.js guide, since Supabase's key naming has changed
-      (anon → publishable). Verify before using.
-- [ ] P2.3 Create the Supabase clients with `@supabase/ssr` in `src/infrastructure/supabase/`: a
+      (anon → publishable). Verify before using. **Done 2026-11-04:**
+      `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (names from the
+      Supabase guide), with `src/infrastructure/config/env.ts` throwing a clear error if either is
+      missing. **The Vercel env vars are your action, and must happen before pushing.**
+- [x] P2.3 Create the Supabase clients with `@supabase/ssr` in `src/infrastructure/supabase/`: a
       server client that reads cookies, and a browser client only if needed. Add session refresh
       in Next.js middleware/proxy, following the current Supabase SSR guide for the installed
-      Next.js version. Server-only modules import `server-only`.
+      Next.js version. Server-only modules import `server-only`. **Done 2026-11-04:**
+      `server.ts`, and `session.ts` (`updateSession`: `getClaims()`, cookies plus cache headers
+      via `setAll(cookies, headers)`), called from `src/proxy.ts`. Next 16 renamed `middleware`
+      to `proxy`. No browser client yet, as nothing needs it. Verified: a fake session cookie is
+      cleared, with `private, no-store` headers.
 - [ ] P2.4 Migration: the `set_updated_at()` trigger function, the `profiles` table and its RLS,
       and the `handle_new_user()` trigger (DATA_MODEL.md).
 - [ ] P2.5 Generate the database types into `src/infrastructure/supabase/database.types.ts`. Add a

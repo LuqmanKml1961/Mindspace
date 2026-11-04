@@ -29,6 +29,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-014 | Installable app and screen edges  | Accepted | —                                                |
 | D-015 | Appearance setting (theme toggle) | Accepted | —                                                |
 | D-016 | System bars always dark           | Accepted | —                                                |
+| D-017 | Supabase access path and tooling  | Accepted | Phase 2                                          |
 
 ---
 
@@ -267,6 +268,24 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   the per-scheme `theme-color`, `color_scheme_dark` (D-014 follow-up) and `ThemeColorSync`
   (D-015), which were removed. Not yet tested on iOS.
 - **Date:** 2026-11-03
+
+## D-017 — Supabase access path and tooling
+
+- **Context:** Supabase's Connect dialog offered four setups: supabase-js with `@supabase/ssr`, a
+  direct Postgres connection string, Prisma, and the MCP server. You also pasted the project URL
+  and publishable key.
+- **Decision:** Accepted (your choices, 2026-11-04):
+  - **App data access:** supabase-js `2.118.0` with `@supabase/ssr` `0.12.7`, pinned exactly.
+    Requests run as the signed-in user, so RLS applies. **No Prisma and no direct Postgres
+    connection:** both connect as the `postgres` superuser (bypassing RLS), need the database
+    password in the app, and would add a second data path.
+  - **Supabase MCP server** (`.mcp.json`): project-scoped, `read_only=true`, features `docs,
+database, debugging, development`, following Supabase's MCP security guidance. Schema
+    changes still go through migration files.
+  - **Agent skills:** `supabase` and `supabase-postgres-best-practices`, reviewed before use.
+  - Session refresh runs in `src/proxy.ts` with `getClaims()`, following Supabase's SSR guide and
+    the installed `@supabase/ssr` types.
+- **Date:** 2026-11-04
 
 ---
 

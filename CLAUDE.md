@@ -52,6 +52,20 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
 - Use pnpm as the runner (`pnpm dlx shadcn@…` or `pnpm exec shadcn`). Read every file the CLI
   adds before relying on it.
 
+## Supabase tooling
+
+- Project skills `.claude/skills/supabase/` and `.claude/skills/supabase-postgres-best-practices/`
+  are installed from `supabase/agent-skills` (`skills@1.7.4`, telemetry off). They were reviewed:
+  no exec directives and no pre-approved commands. Use them before Supabase, schema, RLS or
+  migration work, and verify against current docs (append `.md` to any docs URL).
+- `.mcp.json`: the Supabase MCP server, **project-scoped (`ftsksqfnjocgilmunljx`) and
+  read-only**, with features `docs, database, debugging, development`. You authenticate once by
+  running `claude /mcp` in a normal terminal, then selecting supabase → Authenticate.
+- Schema changes go through migration files in `supabase/migrations/` (D-011), never straight
+  into the hosted database.
+- The app talks to Supabase only through `src/infrastructure/` (supabase-js plus
+  `@supabase/ssr`, so RLS applies per user). No Prisma and no direct Postgres connection (D-017).
+
 ## Commands
 
 | Command             | Purpose                                                   |

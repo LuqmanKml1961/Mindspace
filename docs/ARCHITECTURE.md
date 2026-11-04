@@ -95,7 +95,8 @@ mindspace/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
 ```
 
-Session refresh middleware/proxy sits at the `src/` root where Next.js requires it. It only calls
+Session refresh lives in `src/proxy.ts` (Next.js 16 renamed `middleware` to `proxy`; it runs on
+the Node.js runtime), at the `src/` root where Next.js requires it. It only calls
 an infrastructure helper.
 
 ## 4. Dependency rules

@@ -2,26 +2,26 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                              |
-| ------------------ | -------------------------------------------------- |
-| **Current phase**  | Phase 1 — Foundation                               |
-| **Phase progress** | 11 / 11 tasks done. Phase acceptance check pending |
-| **Last updated**   | 2026-11-03 (Session 2)                             |
-| **Blocked on**     | Nothing                                            |
+| Item               | Value                                                                    |
+| ------------------ | ------------------------------------------------------------------------ |
+| **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
+| **Phase progress** | Phase 2: 2 / 9 tasks done (P2.2, P2.3)                                   |
+| **Last updated**   | 2026-11-04 (Session 4)                                                   |
+| **Blocked on**     | Your Vercel env vars before pushing the Supabase commit                  |
 
 **Next actions (in order)**
 
-1. **Retest on Android** (D-016, D-015). Push, wait for Vercel, then **uninstall the app and
-   install it again**, because Android fixes the bar colours at install. The top and bottom bars
-   should be Charcoal Blue in both themes. Then try Settings → Appearance: the pill should morph
-   into a circle that fills the screen. After that, the Phase 1 acceptance check is done and
-   Phase 1 can be marked Done.
-2. **Push the Next.js 16.4.5 security upgrade** (done 2026-11-04, see the session log), so the
-   live site gets the patch.
-3. **Phase 2:** the hosted Supabase project exists (ref `ftsksqfnjocgilmunljx`). Next: Supabase
-   packages, env and clients (P2.2, P2.3), then the CLI and local stack (P2.1). Add
-   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in Vercel **before**
-   pushing Supabase code.
+1. **Before pushing, in Vercel → Project → Settings → Environment Variables,** add
+   `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (values in your
+   `.env.local`) for Production, Preview and Development. Without them `src/proxy.ts` throws and
+   every page fails. Then push (the Next.js 16.4.5 security fix is in the same push).
+2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
+   supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
+   next Claude session.
+3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
+   Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
+4. **P2.1:** Supabase CLI (dev dependency) plus local stack on Docker. Linking the CLI to the
+   hosted project needs `supabase login` / `link`, which you run with `!`.
 
 **Open questions (yours to decide)**
 
@@ -60,7 +60,7 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 | ----- | ------------------------------- | ----------- | ---------- | ---------- |
 | 0     | Planning and decisions          | Done        | 2026-11-03 | 2026-11-03 |
 | 1     | Foundation                      | In progress | 2026-11-03 | —          |
-| 2     | Supabase and authentication     | Not started | —          | —          |
+| 2     | Supabase and authentication     | In progress | 2026-11-04 | —          |
 | 3     | Brain Dump                      | Not started | —          | —          |
 | —     | Checkpoint A: personal use      | Not started | —          | —          |
 | 4     | External Memory                 | Not started | —          | —          |
@@ -129,6 +129,47 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Supabase wiring
+
+- **Phase:** 2 · **Tasks:** P2.2, P2.3, D-017
+- **Done:**
+  - You pasted four Supabase Connect options. You chose supabase-js with `@supabase/ssr` (no
+    Prisma, no direct Postgres), a read-only MCP server, and the agent skills (D-017).
+  - Installed and reviewed the Supabase agent skills `supabase` and
+    `supabase-postgres-best-practices` (`skills@1.7.4`, telemetry off). Risk scan: no exec
+    directives or pre-approved commands. The only `curl` is an MCP reachability check.
+  - Read the sources:
+    - Supabase's Next.js SSR guide (as `.md`). Its code blocks are missing from the export.
+    - The MCP guide.
+    - Next 16.4.5's bundled `proxy.md`: `middleware` is deprecated and renamed to `proxy`, on
+      the Node.js runtime.
+    - The installed `@supabase/ssr` types: `setAll(cookies, headers)` must set cache headers,
+      and `getClaims()` must be called early.
+  - Installed `@supabase/supabase-js` 2.118.0 and `@supabase/ssr` 0.12.7, pinned exactly.
+    `server-only` was not installed (optional per the Next docs).
+  - Added `.mcp.json` via `claude mcp add --scope project` (read-only, scoped, 4 features).
+  - Added `src/infrastructure/config/env.ts`, `src/infrastructure/supabase/server.ts`,
+    `src/infrastructure/supabase/session.ts` and `src/proxy.ts` (matcher skips static and image
+    files). Also `.env.example` (committed) and `.env.local` (git-ignored, with your URL and
+    publishable key).
+  - Verified on a production server:
+    - `/home` returns 200 and the build lists `ƒ Proxy`.
+    - A fake `sb-…-auth-token` cookie is cleared (`Max-Age=0`) with
+      `Cache-Control: private, no-cache, no-store…`, `Expires: 0` and `Pragma: no-cache`.
+    - Static icons are untouched.
+    - Lint, typecheck and build pass.
+- **Decisions:** D-017 Accepted.
+- **Problems / findings:**
+  - The snippet you pasted from Supabase never calls `getClaims()`/`getUser()`, so it wouldn't
+    refresh sessions. I used the guide and types instead.
+  - Static pages are CDN-cached (`s-maxage=31536000`). Once pages read the session (P2.7) they
+    become dynamic. Responses that set auth cookies get `no-store` from the proxy.
+  - A fetched docs page contained text posing as instructions to the reader. The fetch agent
+    ignored it.
+- **Commits:** `chore: add Supabase agent skills and read-only MCP config` and
+  `feat(supabase): add env config, server client and session-refreshing proxy (P2.2, P2.3)`
+- **Next:** your Vercel env vars, then push, then P2.1.
 
 ### 2026-11-04 — Session 4: Next.js security upgrade
 
