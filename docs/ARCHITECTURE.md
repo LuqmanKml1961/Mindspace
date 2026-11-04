@@ -83,6 +83,7 @@ mindspace/
     │   └── check-ins/
     ├── infrastructure/
     │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
+    │   ├── crypto/             # web-crypto.ts, device-key-store.ts: browser-side E2E (D-021)
     │   ├── config/             # env.ts (validated environment variables)
     │   ├── supabase/           # server/browser clients, session refresh, database.types.ts
     │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles: P2.9)
@@ -181,8 +182,12 @@ CaptureBox (client component)
     Action. The action verifies the user (`getAppContext()`) and the ciphertext format, and
     stores it.
   - **Search and uniqueness checks** on encrypted fields run on the device.
-  - **Where the crypto code lives** (a browser-side composition root next to `container.ts`)
-    is settled in P3.3, with the ESLint layer rules updated to match.
+  - **Where the crypto code lives (settled in P3.3):** `src/infrastructure/crypto/`
+    (`web-crypto.ts` for keys and fields, `device-key-store.ts` for IndexedDB). It is browser
+    code, so it never imports `server-only`. Presentation cannot import it directly; the ESLint
+    rule allows only `container`, verified with a probe import. Client Components will reach it
+    through a **browser composition root**, `src/infrastructure/browser.ts`, added with the first
+    client use case (P3.4), and the ESLint exception is widened to `container|browser` then.
 - RLS is enabled on every user-owned table, with owner policies **and explicit grants** (DATA_MODEL.md
   §2). Supabase no longer exposes new tables to the API automatically. Database helper functions
   live in the unexposed `private` schema.

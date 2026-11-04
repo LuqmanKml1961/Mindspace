@@ -417,6 +417,15 @@ database, debugging, development`, following Supabase's MCP security guidance. S
     recovered by anyone.
   - Future AI features could only use text a person explicitly shares from their device.
 - **Date:** 2026-11-04
+- **Verified (P3.3, 2026-11-04):**
+  - Vitest runs the real module with 600,000 iterations: round trips, unique IVs (500/500),
+    and the exact maximum size (53,376 for 10,000 emoji).
+  - Moved, tampered and malformed ciphertext is rejected, and so is a wrong key, passphrase or
+    recovery code. Unlocked keys are non-extractable, and NFC passphrases match.
+  - In Chrome on `localhost` (a secure context), a non-extractable key stored in IndexedDB reads
+    back as `extractable: false`, `exportKey` and `wrapKey` are refused (`InvalidAccessError`),
+    and it still decrypts. PBKDF2 at 600,000 iterations took 378 ms on the desktop; phones are
+    measured in P3.4.
 
 ---
 

@@ -268,12 +268,15 @@ auth (gap G-2).
       200, category name 50, counted in characters as Postgres does. `NotFoundError` and
       `ConflictError` added. 27 tests; four deliberate breakages were each caught. These rules
       now run in the browser, before encryption (D-021).
-- [ ] P3.3 Encryption core (D-021): a Web Crypto module that creates the data key, wraps it with
+- [x] P3.3 Encryption core (D-021): a Web Crypto module that creates the data key, wraps it with
       a PBKDF2-SHA256 key (600,000 iterations, 16-byte salt) from the passphrase and from a
       recovery code, and encrypts each field with AES-GCM (a fresh 96-bit IV, additional data
       binding the owner and field). Unit tests in Vitest (Node has Web Crypto), including wrong
       passphrase, tampering and a moved ciphertext. A device key store in IndexedDB; prove in a
-      browser that a non-extractable key read back still cannot be exported.
+      browser that a non-extractable key read back still cannot be exported. **Done 2026-11-04:**
+      `src/infrastructure/crypto/` (`web-crypto.ts`, `device-key-store.ts`). 10 crypto tests (37
+      in total); six deliberate breakages were each caught. In Chrome, a key read back from
+      IndexedDB is non-extractable, and export and wrap are both refused.
 - [ ] P3.4 Keys: a `user_keys` migration (salt, iterations, two wrapped keys; RLS, grants,
       pgTAP). Screens to set a passphrase (12+ characters) and show the recovery code once, to
       unlock on a new device, and to reset the passphrase with the recovery code. Sign-out clears

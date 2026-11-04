@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                   |
-| ------------------ | ----------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                  |
-| **Phase progress** | Phase 3: 2 / 13 tasks done (P3.1, P3.2); next is P3.3 (encryption core) |
-| **Last updated**   | 2026-11-04 (Session 4)                                                  |
-| **Blocked on**     | Nothing                                                                 |
+| Item               | Value                                                                          |
+| ------------------ | ------------------------------------------------------------------------------ |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                         |
+| **Phase progress** | Phase 3: 3 / 13 tasks done (P3.1–P3.3); next is P3.4 (keys and unlock screens) |
+| **Last updated**   | 2026-11-04 (Session 4)                                                         |
+| **Blocked on**     | Nothing                                                                        |
 
 **Next actions (in order)**
 
@@ -19,7 +19,7 @@
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Next task:** P3.3 (encryption core, D-021). In Settings, save your time zone (it is
+3. **Next task:** P3.4 (`user_keys`, passphrase setup and unlock screens, recovery). In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -134,6 +134,57 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): encryption core (P3.3)
+
+- **Phase:** 3 · **Tasks:** P3.3
+- **Done:**
+  - **`src/infrastructure/crypto/web-crypto.ts`**, implementing D-021 exactly:
+    - `generateDataKey` (AES-GCM 256, extractable only for wrapping at setup);
+    - `wrapWithPassphrase` / `unwrapWithPassphrase` (NFC-normalised, PBKDF2-SHA256 at 600,000
+      iterations, a 16-byte salt, AES-KW). The unwrapped key is **non-extractable**.
+    - `createRecoveryCode` (128 bits as 32 hex digits in groups of 4) with
+      `wrapWithRecoveryCode` / `unwrapWithRecoveryCode`, which accept any case or spacing;
+    - `encryptField` / `decryptField` (AES-GCM, a fresh 12-byte IV, additional data
+      `mindspace:v1:<table>.<column>:<user id>`, format `v1.<iv>.<ciphertext>`).
+    - Two error types: `UnlockFailedError` and `DecryptFailedError`. Low-level errors never
+      leak out.
+    - There is deliberately no "fewer iterations" option; tests use the real 600,000, which is
+      fast in Node.
+  - **`device-key-store.ts`:** IndexedDB `save`, `load` and `clear`. It refuses to store an
+    extractable key.
+  - **Tests (10 new, 37 in total, 2.7 s):**
+    - round trip, including emoji and line breaks;
+    - 500 encryptions with 500 unique IVs;
+    - the exact maximum size from DATA_MODEL (53,376);
+    - moved ciphertext (field or person), tampered, malformed and wrong-key cases rejected;
+    - 600,000 iterations and a 16-byte salt;
+    - right versus wrong passphrase, a non-extractable unlocked key (export refused);
+    - NFC accents;
+    - recovery code format, unlocking as typed, and wrong or invalid codes.
+  - **Mutation checks**, each caught by exactly its test, then restored byte-for-byte:
+    - a fixed IV;
+    - no additional data;
+    - an extractable unwrap;
+    - no NFC;
+    - 1,000 iterations;
+    - no version or extra-part check.
+  - **Browser proof in your Chrome** (`localhost` is a secure context), with a throwaway IndexedDB
+    database that was deleted afterwards:
+    - the stored key reads back as a `CryptoKey` (AES-GCM-256), `extractable: false`;
+    - `exportKey` and `wrapKey` are refused with `InvalidAccessError`;
+    - it still decrypts;
+    - PBKDF2 at 600,000 iterations took **378 ms**.
+  - **Layer guard verified:** a probe import of the crypto module from `src/app` fails lint (the
+    presentation rule allows only `container`). It will be widened to `container|browser` in
+    P3.4.
+- **Problems / findings:** TypeScript 5.9 rejected `Uint8Array` (backed by `ArrayBufferLike`) as
+  AES-GCM `additionalData`. Vitest passed because it doesn't typecheck, but typecheck caught it.
+  The fix types `fieldAad` as `Uint8Array<ArrayBuffer>`.
+- typecheck, lint, format:check and build pass. ARCHITECTURE §3/§7, D-021 (verified) and
+  ROADMAP are updated.
+- **Commits:** `feat(crypto): add the end-to-end encryption core (P3.3)`
+- **Next:** P3.4 (`user_keys`, setup and unlock screens, recovery; phone PBKDF2 timing).
 
 ### 2026-11-04 — Session 4 (cont.): end-to-end encryption decided (D-021)
 
