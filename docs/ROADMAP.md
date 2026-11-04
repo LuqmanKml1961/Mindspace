@@ -260,32 +260,44 @@ auth (gap G-2).
 **Goal (spec deliverable):** users can capture and manage their thoughts securely.
 
 - [x] P3.1 Set up Vitest for `src/domain` and `src/application`, with a `test` script. **Done
-      2026-11-04:** - Vitest 5.0.5 and Vite 8.3.5, both pinned. `@types/node` is now 22, because Vitest needs
-      it. - `vitest.config.mts` sets the `@/` alias and runs `src/domain` and `src/application`
-      tests only. - The first tests cover the existing profile code: 9 tests. Two deliberate code breakages
-      each made tests fail.
+      2026-11-04:** Vitest 5.0.5 and Vite 8.3.5 (pinned), `@types/node` 22, `vitest.config.mts`
+      with the `@/` alias. 9 tests on the profile code; two deliberate breakages each failed tests.
 - [x] P3.2 Domain: `Thought` and `Category`, their rules (trimmed content must not be empty;
       length limits match the database checks), and the `ThoughtRepository` and
-      `CategoryRepository` interfaces. Unit tests. **Done 2026-11-04:** - limits: content 10,000 (Q-1), title 200, category name 50, counted in characters as
-      Postgres does; - `NotFoundError` and `ConflictError` added for the repository contracts; - 27 tests in total. Four deliberate code breakages were each caught.
-- [ ] P3.3 Migration: `categories` and `thoughts`, with indexes, composite ownership FKs, RLS and
-      updated_at triggers. Two-user pgTAP tests for both tables. Regenerate the types.
-- [ ] P3.4 Infrastructure: the Supabase repositories and row ↔ domain mappers, wired into the
-      composition root.
-- [ ] P3.5 Application use cases: capture; list (newest first, filter by category or status); get;
-      update; delete; search; create, rename and delete a category; assign a category. Zod input
-      schemas. Unit tests with in-memory fakes.
-- [ ] P3.6 Capture UI: a single text area with autofocus. Save with a button or Ctrl/Cmd+Enter.
+      `CategoryRepository` interfaces. Unit tests. **Done 2026-11-04:** content 10,000 (Q-1), title
+      200, category name 50, counted in characters as Postgres does. `NotFoundError` and
+      `ConflictError` added. 27 tests; four deliberate breakages were each caught. These rules
+      now run in the browser, before encryption (D-021).
+- [ ] P3.3 Encryption core (D-021): a Web Crypto module that creates the data key, wraps it with
+      a PBKDF2-SHA256 key (600,000 iterations, 16-byte salt) from the passphrase and from a
+      recovery code, and encrypts each field with AES-GCM (a fresh 96-bit IV, additional data
+      binding the owner and field). Unit tests in Vitest (Node has Web Crypto), including wrong
+      passphrase, tampering and a moved ciphertext. A device key store in IndexedDB; prove in a
+      browser that a non-extractable key read back still cannot be exported.
+- [ ] P3.4 Keys: a `user_keys` migration (salt, iterations, two wrapped keys; RLS, grants,
+      pgTAP). Screens to set a passphrase (12+ characters) and show the recovery code once, to
+      unlock on a new device, and to reset the passphrase with the recovery code. Sign-out clears
+      the key from the device.
+- [ ] P3.5 Migration: `categories` and `thoughts` storing ciphertext (format and maximum-size
+      checks), indexes, composite ownership FKs, RLS, updated_at triggers, two-user pgTAP tests.
+      Regenerate the types.
+- [ ] P3.6 Infrastructure: Supabase repositories for the encrypted records, wired into the
+      container. Revise the P3.2 ports to store ciphertext, not plaintext.
+- [ ] P3.7 Application: use cases (capture; list newest first, filtered by category or status;
+      get; update; delete; create, rename and delete a category; assign a category). Encryption
+      and decryption happen in the browser; Server Actions receive ciphertext only. Zod schemas.
+      Unit tests with in-memory fakes.
+- [ ] P3.8 Capture UI: a single text area with autofocus. Save with a button or Ctrl/Cmd+Enter.
       After saving, the field clears and keeps focus for the next thought. Show a saving state.
       A failed save keeps the text.
-- [ ] P3.7 List and detail/edit UI. Delete through an in-app confirmation dialog (shadcn
+- [ ] P3.9 List and detail/edit UI. Delete through an in-app confirmation dialog (shadcn
       AlertDialog), not the browser's `confirm()`.
-- [ ] P3.8 Categories UI: pick or create a category in place. Offer suggested names from spec
-      §4.1 and §4.2, but create none in advance.
-- [ ] P3.9 Search: a case-insensitive match on title and content, escaping `%` and `_`. Add
-      full-text search later only if needed.
-- [ ] P3.10 Loading, empty and error states on every Brain Dump screen.
-- [ ] P3.11 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
+- [ ] P3.10 Categories UI: pick or create a category in place. Offer suggested names from spec
+      §4.1 and §4.2, but create none in advance. Duplicate names (any case) are caught on the
+      device, since the server only sees ciphertext.
+- [ ] P3.11 Search on the device: a case-insensitive match on the decrypted titles and contents.
+- [ ] P3.12 Loading, empty and error states on every Brain Dump screen, including "locked".
+- [ ] P3.13 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
       with no urgency styling.
 
 **Acceptance**
@@ -293,6 +305,9 @@ auth (gap G-2).
 - From the capture screen, a thought is saved in a few seconds: one field, one action.
 - Create, edit, delete, search and categorise all work. Text is never lost on a failed save.
 - RLS tests pass for `thoughts` and `categories`. Domain and application tests pass.
+- **The database holds no readable thought text** (checked with SQL: titles, contents and
+  category names are ciphertext). A wrong passphrase unlocks nothing, and the recovery code
+  resets the passphrase without losing thoughts.
 - It is deployed so you can use it yourself.
 
 ### Checkpoint A — personal use (spec §17 step 10)

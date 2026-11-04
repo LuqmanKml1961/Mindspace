@@ -172,6 +172,17 @@ CaptureBox (client component)
 
 ## 7. Security
 
+- **End-to-end encryption (D-021).** Free text a person writes is encrypted **in the browser**.
+  The server, the database and its operator only ever see ciphertext. This changes the data
+  flow for those fields:
+  - **Reads:** Server Components load the encrypted rows (RLS still applies) and pass them to
+    Client Components, which decrypt them with the device key.
+  - **Writes:** the browser runs the domain rules, encrypts, and sends ciphertext to a Server
+    Action. The action verifies the user (`getAppContext()`) and the ciphertext format, and
+    stores it.
+  - **Search and uniqueness checks** on encrypted fields run on the device.
+  - **Where the crypto code lives** (a browser-side composition root next to `container.ts`)
+    is settled in P3.3, with the ESLint layer rules updated to match.
 - RLS is enabled on every user-owned table, with owner policies **and explicit grants** (DATA_MODEL.md
   §2). Supabase no longer exposes new tables to the API automatically. Database helper functions
   live in the unexposed `private` schema.

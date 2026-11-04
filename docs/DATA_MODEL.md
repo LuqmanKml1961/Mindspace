@@ -10,7 +10,8 @@
 | Table              | Phase | Status                                              | Purpose                                       |
 | ------------------ | ----- | --------------------------------------------------- | --------------------------------------------- |
 | `profiles`         | 2     | **Migrated** (`20261104020325_create_profiles.sql`) | Per-user preferences (timezone, display name) |
-| `categories`       | 3     | Draft                                               | User-owned thought categories                 |
+| `user_keys`        | 3     | Draft                                               | Wrapped encryption keys (D-021)               |
+| `categories`       | 3     | Draft                                               | User-owned thought categories (encrypted)     |
 | `thoughts`         | 3     | Draft                                               | Brain dumps and parked thoughts               |
 | `tasks`            | 4     | Draft                                               | Tasks with due date and priority              |
 | `reminders`        | 4     | Draft                                               | In-app reminders attached to tasks (D-008)    |
@@ -23,11 +24,13 @@ Common rules:
   Deleting the account removes the data.
 - Timestamps are `timestamptz` (UTC). "Today" is computed in `profiles.timezone`.
 - Tables that have `updated_at` use a shared `set_updated_at()` BEFORE UPDATE trigger.
-- Length limits are enforced with `check` constraints and mirrored in the domain rules. Lengths
-  count characters (code points), as Postgres `char_length` does: `"😀"` is 1, so the domain uses
-  `characterCount()`, not `.length`. The domain stores **trimmed** text. JS `trim()` removes all
-  whitespace, while `btrim()` removes only spaces, so anything the domain accepts passes the
-  `char_length(btrim(…))` checks.
+- **Free text a person writes is encrypted on the device (D-021)** and stored as
+  `*_ciphertext` columns. Its character limits are enforced by the domain rules in the browser,
+  and the database checks the ciphertext format and maximum size. Lengths count characters
+  (code points), as Postgres `char_length` does: `"😀"` is 1, so the domain uses
+  `characterCount()`, not `.length`. The domain trims text before encrypting.
+- Plaintext columns that are not personal writing (for example `profiles.timezone`) keep plain
+  `check` constraints.
 - Parents that other user-owned tables point at get `unique (id, user_id)`, so children can use
   composite ownership FKs (ARCHITECTURE.md §7).
 
@@ -54,35 +57,59 @@ gives 403; `updated_at` moves; deleting the auth user cascades. `supabase db adv
 no issues. The same behaviour is now covered permanently by
 `supabase/tests/profiles_rls_test.sql` (P2.8).
 
+### user_keys (Phase 3, D-021)
+
+One row per person: everything needed to unlock their data key, but never the key itself.
+
+| Column                     | Type        | Notes                                                       |
+| -------------------------- | ----------- | ----------------------------------------------------------- |
+| `user_id`                  | uuid PK     | `references auth.users(id) on delete cascade`               |
+| `version`                  | smallint    | encryption scheme version, `1`                              |
+| `passphrase_salt`          | text        | base64, 16 random bytes                                     |
+| `passphrase_iterations`    | integer     | PBKDF2-SHA256 iterations, `600000` (OWASP)                  |
+| `passphrase_wrapped_key`   | text        | the data key wrapped (AES-KW) by the passphrase key, base64 |
+| `recovery_salt`            | text        | base64, 16 random bytes                                     |
+| `recovery_wrapped_key`     | text        | the data key wrapped by the recovery-code key, base64       |
+| `created_at`, `updated_at` | timestamptz |                                                             |
+
+RLS: select, insert and update your own row only. Changing the passphrase rewrites only this
+row; thoughts are never re-encrypted.
+
 ### categories (Phase 3)
 
-| Column       | Type        | Notes                                               |
-| ------------ | ----------- | --------------------------------------------------- |
-| `id`         | uuid PK     | `default gen_random_uuid()`                         |
-| `user_id`    | uuid        | owner                                               |
-| `name`       | text        | `check (char_length(btrim(name)) between 1 and 50)` |
-| `created_at` | timestamptz | default `now()`                                     |
+| Column            | Type        | Notes                                                                 |
+| ----------------- | ----------- | --------------------------------------------------------------------- |
+| `id`              | uuid PK     | `default gen_random_uuid()`                                           |
+| `user_id`         | uuid        | owner                                                                 |
+| `name_ciphertext` | text        | encrypted name (1–50 characters before encryption); at most 308 chars |
+| `created_at`      | timestamptz | default `now()`                                                       |
 
-Unique index on `(user_id, lower(name))`; `unique (id, user_id)`. Nothing is seeded: the UI
-offers suggested names (Work, Personal, Ideas, To investigate, To remember, Future plans) and
-creates a category the first time it is used.
+`unique (id, user_id)`. **Name uniqueness (any case) is checked on the device**, because the
+server sees only ciphertext. Nothing is seeded: the UI offers suggested names (Work, Personal,
+Ideas, To investigate, To remember, Future plans) and creates a category the first time it is
+used.
 
 ### thoughts (Phase 3)
 
-| Column        | Type        | Notes                                                                                          |
-| ------------- | ----------- | ---------------------------------------------------------------------------------------------- |
-| `id`          | uuid PK     | `default gen_random_uuid()`                                                                    |
-| `user_id`     | uuid        | owner                                                                                          |
-| `title`       | text null   | optional; `check (title is null or char_length(btrim(title)) between 1 and 200)`; blank → null |
-| `content`     | text        | `check (char_length(btrim(content)) between 1 and 10000)` (Q-1, settled)                       |
-| `category_id` | uuid null   | FK `(category_id, user_id)` → `categories(id, user_id)` `on delete set null (category_id)`     |
-| `status`      | text        | not null, default `'inbox'`, `check (status in ('inbox','parked','archived'))`                 |
-| `created_at`  | timestamptz | default `now()`                                                                                |
-| `updated_at`  | timestamptz | default `now()`                                                                                |
+| Column               | Type        | Notes                                                                                      |
+| -------------------- | ----------- | ------------------------------------------------------------------------------------------ |
+| `id`                 | uuid PK     | `default gen_random_uuid()`                                                                |
+| `user_id`            | uuid        | owner                                                                                      |
+| `title_ciphertext`   | text null   | encrypted title (1–200 characters before encryption; blank → null); at most 1,108 chars    |
+| `content_ciphertext` | text        | encrypted content (1–10,000 characters before encryption, Q-1); at most 53,376 chars       |
+| `category_id`        | uuid null   | FK `(category_id, user_id)` → `categories(id, user_id)` `on delete set null (category_id)` |
+| `status`             | text        | not null, default `'inbox'`, `check (status in ('inbox','parked','archived'))`             |
+| `created_at`         | timestamptz | default `now()`                                                                            |
+| `updated_at`         | timestamptz | default `now()`                                                                            |
 
 Indexes: `(user_id, created_at desc)` and `(user_id, status)`. `unique (id, user_id)`.
-Search starts as a case-insensitive match on `title` and `content`; add full-text search (a
-generated `tsvector` with a GIN index) later only if needed.
+**Search runs on the device**, over decrypted text. The server cannot search ciphertext.
+
+**Ciphertext format and limits (D-021):** `v1.<IV base64, 16 chars>.<ciphertext base64>`. The
+maximum is computed from the character limit at 4 UTF-8 bytes per character, plus the 16-byte
+GCM tag: `3 + 16 + 1 + 4·⌈(4·chars + 16)/3⌉`. That gives 53,376 for content, 1,108 for a title
+and 308 for a category name. The database checks the format pattern and these maximums. The
+character limits themselves are enforced on the device by the P3.2 domain rules.
 
 ### tasks (Phase 4)
 

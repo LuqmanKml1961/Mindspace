@@ -33,6 +33,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-018 | Database privileges convention    | Accepted            | Every migration                                  |
 | D-019 | Sign-in methods                   | Accepted            | P2.6                                             |
 | D-020 | Email on the live site            | Accepted            | P6.10 (before the private beta)                  |
+| D-021 | End-to-end encryption             | Accepted            | P3.3 (before any thought is stored)              |
 
 ---
 
@@ -369,6 +370,52 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - the Confirm signup and Reset password templates showing `{{ .Token }}`;
   - an email code length of 6;
   - a minimum password length of 8.
+- **Date:** 2026-11-04
+
+## D-021 — End-to-end encryption
+
+- **Context:** your requirement (2026-11-04): thoughts must stay private even from whoever runs
+  the database, because people may write very personal things. RLS keeps users apart, but it
+  does not stop the operator. Locally, `postgres` and `service_role` have `rolbypassrls`, and
+  `supabase_admin` is a superuser, so a project owner can read every row in the dashboard. Spec
+  §14: "Privacy must be part of the architecture from the beginning."
+- **Decision:** Accepted (your choice, 2026-11-04): **end-to-end encryption from the start.**
+  Every free-text field a person writes is encrypted in their browser before it is sent:
+  thought titles and contents, category names, and later task text and reflections. The server
+  stores and returns only ciphertext.
+- **Design** (sources: the OWASP Password Storage Cheat Sheet, MDN Web Crypto, the W3C
+  WebCrypto spec):
+  - **Data key:** a random 256-bit AES-GCM key per person, created in the browser.
+  - **Passphrase key:** PBKDF2-HMAC-SHA256, **600,000 iterations** (OWASP), with a random salt
+    of at least 16 bytes (MDN). It wraps the data key with AES-KW. OWASP prefers Argon2id, but
+    Web Crypto does not offer it, and PBKDF2 avoids a third-party crypto library.
+  - **Recovery code:** 128 random bits, shown once. It wraps a second copy of the data key. If
+    the passphrase is lost, the recovery code sets a new one, and no thought needs re-encrypting.
+  - **Each field:** AES-GCM with a fresh random 96-bit IV per encryption (MDN: "never reuse an
+    IV with the same key"), a 128-bit tag, and additional data
+    `mindspace:v1:<table>.<column>:<user id>`, so a ciphertext cannot be moved to another field
+    or person. Stored as `v1.<IV base64>.<ciphertext base64>`.
+  - **Stored server-side** (`user_keys`, own row, RLS): the salts, iterations, both wrapped data
+    keys and a version. Never the passphrase, the recovery code or the raw key.
+  - **On the device:** you chose "once per device". After unlocking, the data key is kept in
+    IndexedDB as a **non-extractable** `CryptoKey` (MDN: `CryptoKey` can be stored there) until
+    sign-out.
+  - **Passphrase:** you chose **at least 12 characters**. A few words works well.
+  - The P3.2 domain rules run in the browser before encryption. The server checks only the
+    ciphertext format and maximum size. Search runs on the device. Category-name uniqueness is
+    checked on the device too, because the server can't compare ciphertexts.
+- **Still visible to the operator:**
+  - the account email;
+  - ids, timestamps and statuses;
+  - which category a thought is in, but not the category's name;
+  - ciphertext sizes, which roughly reveal text length.
+- **Limits, honestly:**
+  - It protects against database access, the operator and leaked backups.
+  - It does not protect against a compromised device, a malicious browser extension, or a
+    tampered version of the app's own code. That is the limit of encryption in any web app.
+  - Losing **both** the passphrase and the recovery code means those thoughts cannot be
+    recovered by anyone.
+  - Future AI features could only use text a person explicitly shares from their device.
 - **Date:** 2026-11-04
 
 ---

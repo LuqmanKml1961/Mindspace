@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                 |
-| ------------------ | ----------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                |
-| **Phase progress** | Phase 3: 2 / 11 tasks done (P3.1, P3.2); next is P3.3 |
-| **Last updated**   | 2026-11-04 (Session 4)                                |
-| **Blocked on**     | Nothing                                               |
+| Item               | Value                                                                   |
+| ------------------ | ----------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                  |
+| **Phase progress** | Phase 3: 2 / 13 tasks done (P3.1, P3.2); next is P3.3 (encryption core) |
+| **Last updated**   | 2026-11-04 (Session 4)                                                  |
+| **Blocked on**     | Nothing                                                                 |
 
 **Next actions (in order)**
 
@@ -19,7 +19,7 @@
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-3. **Next task:** P3.3 (migration: `categories` and `thoughts` with RLS and pgTAP tests). In Settings, save your time zone (it is
+3. **Next task:** P3.3 (encryption core, D-021). In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
    before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
    database already has the `profiles` migration. After every new migration, run
@@ -134,6 +134,43 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): end-to-end encryption decided (D-021)
+
+- **Phase:** 3 · **Tasks:** D-021, Phase 3 restructured
+- **Done:**
+  - **Your question:** should thoughts be private even from whoever runs the database?
+    - Verified: locally, `postgres` and `service_role` have `rolbypassrls` and `supabase_admin`
+      is a superuser. So RLS keeps users apart but not the operator, who can read every row in
+      the dashboard.
+    - Spec §14 asks for privacy "part of the architecture from the beginning".
+    - The only way to keep the operator out is end-to-end encryption. You chose it **from the
+      start**, **unlock once per device**, and a passphrase of **12+ characters**.
+  - **Sources checked before designing** (no crypto from memory):
+    - OWASP: PBKDF2-HMAC-SHA256 600,000 iterations. Argon2id is preferred but not in Web
+      Crypto.
+    - MDN:
+      - salt of at least 16 bytes;
+      - AES-GCM IV of 96 bits, unique per encryption, never reused with a key;
+      - tag 128 by default;
+      - AES-KW wrapping, and the wrapped key must be extractable;
+      - Web Crypto only in secure contexts, and `localhost` counts;
+      - `CryptoKey` can be stored in IndexedDB.
+    - W3C: `CryptoKey` is serializable. That a non-extractable key stays non-extractable after
+      storage came through only as a summary, so it **will be proven in a browser in P3.3**.
+  - **Recorded:**
+    - D-021 (design, what stays visible, honest limits);
+    - DATA_MODEL: `user_keys`, and `*_ciphertext` columns with maximum lengths computed from
+      the character limits (53,376, 1,108 and 308). Name uniqueness and search move to the
+      device.
+    - ARCHITECTURE §7 (data flow);
+    - a CLAUDE.md rule;
+    - ROADMAP Phase 3, now 13 tasks: P3.3 crypto core, P3.4 keys and screens, P3.5 encrypted
+      tables, P3.11 search on the device. The P3.1 and P3.2 entries, which Prettier had
+      flattened into run-on lists, are rewritten as sentences.
+- **Decisions:** D-021 Accepted.
+- **Commits:** `docs: plan end-to-end encryption for personal text (D-021)`
+- **Next:** P3.3 (encryption core).
 
 ### 2026-11-04 — Session 4 (cont.): Brain Dump domain (P3.2)
 

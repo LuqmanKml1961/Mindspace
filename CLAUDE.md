@@ -38,6 +38,10 @@ decisions or schema changes in DECISIONS.md and DATA_MODEL.md.
 - Commit only after the user confirms, using Conventional Commits (`feat:`, `fix:`, `docs:`,
   `chore:`, `refactor:`, `test:`). Never push. No co-authored-by trailers.
 - Product tone: calm and non-judgemental. No streaks, guilt, or medical claims (spec §1, §3).
+- **End-to-end encryption (D-021):** free text a person writes (thoughts, category names,
+  later tasks and reflections) is encrypted in the browser. The server and database never
+  receive it in plaintext; never add a code path that does, and never log it. Crypto
+  parameters come from D-021 (sources: OWASP, MDN, W3C); don't change them from memory.
 
 ## Next.js version
 
