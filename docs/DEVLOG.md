@@ -20,8 +20,11 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **P2.1:** Supabase CLI (dev dependency) plus local stack on Docker. Linking the CLI to the
-   hosted project needs `supabase login` / `link`, which you run with `!`.
+4. **P2.1, finish:** the CLI is installed and initialised. You run
+   `! pnpm supabase login` (browser sign-in), then
+   `! pnpm supabase link --project-ref ftsksqfnjocgilmunljx` (it asks for the **database**
+   password; type it into the prompt, not the chat). Then **start Docker Desktop**, and Claude
+   runs `pnpm supabase start` (first run downloads several GB of images).
 
 **Open questions (yours to decide)**
 
@@ -72,19 +75,19 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 
 Checked 2026-11-03 on Windows 11 Pro. Update this when tools change.
 
-| Tool         | Version / state                                                           |
-| ------------ | ------------------------------------------------------------------------- |
-| Node.js      | v22.23.1                                                                  |
-| npm          | 10.9.8                                                                    |
-| pnpm         | 11.17.0 (latest stable on npm: 12.16.1)                                   |
-| yarn         | 4.12.0                                                                    |
-| Docker       | 29.6.1 (daemon not checked)                                               |
-| Git          | 2.44.0.windows.1                                                          |
-| Supabase CLI | not installed (plan: project dev dependency, D-011)                       |
-| GitHub CLI   | not installed                                                             |
-| Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git                 |
-| Git history  | branch `main`; you push (Claude doesn't). `cb37847` was pushed 2026-11-03 |
-| Deployment   | https://m1ndspace.vercel.app (Vercel, from `main`; D-009)                 |
+| Tool         | Version / state                                                                 |
+| ------------ | ------------------------------------------------------------------------------- |
+| Node.js      | v22.23.1                                                                        |
+| npm          | 10.9.8                                                                          |
+| pnpm         | 11.17.0 (latest stable on npm: 12.16.1)                                         |
+| yarn         | 4.12.0                                                                          |
+| Docker       | 29.6.1 (daemon not checked)                                                     |
+| Git          | 2.44.0.windows.1                                                                |
+| Supabase CLI | `supabase` 2.122.0 dev dependency (v3.0.0 deferred); run with `pnpm supabase …` |
+| GitHub CLI   | not installed                                                                   |
+| Git remote   | `origin` → https://github.com/LuqmanKml1961/Mindspace.git                       |
+| Git history  | branch `main`; you push (Claude doesn't). `cb37847` was pushed 2026-11-03       |
+| Deployment   | https://m1ndspace.vercel.app (Vercel, from `main`; D-009)                       |
 
 **Project dependencies** (as of P1.5, 2026-11-03):
 
@@ -129,6 +132,27 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): Supabase CLI
+
+- **Phase:** 2 · **Tasks:** P2.1 (partly)
+- **Done:**
+  - You ran `pnpm supabase login` before the CLI existed, which failed with "Command not found".
+    Installed the CLI.
+  - Checked first: both `supabase` 2.122.0 and 3.0.0 ship a JS launcher plus per-platform
+    optional packages (`@supabase/cli-windows-x64`). Neither has a postinstall script, so no
+    `allowBuilds` change was needed.
+  - Chose **2.122.0**, pinned (12 days old; the skill and docs reference v2). v3.0.0 is a new
+    major released 2026-11-02, deferred until its release notes are read.
+  - `supabase init --help` showed it is non-interactive by default. It created
+    `supabase/config.toml` (Postgres 17, `schema_paths = []` so imperative migrations, email OTP
+    length 6) and `supabase/.gitignore`.
+- **Problems / findings:** Docker Desktop isn't running (`npipe … dockerDesktopLinuxEngine` not
+  found), so `supabase start` waits for you. The CLI's browser `login` creates a full-access
+  token on this machine; the skill recommends scoped tokens for CI and agents.
+- **Commits:** `chore(supabase): add Supabase CLI and project config (P2.1)`
+- **Next:** you `login`, `link` and start Docker; then `supabase start`; then P2.4 (profiles
+  migration).
 
 ### 2026-11-04 — Session 4 (cont.): Supabase wiring
 
