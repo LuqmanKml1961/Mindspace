@@ -75,7 +75,7 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
   hosted project. Local auth emails (confirmation codes) land in Mailpit.
 - Auth (D-019): email and password with a typed 6-digit confirmation code, then Google (P2.6c).
   Local `config.toml` has confirmations on, a minimum password length of 8, and the code-only
-  template `supabase/templates/confirmation.html`. Config changes need `pnpm db:stop` and then
+  templates `supabase/templates/confirmation.html` and `recovery.html`. Config changes need `pnpm db:stop` and then
   `pnpm db:start`.
 - Route protection is in `src/proxy.ts` (the public auth pages are listed there). It is not a
   security boundary: every Server Action and data read must verify the user itself

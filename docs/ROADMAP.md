@@ -207,8 +207,11 @@ auth (gap G-2).
       states. Local config: confirmations on, and a code-only Confirm signup template.
       **Done 2026-11-04:** verified end to end in the browser against the local stack (see
       DEVLOG). Sign-out has a minimal Settings → Account button; P2.9 completes that section.
-- [ ] P2.6b Forgot password: request a reset code by email, type it in, then set a new password
-      (a code-only Reset password template).
+- [x] P2.6b Forgot password: request a reset code by email, type it in, then set a new password
+      (a code-only Reset password template). **Done 2026-11-04:** `/forgot-password` (public) sends
+      the code. The code step shares `EmailCodeForm` with sign-up and never reveals whether the
+      email has an account. A valid code signs the user in and redirects to `/reset-password`
+      (protected), which sets the new password. Verified in the browser and against the Auth API.
 - [ ] P2.6c Google sign-in: an OAuth button, an `auth/callback` route (`exchangeCodeForSession`)
       and an error page. You create the Google Cloud OAuth client. Test sign-in from the
       installed PWA on Android and iOS.

@@ -75,7 +75,7 @@ mindspace/
     │   ├── tasks/              # task.ts, reminder.ts, repositories
     │   └── check-ins/
     ├── application/
-    │   ├── auth/               # auth-service.ts (port: sign-up, confirm, sign-in, sign-out), schemas.ts
+    │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
     │   ├── thoughts/           # capture-thought.ts, search-thoughts.ts, schemas.ts, *.test.ts
     │   ├── tasks/
     │   └── check-ins/
@@ -86,7 +86,7 @@ mindspace/
     │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers
     │   └── container.ts        # composition root: builds use cases for the current request
     ├── app/                    # Next.js App Router (presentation)
-    │   ├── (auth)/sign-in | sign-up/, actions.ts   # server actions for the auth forms
+    │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── (app)/home | thoughts | tasks | clarity | settings/
     │   └── layout.tsx
     ├── components/             # presentation

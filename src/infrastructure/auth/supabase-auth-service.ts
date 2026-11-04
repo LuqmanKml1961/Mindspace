@@ -1,6 +1,7 @@
 import "server-only";
 import {
   isAuthApiError,
+  isAuthSessionMissingError,
   type AuthError,
   type SupabaseClient,
 } from "@supabase/supabase-js";
@@ -16,6 +17,7 @@ const failureByCode: Record<string, AuthFailure> = {
   validation_failed: "invalid_input",
   email_address_invalid: "invalid_input",
   weak_password: "weak_password",
+  same_password: "same_password",
   user_already_exists: "email_taken",
   email_exists: "email_taken",
   invalid_credentials: "invalid_credentials",
@@ -35,6 +37,9 @@ function logFailure(action: string, error: AuthError) {
 
 function toResult(action: string, error: AuthError | null): AuthResult {
   if (!error) return { ok: true };
+  if (isAuthSessionMissingError(error)) {
+    return { ok: false, reason: "session_missing" };
+  }
 
   const reason =
     isAuthApiError(error) && error.code ? failureByCode[error.code] : undefined;
@@ -75,6 +80,22 @@ export function createSupabaseAuthService(
       // Local scope: signing out here keeps the user's other devices signed in.
       const { error } = await supabase.auth.signOut({ scope: "local" });
       if (error) logFailure("sign-out", error);
+    },
+    async sendPasswordResetCode(email) {
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      return toResult("reset request", error);
+    },
+    async verifyPasswordResetCode(email, code) {
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "recovery",
+      });
+      return toResult("reset verify", error);
+    },
+    async updatePassword(password) {
+      const { error } = await supabase.auth.updateUser({ password });
+      return toResult("password update", error);
     },
   };
 }

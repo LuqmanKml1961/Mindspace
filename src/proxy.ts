@@ -2,7 +2,7 @@ import type { NextRequest } from "next/server";
 import { updateSession } from "@/infrastructure/supabase/session";
 
 // Every other route needs a signed-in user.
-const authPages = ["/sign-in", "/sign-up"];
+const authPages = ["/sign-in", "/sign-up", "/forgot-password"];
 
 export async function proxy(request: NextRequest) {
   const session = await updateSession(request);

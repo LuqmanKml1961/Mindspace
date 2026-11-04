@@ -5,16 +5,16 @@
 | Item               | Value                                                                    |
 | ------------------ | ------------------------------------------------------------------------ |
 | **Current phase**  | Phase 2 — Supabase and authentication (Phase 1 acceptance check pending) |
-| **Phase progress** | Phase 2: 8 / 12 tasks done (P2.1–P2.5, P2.6a, P2.7, P2.8)                |
+| **Phase progress** | Phase 2: 9 / 12 tasks done (P2.1–P2.5, P2.6a, P2.6b, P2.7, P2.8)         |
 | **Last updated**   | 2026-11-04 (Session 4)                                                   |
 | **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
-1. **Push in two steps.** Once P2.7 is deployed, **every page on the live site redirects to sign-in**,
-   and hosted sign-in cannot work until P2.10 (hosted SMTP, templates and the `profiles`
-   migration). So first push up to P2.6a with `git push origin 4de63c0:main` and do the Android
-   retest (item 3). Then push the rest (`git push`). Or push everything now and retest after P2.10.
+1. **Push the rest after the Android retest.** Everything up to P2.6a is pushed (`origin/main` is at
+   `4de63c0`). Once P2.7 is deployed, **every page on the live site redirects to sign-in**, and
+   hosted sign-in cannot work until P2.10 (hosted SMTP, templates and the `profiles` migration).
+   So do the Android retest (item 3) first, then `git push`. Or hold the push until P2.10.
    **Do not sign up on the live site until P2.10.** The live site was last checked on 2026-11-04 after the
    P2.2/P2.3 push: `/` redirects to `/home`, and the proxy clears a stale session cookie. The
    Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -26,10 +26,10 @@
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next tasks:** P2.6b (forgot password), P2.6c (Google: you
+4. **Next tasks:** P2.6c (Google: you
    create the Google Cloud OAuth client), P2.9 (settings) and P2.10 (hosted auth setup). Local
-   dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). Restart
-   your dev server: the one still running is Next 16.4.4. The `profiles` migration is **local only**. Push it to the hosted project with
+   dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). The
+   `profiles` migration is **local only**. Push it to the hosted project with
    `pnpm supabase db push` before deploying any code that uses it. After every new migration,
    run `pnpm db:types` and `pnpm db:test` with the local stack running.
 
@@ -140,6 +140,57 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): forgot password (P2.6b)
+
+- **Phase:** 2 · **Tasks:** P2.6b
+- **Done:**
+  - **Config:** `[auth.email.template.recovery]` points to `supabase/templates/recovery.html`
+    (code only, no link). Restarted the stack.
+  - **Probed the Auth API first** (scratch script, test user deleted):
+    - The recovery email holds a 6-digit code and no link.
+    - **An unknown email also gets 200 and no email is sent.**
+    - A wrong code gives `otp_expired`. The right code gives a session.
+    - `updateUser`: under 8 characters → `weak_password`; over 72 → `validation_failed`;
+      **the same password → `same_password`**.
+    - Afterwards the old password fails and the new one works.
+    - The auth-js source shows that `updateUser` with no session returns
+      `AuthSessionMissingError`.
+  - **Code:**
+    - **Application:** port methods `sendPasswordResetCode`, `verifyPasswordResetCode` and
+      `updatePassword`. New failures `same_password` and `session_missing`. Schemas: a shared
+      `passwordSchema`, `resetRequestSchema` and `newPasswordSchema`. The renames
+      `confirmationSchema` → `emailCodeSchema` and `CONFIRMATION_CODE_LENGTH` →
+      `EMAIL_CODE_LENGTH` reflect that both flows use them.
+    - **Adapter:** maps those calls, `same_password`, and a missing session.
+    - **Actions:**
+      - `sendResetCodeAction`;
+      - `verifyResetCodeAction`, which redirects to `/reset-password`;
+      - `updatePasswordAction`, which redirects to `/home`, or to `/sign-in` without a session;
+      - shared `resendCode` and `codeStepErrors` helpers.
+    - **UI:**
+      - `ConfirmEmailForm` became `EmailCodeForm` (renamed with `git mv`), with a `purpose` of
+        `confirm` or `reset`. Its reset wording never says whether an account exists.
+      - New `/forgot-password` (public, added to the proxy's list) and `/reset-password`
+        (protected). The set-password step can't live on `/forgot-password`, because the code
+        signs the user in and the proxy sends signed-in users away from auth pages.
+      - A "Forgot your password?" link on sign-in.
+  - **Verified in your Chrome (LUQMAN) on MYS231**, with each request in the local Auth log:
+    - the link opens `/forgot-password`, and sending the code shows the non-revealing code step;
+    - a wrong code is rejected, and resend gives the right notice and a second email;
+    - the right code lands on `/reset-password`;
+    - a short password gets the field error, and a valid one lands on Home;
+    - signed in, `/forgot-password` goes to Home;
+    - after sign-out, signing in with the new password works;
+    - an unknown email gets the same screen and **0 emails**.
+    - Signed out, `/reset-password` → 307 `/sign-in`.
+    - lint, typecheck, format:check and build pass. Test users are deleted (local database
+      empty).
+- **Decisions:** none (D-019 already lists the Reset password template for P2.10).
+- **Problems / findings:** two browser-script timing hiccups (the page was still loading, and a
+  sign-out redirect landed after my navigation). Re-checked; the app was fine.
+- **Commits:** `feat(auth): add forgot-password flow with email code (P2.6b)`
+- **Next:** P2.6c (Google). You create a Google Cloud OAuth client first.
 
 ### 2026-11-04 — Session 4 (cont.): route protection (P2.7)
 

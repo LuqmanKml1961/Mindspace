@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signUpAction } from "@/app/(auth)/actions";
-import { ConfirmEmailForm } from "@/components/auth/confirm-email-form";
+import { EmailCodeForm } from "@/components/auth/email-code-form";
 import {
   FormField,
   FormMessages,
@@ -30,9 +30,10 @@ export function SignUpForm() {
 function SignUpSteps({ onRestart }: { onRestart: () => void }) {
   const [state, formAction, pending] = useActionState(signUpAction, {});
 
-  if (state.needsConfirmation && state.email) {
+  if (state.awaitingCode && state.email) {
     return (
-      <ConfirmEmailForm
+      <EmailCodeForm
+        purpose="confirm"
         email={state.email}
         backLabel="Use a different email"
         onBack={onRestart}

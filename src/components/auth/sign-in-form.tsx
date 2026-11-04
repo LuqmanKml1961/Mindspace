@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { signInAction } from "@/app/(auth)/actions";
-import { ConfirmEmailForm } from "@/components/auth/confirm-email-form";
+import { EmailCodeForm } from "@/components/auth/email-code-form";
 import {
   FormField,
   FormMessages,
@@ -30,9 +30,10 @@ export function SignInForm() {
 function SignInSteps({ onRestart }: { onRestart: () => void }) {
   const [state, formAction, pending] = useActionState(signInAction, {});
 
-  if (state.needsConfirmation && state.email) {
+  if (state.awaitingCode && state.email) {
     return (
-      <ConfirmEmailForm
+      <EmailCodeForm
+        purpose="confirm"
         email={state.email}
         notice={state.notice}
         backLabel="Back to sign in"
@@ -76,7 +77,13 @@ function SignInSteps({ onRestart }: { onRestart: () => void }) {
           </FieldGroup>
         </form>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="flex-col gap-2">
+        <Link
+          href="/forgot-password"
+          className="text-sm font-medium text-foreground underline underline-offset-4"
+        >
+          Forgot your password?
+        </Link>
         <p className="text-sm text-muted-foreground">
           New here?{" "}
           <Link
