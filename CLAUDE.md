@@ -81,6 +81,9 @@ data. Check APIs against the version-matched docs in `node_modules/next/dist/doc
   security boundary: every Server Action and data read must verify the user itself
   (`getAppContext()`, RLS). `/auth/callback` is in its `publicRoutes`. Add any new public route
   there.
+- Email and password sign-in is hidden (`emailSignInEnabled = false` in `src/lib/features.ts`,
+  D-020) until P6.10. Google is the only sign-in. Keep the email flows working; don't delete
+  them.
 - Supabase CLI secrets for `env(...)` in `config.toml` (the Google client ID and secret) live in
   the git-ignored **root `.env`** (Supabase docs). Next.js loads it too, so never prefix them
   `NEXT_PUBLIC_`. Never print or paste their values.

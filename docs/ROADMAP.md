@@ -236,12 +236,13 @@ auth (gap G-2).
       use cases, a Supabase repository, and `getAppContext()` in the container. A profile still on
       `UTC` is pre-filled with the device zone, which you save. Setting it automatically at first
       sign-in is open (DATA_MODEL Q-5).
-- [ ] P2.10 Hosted auth setup (you, with steps from Claude), before auth is deployed:
-      `pnpm supabase db push` for `profiles`; a custom SMTP provider; Confirm email on; the
-      Confirm signup and Reset password templates showing `{{ .Token }}`; email code length 6;
-      minimum password length 8; the Google provider (the same Google client); Site URL and
-      redirect URLs (D-019). Then test sign-in, including Google, from the installed PWA on
-      Android and iOS.
+- [ ] P2.10 Hosted auth setup, Google only (D-020): the `profiles` migration on the hosted
+      database, the Google provider (the same Google client), the Site URL and redirect URLs. Then
+      test Google sign-in on the live site and from the installed PWA on Android and iOS. The
+      hosted email setup moved to P6.10. **Progress 2026-11-04:** the hosted `profiles` schema is
+      already applied and matches local (read-only checks), and the advisors report no issues.
+      Email sign-in is hidden in the UI (`src/lib/features.ts`). The sign-in screen is Google-only,
+      with a note and the logo.
 
 **Acceptance**
 
@@ -387,6 +388,12 @@ and then the private beta.
       review is your task (legal); Claude can draft.
 - [ ] P6.9 Production deployment on the chosen host. Review the hosting terms (D-009) before the
       beta.
+- [ ] P6.10 Email on the live site (D-020): buy a domain and verify it in Mailtrap (DNS). In
+      Supabase, set Mailtrap as custom SMTP, turn Confirm email on, make the Confirm signup and
+      Reset password templates show `{{ .Token }}`, and set the email code length to 6 and the
+      minimum password length to 8. Turn the hosted Email provider back on, and set
+      `emailSignInEnabled = true` in `src/lib/features.ts`. Then test email sign-up and password
+      reset on the live site.
 
 **Acceptance**
 

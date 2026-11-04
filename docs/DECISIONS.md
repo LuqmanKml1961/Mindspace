@@ -32,6 +32,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-017 | Supabase access path and tooling  | Accepted            | Phase 2                                          |
 | D-018 | Database privileges convention    | Accepted            | Every migration                                  |
 | D-019 | Sign-in methods                   | Accepted            | P2.6                                             |
+| D-020 | Email on the live site            | Accepted            | P6.10 (before the private beta)                  |
 
 ---
 
@@ -335,6 +336,33 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - Site URL and redirect URLs.
 - **Open:** sign-in from inside the installed PWA (OAuth redirects) is not covered by the docs.
   Test it on Android and iOS in P2.6c.
+- **Date:** 2026-11-04
+
+## D-020 — Email on the live site
+
+- **Context:** P2.10. You chose Mailtrap (free: 4,000 emails a month, 150 a day, one domain).
+  Mailtrap's docs say you cannot send without a domain you own and verify through DNS (4 CNAME
+  records and 1 TXT). `m1ndspace.vercel.app` cannot be verified. Mailtrap's demo domain only
+  sends to the address the Mailtrap account was registered with. Supabase's built-in sender only
+  reaches team members.
+- **Decision:** Accepted (your choice, 2026-11-04): **Google only on the live site for now.**
+  Email sign-up and password reset stay in the app and keep working locally through Mailpit. They
+  are not used on the live site until a domain is bought and verified in Mailtrap.
+- **UI (your request, 2026-11-04):** email sign-in is **hidden everywhere**, behind
+  `emailSignInEnabled = false` in `src/lib/features.ts`:
+  - sign-in shows only "Continue with Google", the auth screens show the app icon as the logo,
+    and a note explains the early stage;
+  - `/sign-up` and `/forgot-password` redirect to sign-in, and `/reset-password` redirects to
+    Home.
+  - The UI is not the lock. The Supabase Auth API is public, so the hosted **Email provider is
+    turned off** in the dashboard too.
+- **Consequence:** the hosted email setup moves from P2.10 to **P6.10**, before the private beta:
+  - a domain;
+  - the Mailtrap sending domain and SMTP in Supabase;
+  - Confirm email on;
+  - the Confirm signup and Reset password templates showing `{{ .Token }}`;
+  - an email code length of 6;
+  - a minimum password length of 8.
 - **Date:** 2026-11-04
 
 ---

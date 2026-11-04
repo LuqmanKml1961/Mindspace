@@ -11,27 +11,28 @@
 
 **Next actions (in order)**
 
-1. **Push the rest after the Android retest.** Everything up to P2.6a is pushed (`origin/main` is at
-   `4de63c0`). Once P2.7 is deployed, **every page on the live site redirects to sign-in**, and
-   hosted sign-in cannot work until P2.10 (hosted SMTP, templates and the `profiles` migration).
-   So do the Android retest (item 3) first, then `git push`. Or hold the push until P2.10.
-   **Do not sign up on the live site until P2.10.** The live site was last checked on 2026-11-04 after the
-   P2.2/P2.3 push: `/` redirects to `/home`, and the proxy clears a stale session cookie. The
-   Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
-   type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
-   Real secrets (service-role or secret key, DB password) must always be **Secret** and never
-   `NEXT_PUBLIC_`.
+1. **Finish P2.10 in the dashboards** (steps in the latest session entry):
+   - Supabase: turn on the Google provider (the same client ID and secret as the root `.env`),
+     set the Site URL and redirect URL, and **turn off the Email provider** (D-020).
+   - Google Cloud: add the live origin and the Supabase callback URL.
+   - Then `git push`, sign in with Google on https://m1ndspace.vercel.app, and do the Android
+     retest (item 3) from the installed app.
+   - `origin/main` is at `427da10` (P2.6c), and P2.7 is live, so the site requires sign-in.
+     The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
+     type **Config** (Vercel blocks `NEXT_PUBLIC_` on Secret; both values are public by design).
+     Real secrets (service-role or secret key, DB password) must always be **Secret** and never
+     `NEXT_PUBLIC_`.
 2. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
 3. **Retest on Android** (D-016, D-015): uninstall and reinstall. Both bars should be Charcoal
    Blue, and Settings → Appearance should morph the pill into a circle. Then mark Phase 1 Done.
-4. **Next task:** P2.10 (hosted auth setup, then the installed-PWA sign-in test). Then Phase 3
-   starts with P3.1 (Vitest). In Settings, save your time zone (it is pre-filled from your device). Local
-   dev needs `pnpm db:start` before `pnpm dev`, and `.env.development.local` (README). The
-   `profiles` migration is **local only**. Push it to the hosted project with
-   `pnpm supabase db push` before deploying any code that uses it. After every new migration,
-   run `pnpm db:types` and `pnpm db:test` with the local stack running.
+4. **Next task:** finish P2.10 (item 1). Then Phase 3 starts with P3.1 (Vitest). In Settings,
+   save your time zone (it is pre-filled from your device). Local dev needs `pnpm db:start`
+   before `pnpm dev`, and `.env.development.local` plus the root `.env` (README). The hosted
+   database already has the `profiles` migration. After every new migration, run
+   `pnpm db:types` and `pnpm db:test` with the local stack running, then
+   `pnpm supabase db push --dry-run` before the real push.
 
 **Open questions (yours to decide)**
 
@@ -140,6 +141,66 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-04 — Session 4 (cont.): hosted setup, Google only (P2.10, in progress)
+
+- **Phase:** 2 · **Tasks:** P2.10, D-020
+- **Done:**
+  - **Hosted `profiles` migration.** `db push --linked --dry-run --skip-vault` reported "Remote
+    database is up to date", and `migration list --linked` shows `20261104020325` both locally
+    and remotely, so you had already pushed it. Read-only `db query --linked` checks match local:
+    - RLS is on;
+    - the two policies (SELECT and UPDATE) apply to `authenticated` only;
+    - the grants are `authenticated` SELECT and UPDATE only;
+    - the `private` functions are executable only by `postgres`;
+    - both triggers exist;
+    - there are 0 users and 0 profiles.
+
+    `db advisors --linked`: no issues.
+
+  - **Email provider research.** Your choice was Mailtrap. Its docs (FAQ, sending domain,
+    Supabase guide, plans):
+    - you cannot send without a domain you own and verify (4 CNAME records and 1 TXT);
+    - the demo domain only reaches the registered address;
+    - free: 4,000 emails a month, 150 a day, 1 domain.
+
+    You chose **Google only for now** (D-020). The hosted email setup moved to **P6.10**.
+
+  - **Google-only UI (your request).** `emailSignInEnabled = false` in `src/lib/features.ts`:
+    - `/sign-in` renders `GoogleOnlySignIn`: "Continue with Google", "New here? Signing in with
+      Google creates your account.", and an Alert "Why only Google for now?" explaining the
+      early stage.
+    - `/sign-up` and `/forgot-password` redirect to `/sign-in`, and `/reset-password`
+      redirects to `/home`.
+    - The email flows are kept for P6.10.
+  - **Logo.** The auth layout shows the app icon (`/icons/icon-192.png`, 64px, rounded) above
+    the name. It uses the same file as the icon, so the open icon choice updates it too.
+  - **Verified:**
+    - dev over HTTP: the Google-only card and note render, with no email or password fields
+      or links. `/sign-up` and `/forgot-password` → 307 `/sign-in`. `?error=google` still
+      shows. The logo is optimised: 555 bytes at 1×, 1,159 at 2×.
+    - **Production build plus `next start` on port 3002** (stopped afterwards): the same 307s
+      and card.
+    - typecheck, lint, format:check and build pass.
+- **Your dashboard steps:**
+  - Supabase → Authentication → Sign In / Providers:
+    - **Google** on, with the client ID and secret, and the callback
+      `https://ftsksqfnjocgilmunljx.supabase.co/auth/v1/callback`;
+    - **Email off**, because the UI is not a lock and the Auth API is public.
+  - Supabase → URL Configuration: Site URL `https://m1ndspace.vercel.app`, and redirect URL
+    `https://m1ndspace.vercel.app/auth/callback`.
+  - Google Cloud: the origin `https://m1ndspace.vercel.app` and that callback.
+- **Decisions:** D-020 Accepted.
+- **Problems / findings:**
+  - The live Google error "provider is not enabled" is expected until the Google provider is
+    turned on.
+  - In Windows Git Bash, `MSYS_NO_PATHCONV=1` also breaks `-o /dev/null`, so use it only when
+    needed.
+  - Stopping the background `next start` task left its Node child running, so it was killed
+    by PID after confirming its command line.
+- **Commits:** `feat(auth): show Google-only sign-in with early-stage note and logo (D-020)`
+- **Next:** your dashboard steps, then the live and installed-PWA Google test, which completes
+  P2.10.
 
 ### 2026-11-04 — Session 4 (cont.): Settings with email and time zone (P2.9)
 
