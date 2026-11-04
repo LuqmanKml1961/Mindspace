@@ -164,7 +164,7 @@ screens. No backend yet.
 **Goal:** only signed-in users get in, every user has a profile row, and the RLS testing harness
 is in place. This phase is separate because RLS needs auth and the spec has no milestone for
 auth (gap G-2).
-**Needs:** D-003, D-007, D-011.
+**Needs:** D-003, D-011, D-019 (which replaced D-007).
 
 - [x] P2.1 Add the Supabase CLI as a dev dependency and run `supabase init`. The local stack runs on
       Docker (`supabase start`). You create a hosted free-tier project for preview and production.
@@ -200,8 +200,16 @@ auth (gap G-2).
       the local database, then formats it with Prettier. `createSupabaseServerClient()` is typed
       with `<Database>`. A throwaway probe proved that wrong tables, unselected columns and
       wrongly typed values are type errors.
-- [ ] P2.6 Build the auth flow for D-007: a `(auth)/sign-in` page, server actions for sign-in and
-      sign-out, an `auth/callback` route if the method needs one, and friendly error states.
+- [ ] P2.6a Email and password (D-019): a `(auth)` route group with sign-up and sign-in pages.
+      Sign-up sends a 6-digit confirmation code, which the user types in, with a resend option.
+      Add server actions for sign-up, confirm, sign-in and sign-out, an application-layer auth
+      port with a Supabase adapter behind the container, zod input schemas, and calm error
+      states. Local config: confirmations on, and a code-only Confirm signup template.
+- [ ] P2.6b Forgot password: request a reset code by email, type it in, then set a new password
+      (a code-only Reset password template).
+- [ ] P2.6c Google sign-in: an OAuth button, an `auth/callback` route (`exchangeCodeForSession`)
+      and an error page. You create the Google Cloud OAuth client. Test sign-in from the
+      installed PWA on Android and iOS.
 - [ ] P2.7 Protect routes: the `(app)` layout requires a session (checked on the server), and a
       signed-in user who visits sign-in is sent to `/home`.
 - [x] P2.8 Set up the pgTAP harness in `supabase/tests/`. First test: user A cannot read or update
@@ -211,6 +219,10 @@ auth (gap G-2).
       grants, the trigger disabled) failed the 7 tests aimed at those breaks.
 - [ ] P2.9 Settings page: the signed-in email, a timezone setting (pre-filled from the browser,
       editable), and sign-out. (Settings → Appearance already exists: D-015.)
+- [ ] P2.10 Hosted auth setup (you, with steps from Claude), before auth is deployed:
+      `pnpm supabase db push` for `profiles`; a custom SMTP provider; Confirm email on; the
+      Confirm signup and Reset password templates showing `{{ .Token }}`; email code length 6;
+      minimum password length 8; the Google provider; Site URL and redirect URLs (D-019).
 
 **Acceptance**
 
@@ -387,5 +399,7 @@ and then the private beta.
 - AI categorisation: opt-in, server-side, disclosed (spec §4.1, §14).
 - Push notifications and a morning review (spec §4.5).
 - Reflection pattern review, in non-medical language (spec §4.6).
+- Sign in with Apple (D-019): needs an Apple Developer account and a secret rotated every 6
+  months.
 - Guest or local-only mode (D-003).
 - Dark theme, if it is not delivered in P1.6.

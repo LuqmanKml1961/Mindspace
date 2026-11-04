@@ -11,26 +11,27 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 ## Summary
 
-| ID    | Topic                             | Status   | Needed before                                    |
-| ----- | --------------------------------- | -------- | ------------------------------------------------ |
-| D-001 | Product name                      | Accepted | P6.1 (manifest). Working name is fine until then |
-| D-002 | Visual direction                  | Accepted | P1.6 (design tokens)                             |
-| D-003 | Accounts                          | Accepted | Phase 2                                          |
-| D-004 | Scope and build order             | Accepted | Phase 1                                          |
-| D-005 | Technology stack                  | Accepted | P1.1 (scaffold)                                  |
-| D-006 | Onion Architecture                | Accepted | —                                                |
-| D-007 | Sign-in method                    | Accepted | P2.6                                             |
-| D-008 | Reminders in the MVP              | Accepted | Phase 4                                          |
-| D-009 | Hosting                           | Accepted | P1.10 (deployment previews)                      |
-| D-010 | Package manager                   | Accepted | P1.1                                             |
-| D-011 | Local database and tests          | Accepted | Phase 2                                          |
-| D-012 | shadcn/ui library and preset      | Accepted | Before more components are added                 |
-| D-013 | Colour palette and control height | Accepted | P1.6                                             |
-| D-014 | Installable app and screen edges  | Accepted | —                                                |
-| D-015 | Appearance setting (theme toggle) | Accepted | —                                                |
-| D-016 | System bars always dark           | Accepted | —                                                |
-| D-017 | Supabase access path and tooling  | Accepted | Phase 2                                          |
-| D-018 | Database privileges convention    | Accepted | Every migration                                  |
+| ID    | Topic                             | Status              | Needed before                                    |
+| ----- | --------------------------------- | ------------------- | ------------------------------------------------ |
+| D-001 | Product name                      | Accepted            | P6.1 (manifest). Working name is fine until then |
+| D-002 | Visual direction                  | Accepted            | P1.6 (design tokens)                             |
+| D-003 | Accounts                          | Accepted            | Phase 2                                          |
+| D-004 | Scope and build order             | Accepted            | Phase 1                                          |
+| D-005 | Technology stack                  | Accepted            | P1.1 (scaffold)                                  |
+| D-006 | Onion Architecture                | Accepted            | —                                                |
+| D-007 | Sign-in method                    | Superseded by D-019 | P2.6                                             |
+| D-008 | Reminders in the MVP              | Accepted            | Phase 4                                          |
+| D-009 | Hosting                           | Accepted            | P1.10 (deployment previews)                      |
+| D-010 | Package manager                   | Accepted            | P1.1                                             |
+| D-011 | Local database and tests          | Accepted            | Phase 2                                          |
+| D-012 | shadcn/ui library and preset      | Accepted            | Before more components are added                 |
+| D-013 | Colour palette and control height | Accepted            | P1.6                                             |
+| D-014 | Installable app and screen edges  | Accepted            | —                                                |
+| D-015 | Appearance setting (theme toggle) | Accepted            | —                                                |
+| D-016 | System bars always dark           | Accepted            | —                                                |
+| D-017 | Supabase access path and tooling  | Accepted            | Phase 2                                          |
+| D-018 | Database privileges convention    | Accepted            | Every migration                                  |
+| D-019 | Sign-in methods                   | Accepted            | P2.6                                             |
 
 ---
 
@@ -121,9 +122,11 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
     lands in the wrong place. A typed one-time code avoids that.
   - Google OAuth avoids email delivery but needs a Google Cloud OAuth setup.
 - **Recommendation:** **Email one-time code** for Phase 2. Consider adding Google OAuth later.
-- **Status:** Accepted
+- **Status:** Superseded by D-019
 - **Decision:** Accepted: email one-time code.
 - **Date:** 2026-11-03
+- **Superseded 2026-11-04 by D-019:** a code at every sign-in uses too many emails for the
+  free SMTP tiers you would use.
 
 ## D-008 — Reminders in the MVP
 
@@ -303,6 +306,35 @@ database, debugging, development`, following Supabase's MCP security guidance. S
     sign-up trigger).
   - Every migration is verified locally (structure, behaviour with two users, and
     `supabase db advisors`) before it is committed.
+- **Date:** 2026-11-04
+
+## D-019 — Sign-in methods
+
+- **Context:** P2.6, replacing D-007. A code at every sign-in means one email per sign-in. The
+  hosted project has no custom SMTP yet, and the free tiers you would use (Resend, Mailtrap)
+  cap monthly volume at a few thousand. Supabase's built-in sender only delivers to project
+  team members, at 2 emails an hour. Since 2026-06-03, new Free projects on it also cannot edit
+  their email templates (Supabase changelog).
+- **Decision:** Accepted (your answers, 2026-11-04).
+  1. **Email and password**, confirmed with a typed **6-digit code**, not a link. Mobile links
+     can open in the browser instead of the installed app (the D-007 reason). Email goes out
+     only to confirm a new account and to reset a password, never at each sign-in. Minimum
+     password length is 8.
+  2. **Google** (OAuth, PKCE, via an `/auth/callback` route).
+  3. **Apple later**, as a backlog item. It needs a paid Apple Developer account, Apple
+     requires a new secret every 6 months, and Apple sends no name in the web flow (Supabase
+     docs).
+  4. The emailed one-time code for sign-in is **dropped**.
+- **Hosted setup this needs (P2.10):**
+  - a custom SMTP provider;
+  - "Confirm email" on;
+  - the Confirm signup and Reset password templates showing `{{ .Token }}` (the code);
+  - an email code length of 6;
+  - a minimum password length of 8;
+  - the Google provider configured;
+  - Site URL and redirect URLs.
+- **Open:** sign-in from inside the installed PWA (OAuth redirects) is not covered by the docs.
+  Test it on Android and iOS in P2.6c.
 - **Date:** 2026-11-04
 
 ---
