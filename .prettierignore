@@ -2,5 +2,6 @@ pnpm-lock.yaml
 pnpm-workspace.yaml
 AGENTS.md
 .vscode/mcp.json
+.mcp.json
 mindspace_product_and_development_plan.md
 .claude/
