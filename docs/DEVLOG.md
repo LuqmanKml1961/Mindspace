@@ -5,16 +5,16 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 2 / 10 tasks done (P4.1, P4.2); next is P4.3                       |
+| **Phase progress** | Phase 4: 3 / 10 tasks done (P4.1–P4.3, P4.3 local only); next is P4.4       |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
 **Next actions (in order)**
 
-1. **Hosted database:** up to date with all three migrations (`profiles`, `user_keys`,
-   `categories` and `thoughts`). P3.5 was pushed with your approval on 2026-11-04, and RLS,
-   policies, grants, constraints and indexes match local. After deploying, set up the passphrase
-   on the live site and time PBKDF2 on a phone.
+1. **Hosted database:** has the first three migrations (`profiles`, `user_keys`,
+   `categories` and `thoughts`). **P4.3's `tasks` and `reminders` migration is local only**, until
+   you approve the push (dry run first). After deploying, set up the passphrase on the live
+   site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -24,8 +24,8 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.3 next:** the `tasks` and `reminders` migration, with RLS and pgTAP tests.
-   It goes to the hosted database only with your approval.
+4. **Now: Phase 4, P4.4 next:** the Supabase task and reminder repositories, wired into the
+   container. P4.3's migration still needs your approval for the hosted push (item 1).
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -157,6 +157,52 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.3 tasks and reminders migration
+
+- **Phase:** 4 · **Task:** P4.3 (your "sure, go").
+- **Migration** `20261105080758_create_tasks_and_reminders.sql` (`migration new`; it follows
+  the P3.5 thoughts migration):
+  - **`tasks`:**
+    - ciphertext `title` (≤ 2,708) and `notes` (null or ≤ 53,376), in the same `v1.` format
+      check;
+    - `due_date date`, `due_time time` with `tasks_time_needs_date`;
+    - `priority` (low, normal or high; default normal), `completed_at`;
+    - `source_thought_id` with the composite FK to `thoughts`, `on delete set null`;
+    - `unique (id, user_id)` and the `updated_at` trigger;
+    - indexes `(user_id, completed_at, due_date)` and `(source_thought_id, user_id)`.
+  - **`reminders`:**
+    - `remind_at`, `dismissed_at`;
+    - the composite FK to `tasks` with `on delete cascade`;
+    - a partial index on active reminders and a `(task_id, user_id)` index.
+  - **Grants (D-018):** revoke all, then the CRUD grants on `tasks`. On `reminders`, `select,
+insert, update`, with no delete, because reminders are dismissed. Own-row policies on both.
+- **Applied** with `migration up --local`, which kept your data. `pnpm db:types` added only the
+  two tables.
+- **Tests:**
+  - `tasks_rls_test.sql` (22): own rows only; no task for B; no link to B's thought, by insert
+    or update; time needs a date; unknown priority; plaintext title and notes rejected; the
+    largest ciphertexts accepted and one block over rejected; complete; no hand-over to B;
+    deleting a thought keeps its tasks; unfiltered update and delete as A leave B alone;
+    signed-out visitors denied; `updated_at`; the account cascade.
+  - `reminders_rls_test.sql` (12): own rows only; none for B; none on B's task, by insert or
+    update; dismiss; delete denied; unfiltered update leaves B alone; signed-out visitors
+    denied; the task and account cascades.
+- **Verified:**
+  - Ten deliberate breaks, each caught by its own test:
+    - all four tasks policies opened;
+    - the reminders select and update policies opened;
+    - each composite FK reduced to a single column;
+    - the time rule dropped;
+    - a reminder delete grant added.
+  - `supabase db advisors --local`: no issues.
+  - The FK-index query finds nothing unindexed.
+  - `has_table_privilege` matches the grants above.
+  - 93 pgTAP tests, 138 unit tests, lint, typecheck and the build pass.
+- **Hosted:** not pushed. It waits for your approval, with `pnpm supabase db push --dry-run`
+  first.
+- **Commits:** `feat(db): add tasks and reminders with RLS (P4.3)`
+- **Next:** the hosted push (with your approval), then P4.4.
 
 ### 2026-11-05 — Session 5 (cont.): P4.2 dates and time zones
 

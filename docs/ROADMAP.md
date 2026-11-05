@@ -443,10 +443,18 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
       device zone once and shows a toast.
     - Settings pre-fills the device zone under the same rule, so a UTC you saved shows as
       saved.
-- [ ] P4.3 Migration: `tasks` and `reminders`, with indexes, ownership FKs and RLS. pgTAP tests,
+- [x] P4.3 Migration: `tasks` and `reminders`, with indexes, ownership FKs and RLS. pgTAP tests,
       including a cross-user FK attempt that must be rejected. Regenerate the types. The task
       title and notes are ciphertext (D-021, DATA_MODEL.md), encrypted and decrypted in the
-      browser as in P3.7.
+      browser as in P3.7. **Done 2026-11-05 (local):**
+  - `20261105080758_create_tasks_and_reminders.sql`, applied with `migration up --local`. Types
+    were regenerated, with only `tasks` and `reminders` added.
+  - **Tests:** `tasks_rls_test.sql` (22) and `reminders_rls_test.sql` (12). Cross-user links (a
+    task to B's thought, a reminder to B's task) are rejected, by insert and by update.
+  - **Ten deliberate breaks** (each policy, both ownership FKs, the time rule, a delete grant on
+    reminders) were all caught.
+  - Advisors: no issues. No unindexed foreign keys.
+  - **Hosted:** waiting for your approval (dry run first).
 - [ ] P4.4 Infrastructure repositories, wired into the composition root.
 - [ ] P4.5 Use cases: create, edit, complete, reopen and delete a task; set due date and priority;
       add and dismiss a reminder; list Today (overdue plus today), Upcoming, No date and recently

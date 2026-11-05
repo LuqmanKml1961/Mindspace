@@ -205,6 +205,17 @@ Index: `(user_id, completed_at, due_date)`. `unique (id, user_id)`. The title an
 encrypted (D-021). The due date, time, priority and completion stay readable, so the Today,
 Upcoming and Completed views (P4.5) can be queried and sorted.
 
+**Built in P4.3** (`20261105080758_create_tasks_and_reminders.sql`):
+
+- Named constraints: `tasks_time_needs_date`, `tasks_id_user_id_key` and
+  `tasks_source_thought_fk`.
+- The ciphertext checks use the thoughts format: title ≤ 2,708, notes ≤ 53,376.
+- A second index, `(source_thought_id, user_id)`, serves thought deletes.
+- `updated_at` is kept by `private.set_updated_at()`.
+- **Grants:** `authenticated` has `select, insert, update, delete`; `anon` and `service_role` have
+  nothing. There are four own-row policies.
+- `supabase/tests/tasks_rls_test.sql` has 22 checks.
+
 ### reminders (Phase 4)
 
 | Column         | Type             | Notes                                                              |
@@ -217,6 +228,16 @@ Upcoming and Completed views (P4.5) can be queried and sorted.
 | `created_at`   | timestamptz      |                                                                    |
 
 Partial index: `(user_id, remind_at) where dismissed_at is null`.
+
+**Built in P4.3** (same migration):
+
+- Constraint `reminders_task_fk`, plus an index on `(task_id, user_id)` for task deletes.
+- Deleting an account removes reminders through their tasks (indexed). The direct `user_id`
+  cascade finds the partial index instead, which is fine at this size.
+- **Grants:** `authenticated` has `select, insert, update` and **no delete**. Reminders are
+  dismissed (D-008) and go with their task. `anon` and `service_role` have nothing. There are
+  three own-row policies.
+- `supabase/tests/reminders_rls_test.sql` has 12 checks.
 
 ### daily_checkins (Phase 5)
 

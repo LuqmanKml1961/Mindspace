@@ -56,6 +56,93 @@ export type Database = {
         };
         Relationships: [];
       };
+      reminders: {
+        Row: {
+          created_at: string;
+          dismissed_at: string | null;
+          id: string;
+          remind_at: string;
+          task_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          dismissed_at?: string | null;
+          id?: string;
+          remind_at: string;
+          task_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          dismissed_at?: string | null;
+          id?: string;
+          remind_at?: string;
+          task_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "reminders_task_fk";
+            columns: ["task_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id", "user_id"];
+          },
+        ];
+      };
+      tasks: {
+        Row: {
+          completed_at: string | null;
+          created_at: string;
+          due_date: string | null;
+          due_time: string | null;
+          id: string;
+          notes_ciphertext: string | null;
+          priority: string;
+          source_thought_id: string | null;
+          title_ciphertext: string;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          completed_at?: string | null;
+          created_at?: string;
+          due_date?: string | null;
+          due_time?: string | null;
+          id?: string;
+          notes_ciphertext?: string | null;
+          priority?: string;
+          source_thought_id?: string | null;
+          title_ciphertext: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          completed_at?: string | null;
+          created_at?: string;
+          due_date?: string | null;
+          due_time?: string | null;
+          id?: string;
+          notes_ciphertext?: string | null;
+          priority?: string;
+          source_thought_id?: string | null;
+          title_ciphertext?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_source_thought_fk";
+            columns: ["source_thought_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "thoughts";
+            referencedColumns: ["id", "user_id"];
+          },
+        ];
+      };
       thoughts: {
         Row: {
           category_id: string | null;
