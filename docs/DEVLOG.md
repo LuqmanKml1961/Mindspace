@@ -5,7 +5,7 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 7 / 10 tasks done (P4.1–P4.7; P4.3 also hosted); next is P4.8      |
+| **Phase progress** | Phase 4: 8 / 10 tasks done (P4.1–P4.8; P4.3 also hosted); next is P4.9      |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
@@ -24,9 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.8 next:** in-app reminders (D-008). Due reminders appear on Home and Tasks,
-   with a dismiss action; there is no push. Tasks (P4.6) and "Make it a task" (P4.7) are ready
-   to try locally.
+4. **Now: Phase 4, P4.9 next:** Home shows a summary of today's tasks and upcoming reminders,
+   with overdue items neutral. Tasks (P4.6), "Make it a task" (P4.7) and reminders (P4.8) are
+   ready to try locally.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -158,6 +158,47 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.8 in-app reminders
+
+- **Phase:** 4 · **Task:** P4.8 (your "go"; you approved the commit ahead: "commit after done").
+- **Done:**
+  - **Domain `isReminderDue`:** due from its time onwards, never once dismissed (2 tests).
+  - **Application:** `makeListReminderRecords` replaces `makeListActiveReminders`.
+    - It returns the active reminders with their open tasks' records (ciphertext), so the
+      browser can show the titles.
+    - Reminders of completed or missing tasks are left out, with one read per distinct task
+      (1 test).
+  - **Server Actions:** `addReminderAction` (`reminderInputSchema`) and `dismissReminderAction`,
+    both with `refresh()`. Browser wrappers: `addReminder` and `dismissReminder`.
+  - **UI:**
+    - `ReminderList`: a Card that decrypts the titles, with a Now badge and Dismiss. It is
+      hidden when there is nothing to show. On Home: all active, up to 5. On Tasks: due only.
+    - `TaskReminders` in the edit sheet: the list, Dismiss, and a `datetime-local` picker with
+      Add, for open tasks only.
+    - `useNow`: a 30 s `useSyncExternalStore` clock, null on the server, so hydration matches.
+    - `reminderLabel`: "Today, 6:00 PM", "Tomorrow, …" or a short date, in the device's time
+      zone.
+- **In Chrome (MYS231):**
+  - **Setting:** 18:00 today and 09:00 tomorrow on the dentist test task gave both toasts, the
+    sheet listed both, and the picker cleared.
+  - **Tasks** showed only the due one, with Now. **Home** showed both, soonest first, with Now on
+    the due one. A screenshot was saved.
+  - **Dismiss on Home:** "Reminder dismissed.", and the card went to 1 reminder.
+  - **Live:** a reminder for 18:14, set at 18:13:32, appeared on Tasks by 18:15:15 with no
+    reload.
+  - **Completing** the task hid its reminder, and **Undo** brought it back.
+  - **Database:** the 18:00 reminder is dismissed; 18:14 and tomorrow 09:00 are active.
+  - **No console errors** on fresh loads. The 6:08 errors came from the moment between the
+    rename and the container edit.
+- **Verified:**
+  - 174 unit tests, lint, typecheck and the build pass.
+  - Four deliberate breaks were all caught: dismissed still due; due only after its time;
+    completed tasks still reminding; one read per reminder.
+- **Not done:** a screenshot of Tasks, because Chrome had paused rendering again. The Home
+  screenshots were taken.
+- **Commits:** `feat(tasks): add in-app reminders (P4.8)`
+- **Next:** P4.9 (the Home summary).
 
 ### 2026-11-05 — Session 5 (cont.): P4.7 turn a thought into a task
 

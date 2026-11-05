@@ -1,8 +1,13 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { taskEditsSchema, taskInputSchema } from "@/application/tasks/schemas";
+import {
+  reminderInputSchema,
+  taskEditsSchema,
+  taskInputSchema,
+} from "@/application/tasks/schemas";
 import { idSchema } from "@/application/thoughts/schemas";
+import type { Reminder } from "@/domain/tasks/reminder";
 import type { EncryptedTask } from "@/domain/tasks/task-repository";
 import { getAppContext } from "@/infrastructure/container";
 import { attempt, failure, type ActionResult } from "@/lib/action-result";
@@ -78,5 +83,28 @@ export async function reopenTaskAction(
   if (!parsedId.success) return failure(new Error("Invalid task id"));
   return attempt(() =>
     refreshed(() => useCases.reopenTask(user.id, parsedId.data)),
+  );
+}
+
+// Reminders hold no free text (D-008), so they arrive as they are.
+export async function addReminderAction(
+  input: unknown,
+): Promise<ActionResult<Reminder>> {
+  const { user, useCases } = await getAppContext();
+  const parsed = reminderInputSchema.safeParse(input);
+  if (!parsed.success) return failure(new Error("Invalid reminder"));
+  return attempt(() =>
+    refreshed(() => useCases.addReminder(user.id, parsed.data)),
+  );
+}
+
+export async function dismissReminderAction(
+  id: unknown,
+): Promise<ActionResult<Reminder>> {
+  const { user, useCases } = await getAppContext();
+  const parsedId = idSchema.safeParse(id);
+  if (!parsedId.success) return failure(new Error("Invalid reminder id"));
+  return attempt(() =>
+    refreshed(() => useCases.dismissReminder(user.id, parsedId.data)),
   );
 }

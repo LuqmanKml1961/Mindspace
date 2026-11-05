@@ -15,6 +15,17 @@ export type Reminder = {
 // The database assigns id and createdAt, and a new reminder is not dismissed.
 export type NewReminder = Pick<Reminder, "userId" | "taskId" | "remindAt">;
 
+// Due once its time has come, until it is dismissed.
+export function isReminderDue(
+  reminder: Pick<Reminder, "remindAt" | "dismissedAt">,
+  now: Date,
+): boolean {
+  return (
+    reminder.dismissedAt === null &&
+    reminder.remindAt.getTime() <= now.getTime()
+  );
+}
+
 export function createReminder(props: {
   userId: string;
   taskId: string;

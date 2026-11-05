@@ -18,6 +18,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Reminder } from "@/domain/tasks/reminder";
 import type { Task } from "@/domain/tasks/task";
 import type { EncryptedTask } from "@/domain/tasks/task-repository";
 import { errorMessage } from "@/lib/action-errors";
@@ -48,11 +49,13 @@ const emptyText: Record<TaskViewName, { title: string; description: string }> =
 export function TaskList({
   userId,
   records,
+  reminders,
   today,
   view,
 }: {
   userId: string;
   records: EncryptedTask[];
+  reminders: Reminder[];
   today: string;
   view: TaskViewName;
 }) {
@@ -154,6 +157,7 @@ export function TaskList({
       <TaskSheet
         userId={userId}
         task={editing}
+        reminders={reminders}
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}
         onClosed={() => setEditing(null)}

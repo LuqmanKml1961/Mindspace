@@ -481,7 +481,8 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
       covering the last **7 days** (`RECENTLY_COMPLETED_DAYS`, a default you can change);
     - create and edit re-check the readable date and time with the domain rules;
     - `completeTask` and `dismissReminder` use the server's clock; `reopenTask`;
-      `addReminder` (domain-checked); `listActiveReminders`.
+      `addReminder` (domain-checked); `listActiveReminders` (renamed `listReminderRecords` in
+      P4.8).
   - **Schemas** (`schemas.ts`): ciphertext shapes and sizes as the database checks them; the
     date and time are sent together; completion and user ids are dropped.
   - **Wiring:** the server use cases in `container.ts` and `createTaskUseCases` in
@@ -510,8 +511,18 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     - takes you to the view where the task landed.
   - **Disabled while the thought has unsaved edits.**
   - **Shared fields:** `TaskFields` is shared with the edit sheet.
-- [ ] P4.8 In-app reminders (D-008): due reminders appear on Home ("Upcoming reminders") and on
-      Tasks, with a dismiss action. No push.
+- [x] P4.8 In-app reminders (D-008): due reminders appear on Home ("Upcoming reminders") and on
+      Tasks, with a dismiss action. No push. **Done 2026-11-05:**
+  - **Setting a reminder:** in the task's edit sheet, through "Remind me at" (a native
+    `datetime-local` picker in the device's time zone). Add and Dismiss save at once.
+  - **Home:** "Upcoming reminders" lists the active ones, soonest first, with due ones marked
+    **Now**, up to 5. The card is hidden when there are none.
+  - **Tasks:** a "Reminders" card shows only the due ones.
+  - **Live:** the lists re-check the time every 30 s (`useNow`), so a reminder appears when it
+    is due, without a reload.
+  - **Completed tasks:** their reminders are hidden, and reopening brings them back
+    (`listReminderRecords`).
+  - **Domain:** `isReminderDue`.
 - [ ] P4.9 Home: a summary of today's tasks and upcoming reminders. Overdue items look neutral, with
       no red alarms.
 - [ ] P4.10 Validation, empty and error states.

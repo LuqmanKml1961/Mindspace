@@ -11,11 +11,12 @@ import {
 import {
   makeAddReminder,
   makeDismissReminder,
-  makeListActiveReminders,
+  makeListReminderRecords,
 } from "@/application/tasks/reminders";
 import type { Profile } from "@/domain/profiles/profile";
 import type { ProfileRepository } from "@/domain/profiles/profile-repository";
 import { ValidationError } from "@/domain/shared/errors";
+import type { Reminder } from "@/domain/tasks/reminder";
 import type { ReminderRepository } from "@/domain/tasks/reminder-repository";
 import type { TaskRepository } from "@/domain/tasks/task-repository";
 
@@ -188,13 +189,44 @@ describe("reminders (server)", () => {
     expect(calls).toHaveLength(1);
   });
 
-  it("lists active reminders and dismisses with the server's clock", async () => {
+  it("dismisses with the server's clock", async () => {
     const { calls, reminders } = recording();
-    await makeListActiveReminders({ reminders })("user-a");
     await makeDismissReminder({ reminders, clock })("user-a", "reminder-1");
-    expect(calls).toEqual([
-      ["listActive", "user-a"],
-      ["dismiss", "user-a", "reminder-1", now],
-    ]);
+    expect(calls).toEqual([["dismiss", "user-a", "reminder-1", now]]);
+  });
+
+  it("lists active reminders with their open tasks, leaving out completed and missing ones", async () => {
+    const reminder = (id: string, taskId: string): Reminder => ({
+      id,
+      userId: "user-a",
+      taskId,
+      remindAt: now,
+      dismissedAt: null,
+      createdAt: now,
+    });
+    const reminders = {
+      listActive: async () => [
+        reminder("r1", "t-open"),
+        reminder("r2", "t-done"),
+        reminder("r3", "t-open"),
+        reminder("r4", "t-gone"),
+      ],
+    } as unknown as ReminderRepository;
+    const reads: string[] = [];
+    const tasks = {
+      findById: async (_userId: string, id: string) => {
+        reads.push(id);
+        if (id === "t-open") return { id, completedAt: null };
+        if (id === "t-done") return { id, completedAt: now };
+        return null;
+      },
+    } as unknown as TaskRepository;
+
+    const result = await makeListReminderRecords({ reminders, tasks })(
+      "user-a",
+    );
+    expect(result.reminders.map((r) => r.id)).toEqual(["r1", "r3"]);
+    expect(result.tasks.map((t) => t.id)).toEqual(["t-open"]);
+    expect(reads.sort()).toEqual(["t-done", "t-gone", "t-open"]);
   });
 });

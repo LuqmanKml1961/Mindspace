@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ReminderList } from "@/components/tasks/reminder-list";
 import { InboxPreview } from "@/components/thoughts/inbox-preview";
 import { buttonVariants } from "@/components/ui/button";
 import { getAppContext } from "@/infrastructure/container";
@@ -7,10 +8,14 @@ import { getAppContext } from "@/infrastructure/container";
 export const metadata: Metadata = { title: "Home" };
 
 const PREVIEW_SIZE = 3;
+const REMINDERS_SHOWN = 5;
 
 export default async function HomePage() {
   const { user, useCases } = await getAppContext();
-  const inbox = await useCases.getInboxPreview(user.id, PREVIEW_SIZE);
+  const [inbox, reminders] = await Promise.all([
+    useCases.getInboxPreview(user.id, PREVIEW_SIZE),
+    useCases.listReminderRecords(user.id),
+  ]);
 
   return (
     <>
@@ -27,6 +32,13 @@ export default async function HomePage() {
           Brain Dump
         </Link>
       </div>
+      <ReminderList
+        userId={user.id}
+        reminders={reminders.reminders}
+        tasks={reminders.tasks}
+        title="Upcoming reminders"
+        limit={REMINDERS_SHOWN}
+      />
       <InboxPreview
         userId={user.id}
         records={inbox.records}

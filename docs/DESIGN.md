@@ -271,6 +271,17 @@ darken `input`.
   - **Edit sheet:** **Sheet** on the right, full width on phones. It has the title, notes, a
     native date and time pair (the time is disabled until there is a date; "Clear date" clears
     both), and **ToggleGroup** priority. Save, and Delete with the same confirmation as thoughts.
+  - **Reminders (P4.8, D-008, in-app only):**
+    - **In the edit sheet:** a "Reminders" field lists the task's reminders, each with Dismiss,
+      and a "Remind me at" `datetime-local` picker with Add inside it. The hint reads "Shows on
+      Home and Tasks when it's time. No notifications are sent."
+    - **On Home:** an "Upcoming reminders" Card lists active reminders, soonest first; due ones
+      carry a secondary **Now** badge. On Tasks, a "Reminders" Card shows only the due ones.
+      Each row is an outline Item on the page colour (the boxes-in-cards rule, §3), with a ghost
+      Dismiss.
+    - **Times:** shown in the device's time zone ("Today, 6:00 PM", "Tomorrow, 9:00 AM").
+    - **Quiet by design:** the cards don't show when empty, and a completed task's reminders
+      don't show.
   - **"Make it a task" (P4.7):**
     - an outline button with the Tasks icon, beside Save on the thought page, disabled while
       there are unsaved edits;

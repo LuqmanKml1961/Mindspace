@@ -5,6 +5,7 @@ import { HugeiconsIcon } from "@hugeicons/react";
 import { useState, useTransition } from "react";
 import { SubmitButton } from "@/components/forms/form-parts";
 import { TaskFields, type TaskDraft } from "@/components/tasks/task-fields";
+import { TaskReminders } from "@/components/tasks/task-reminders";
 import { taskUseCases } from "@/components/tasks/task-use-cases";
 import {
   AlertDialog,
@@ -28,6 +29,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Spinner } from "@/components/ui/spinner";
+import type { Reminder } from "@/domain/tasks/reminder";
 import type { Task, TaskPriority } from "@/domain/tasks/task";
 import { errorMessage } from "@/lib/action-errors";
 import { notify } from "@/lib/notify";
@@ -62,10 +64,12 @@ function changesBetween(task: Task, draft: TaskDraft) {
 function TaskForm({
   userId,
   task,
+  reminders,
   onDone,
 }: {
   userId: string;
   task: Task;
+  reminders: Reminder[];
   onDone: () => void;
 }) {
   const [draft, setDraft] = useState(() => draftOf(task));
@@ -114,12 +118,16 @@ function TaskForm({
         <SheetTitle>Edit task</SheetTitle>
         <SheetDescription>Only the title is needed.</SheetDescription>
       </SheetHeader>
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-6 pb-2">
         <TaskFields
           draft={draft}
           pending={pending}
           onChange={(next) => setDraft({ ...draft, ...next })}
         />
+        {/* A completed task can't remind you, so its reminders are hidden until it reopens. */}
+        {task.completedAt === null && (
+          <TaskReminders taskId={task.id} reminders={reminders} />
+        )}
       </div>
       <SheetFooter className="flex-row flex-wrap items-center justify-between">
         <SubmitButton
@@ -189,12 +197,15 @@ function TaskForm({
 export function TaskSheet({
   userId,
   task,
+  reminders,
   open,
   onClose,
   onClosed,
 }: {
   userId: string;
   task: Task | null;
+  // Active reminders; the sheet shows those of its task.
+  reminders: Reminder[];
   open: boolean;
   onClose: () => void;
   onClosed: () => void;
@@ -215,6 +226,7 @@ export function TaskSheet({
             key={task.id}
             userId={userId}
             task={task}
+            reminders={reminders.filter((r) => r.taskId === task.id)}
             onDone={onClose}
           />
         )}

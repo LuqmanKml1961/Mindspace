@@ -22,7 +22,7 @@ import {
 import {
   makeAddReminder,
   makeDismissReminder,
-  makeListActiveReminders,
+  makeListReminderRecords,
 } from "@/application/tasks/reminders";
 import {
   makeCreateCategoryRecord,
@@ -91,7 +91,7 @@ export async function getAppContext() {
       completeTask: makeCompleteTask({ tasks, clock }),
       reopenTask: makeReopenTask({ tasks }),
       addReminder: makeAddReminder({ reminders }),
-      listActiveReminders: makeListActiveReminders({ reminders }),
+      listReminderRecords: makeListReminderRecords({ reminders, tasks }),
       dismissReminder: makeDismissReminder({ reminders, clock }),
     },
   };

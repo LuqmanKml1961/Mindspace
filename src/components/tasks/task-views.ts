@@ -86,6 +86,38 @@ function formatDay(date: string, today: string): string {
   return format.format(new Date(`${date}T00:00:00Z`));
 }
 
+// Reminders are moments, so they are shown in the device's own time zone.
+const reminderDay = new Intl.DateTimeFormat(undefined, {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+});
+const reminderDayWithYear = new Intl.DateTimeFormat(undefined, {
+  weekday: "short",
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+});
+const reminderTime = new Intl.DateTimeFormat(undefined, {
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+export function reminderLabel(remindAt: Date, now: Date): string {
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  let day: string;
+  if (remindAt.toDateString() === now.toDateString()) day = "Today";
+  else if (remindAt.toDateString() === tomorrow.toDateString()) {
+    day = "Tomorrow";
+  } else if (remindAt.getFullYear() === now.getFullYear()) {
+    day = reminderDay.format(remindAt);
+  } else {
+    day = reminderDayWithYear.format(remindAt);
+  }
+  return `${day}, ${reminderTime.format(remindAt)}`;
+}
+
 // Neutral wording for a date that has passed (DESIGN.md §8: no "overdue" in red).
 export function dueLabel(
   task: Pick<Task, "dueDate" | "dueTime">,

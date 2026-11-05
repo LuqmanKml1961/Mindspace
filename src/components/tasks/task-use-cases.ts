@@ -1,7 +1,9 @@
 import {
+  addReminderAction,
   completeTaskAction,
   createTaskAction,
   deleteTaskAction,
+  dismissReminderAction,
   reopenTaskAction,
   updateTaskAction,
 } from "@/app/(app)/tasks/actions";
@@ -28,4 +30,16 @@ export async function completeTask(id: string): Promise<void> {
 
 export async function reopenTask(id: string): Promise<void> {
   unwrap(await reopenTaskAction(id));
+}
+
+// Reminders hold no text either; the server checks them (createReminder) and stamps dismissal.
+export async function addReminder(
+  taskId: string,
+  remindAt: Date,
+): Promise<void> {
+  unwrap(await addReminderAction({ taskId, remindAt }));
+}
+
+export async function dismissReminder(id: string): Promise<void> {
+  unwrap(await dismissReminderAction(id));
 }
