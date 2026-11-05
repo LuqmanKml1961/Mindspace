@@ -187,7 +187,7 @@ The format check is
 | `id`                | uuid PK          |                                                                                                      |
 | `user_id`           | uuid             | owner                                                                                                |
 | `title_ciphertext`  | text             | encrypted title (1–500 characters before encryption); at most 2,708 chars                            |
-| `notes_ciphertext`  | text null        | encrypted notes (blank → null; limit Q-6, proposed 10,000 characters → at most 53,376 chars)         |
+| `notes_ciphertext`  | text null        | encrypted notes (blank → null; up to 10,000 characters, Q-6 → at most 53,376 chars)                  |
 | `due_date`          | date null        | the user's local date                                                                                |
 | `due_time`          | time null        | `check (due_time is null or due_date is not null)`                                                   |
 | `priority`          | text             | not null, default `'normal'`, `check (priority in ('low','normal','high'))`                          |
@@ -335,12 +335,12 @@ For every table, with two test users A and B:
 
 ## 5. Open questions
 
-| ID  | Question                                                          | Proposed answer                                                                                                                    | Settle by |
-| --- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| Q-1 | Maximum length for thought content?                               | **Settled 2026-11-04: 10,000 characters** (your go). Titles: 200                                                                   | P3.2      |
-| Q-2 | What happens to a thought once it is converted into a task?       | It moves to `archived` and stays linked through `tasks.source_thought_id`, so it leaves the inbox but is never lost                | P4.7      |
-| Q-3 | Can a thought have more than one category or tag?                 | One category for the MVP. Tags only if real use shows the need                                                                     | P3.3      |
-| Q-4 | Can a reminder exist without a task?                              | No. A standalone reminder is a task with a reminder (D-008)                                                                        | P4.1      |
-| Q-5 | Should `profiles.timezone` be set automatically at first sign-in? | Yes, before "today" is used: save the device zone once while the profile is still on `UTC` (Settings stays the place to change it) | P4.1      |
-| Q-6 | Maximum length for task notes?                                    | 10,000 characters, the same as a thought, so a converted thought's text fits                                                       | P4.1      |
-| Q-7 | Maximum length for each check-in answer?                          | 2,000 characters                                                                                                                   | P5.1      |
+| ID  | Question                                                          | Proposed answer                                                                                                                                    | Settle by |
+| --- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Q-1 | Maximum length for thought content?                               | **Settled 2026-11-04: 10,000 characters** (your go). Titles: 200                                                                                   | P3.2      |
+| Q-2 | What happens to a thought once it is converted into a task?       | It moves to `archived` and stays linked through `tasks.source_thought_id`, so it leaves the inbox but is never lost                                | P4.7      |
+| Q-3 | Can a thought have more than one category or tag?                 | One category for the MVP. Tags only if real use shows the need                                                                                     | P3.3      |
+| Q-4 | Can a reminder exist without a task?                              | **Settled 2026-11-05: no** (D-008). A standalone reminder is a task with a reminder                                                                | P4.1      |
+| Q-5 | Should `profiles.timezone` be set automatically at first sign-in? | **Settled 2026-11-05: yes** (your choice). Save the device zone once while the profile is still on `UTC`; Settings still changes it. Built in P4.2 | P4.1      |
+| Q-6 | Maximum length for task notes?                                    | **Settled 2026-11-05: 10,000 characters** (your choice), the same as a thought, so a converted thought's text fits                                 | P4.1      |
+| Q-7 | Maximum length for each check-in answer?                          | 2,000 characters                                                                                                                                   | P5.1      |

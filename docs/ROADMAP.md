@@ -411,11 +411,27 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
 **Goal (spec deliverable):** users can manage basic tasks and reminders.
 **Needs:** D-008.
 
-- [ ] P4.1 Domain: `Task` (title, notes, due date with optional time, priority low/normal/high,
+- [x] P4.1 Domain: `Task` (title, notes, due date with optional time, priority low/normal/high,
       completion) and `Reminder`. Rules: a time needs a date, and a reminder belongs to a task.
-      Repository interfaces and unit tests.
+      Repository interfaces and unit tests. **Done 2026-11-05:**
+  - `src/domain/tasks/`:
+    - `task.ts`: the title (1–500), notes (blank → none, up to 10,000, Q-6) and priority
+      (default normal);
+    - the due date is the user's own calendar day (`YYYY-MM-DD`, real dates only) and the time
+      is wall-clock `HH:MM`. A time needs a date, and the two always change together;
+    - `reminder.ts`: a reminder needs a task and a real moment. It holds no free text, so it
+      isn't encrypted.
+  - **Ports:**
+    - `TaskRepository`: create, findById, list by view (Today including overdue, Upcoming, No
+      date, Completed since), update, delete;
+    - `ReminderRepository`: create, listActive, dismiss. `EncryptedTask` keeps the title and
+      notes as ciphertext.
+  - **Tests:** 30 new unit tests. Deliberate breaks to the rules were each caught (see the
+    DEVLOG).
 - [ ] P4.2 Dates and timezones: compute "today" in the profile's timezone. Add a small date library
-      only if `Intl` is not enough. Test the boundaries (late at night, timezone offsets).
+      only if `Intl` is not enough. Test the boundaries (late at night, timezone offsets). Also
+      save the device zone once while the profile is still on `UTC` (DATA_MODEL Q-5, settled
+      2026-11-05).
 - [ ] P4.3 Migration: `tasks` and `reminders`, with indexes, ownership FKs and RLS. pgTAP tests,
       including a cross-user FK attempt that must be rejected. Regenerate the types. The task
       title and notes are ciphertext (D-021, DATA_MODEL.md), encrypted and decrypted in the

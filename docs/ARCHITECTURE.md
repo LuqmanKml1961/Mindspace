@@ -74,7 +74,7 @@ mindspace/
     │   ├── encryption/         # passphrase.ts, user-keys.ts, user-keys-repository.ts (D-021)
     │   ├── profiles/           # profile.ts (Profile, toTimezone), profile-repository.ts
     │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts (ports), *.test.ts (P3.2)
-    │   ├── tasks/              # task.ts, reminder.ts, repositories
+    │   ├── tasks/              # task.ts, reminder.ts, *-repository.ts (ports), *.test.ts (P4.1)
     │   └── check-ins/
     ├── application/
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts

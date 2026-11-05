@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                               |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| **Current phase**  | Checkpoint A — personal use (Phases 0–3 done)                                       |
-| **Phase progress** | Phase 3: 13 / 13 tasks done; acceptance checked; next is Checkpoint A, then Phase 4 |
-| **Last updated**   | 2026-11-05 (Session 5)                                                              |
-| **Blocked on**     | Nothing                                                                             |
+| Item               | Value                                                                       |
+| ------------------ | --------------------------------------------------------------------------- |
+| **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
+| **Phase progress** | Phase 4: 1 / 10 tasks done (P4.1); next is P4.2                             |
+| **Last updated**   | 2026-11-05 (Session 5)                                                      |
+| **Blocked on**     | Nothing                                                                     |
 
 **Next actions (in order)**
 
@@ -24,9 +24,10 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Checkpoint A (spec §17 step 10), in progress.** Use Brain Dump yourself on the live site,
-   on desktop and phone. Note what helped and what caused friction (see "Checkpoint A notes"
-   below), and adjust Phases 4–5 if needed. Then Phase 4 (External Memory: tasks and reminders).
+4. **Now: Phase 4, P4.2 next** (dates and time zones, plus saving the device zone once, Q-5).
+   Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
+   using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
+   the way (see "Checkpoint A notes" below).
    - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
      toast" (inbox, test). The categories are Home admin, Personal, test and Zambaroni.
    - **Follow-up:** time PBKDF2 on a phone.
@@ -155,6 +156,38 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.1 task and reminder domain
+
+- **Phase:** 4 · **Task:** P4.1 (your "go").
+- **Decisions (your answers):** Q-6, task notes up to 10,000 characters; Q-5, save the device
+  time zone once while the profile is on `UTC` (built in P4.2). Q-4 was already answered by
+  D-008: a reminder always belongs to a task. All three are recorded in DATA_MODEL §5.
+- **Done** (`src/domain/tasks/`, domain only, mirroring `thoughts/`):
+  - **`task.ts`:**
+    - `TASK_TITLE_MAX` 500 and `TASK_NOTES_MAX` 10,000, counted in code points, as Postgres
+      does;
+    - `TaskPriority` low, normal or high (default normal);
+    - `toTaskDue`: the due date is a real calendar day `YYYY-MM-DD` (2026-02-29 is refused,
+      2028-02-29 is kept), and the time is `HH:MM` from 00:00 to 23:59. A time without a date
+      is refused;
+    - `createTask` starts a task open; `toTaskChanges` validates only the changed fields, and
+      the date and time always change together, so the rule doesn't depend on saved values.
+  - **`reminder.ts`:** `createReminder` needs a task and a real moment. It holds no free text,
+    so it isn't encrypted.
+  - **Ports:**
+    - `TaskRepository`, with `EncryptedTask` (the title and notes are ciphertext, D-021) and
+      `TaskView`: Today including overdue, Upcoming, No date, or Completed since a moment.
+      `today` comes from the device (P4.2), so the server never guesses a time zone;
+    - `ReminderRepository`: create, listActive (not dismissed, soonest first), dismiss.
+- **Verified:**
+  - 30 new tests; the suite is 125, and lint and typecheck pass.
+  - **Mutation check:** five breaks were caught (a time without a date, emoji counted as two,
+    a reminder without a task, a raised notes limit, and the whole real-date check removed).
+  - Removing only the day comparison changed nothing, because an impossible day rolls into the
+    next month and the month check catches it. The full round trip is kept, for clarity.
+- **Commits:** `feat(tasks): add the task and reminder domain (P4.1)`
+- **Next:** P4.2 (dates and time zones, plus Q-5).
 
 ### 2026-11-05 — Session 5 (cont.): two follow-ups (Checkpoint A)
 
