@@ -5,7 +5,7 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 3 / 10 tasks done (P4.1–P4.3, P4.3 local only); next is P4.4       |
+| **Phase progress** | Phase 4: 4 / 10 tasks done (P4.1–P4.4, P4.3 local only); next is P4.5       |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
@@ -24,8 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.4 next:** the Supabase task and reminder repositories, wired into the
-   container. P4.3's migration still needs your approval for the hosted push (item 1).
+4. **Now: Phase 4, P4.5 next:** the task and reminder use cases (browser: encrypt, decrypt and the
+   views; server: records) and their container wiring. P4.3's hosted push waits for your go;
+   the dry run was clean (item 1).
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -157,6 +158,46 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.4 repositories, and the P4.3 hosted dry run
+
+- **Phase:** 4 · **Tasks:** P4.4 and the P4.3 dry run (your "go, run the dry run").
+- **Hosted dry run:** `db push --linked --dry-run` would push only
+  `20261105080758_create_tasks_and_reminders.sql`, with no seeds or roles. `migration list
+--linked` shows the other three on both sides. **Nothing was pushed.** The real push waits for
+  your go.
+- **Done (P4.4):**
+  - **`supabase-task-repository.ts`:**
+    - the views: Today (open, due ≤ today), Upcoming (open, due > today), No date (open,
+      undated, newest first), Completed (since a moment, most recent first). Open views are
+      ordered by due date, then time with untimed last, then oldest first;
+    - `due_time` `HH:MM:SS` → `HH:MM`;
+    - `23503` becomes "That thought no longer exists."; a missing task gives `NotFoundError`;
+      an empty change returns the current task.
+  - **`supabase-reminder-repository.ts`:** create (`23503` becomes "That task no longer
+    exists."), `listActive` (not dismissed, soonest first), and `dismiss`.
+  - **`supabase/fetch-all-rows.ts`:** shared paging past `max_rows`, used by both. The thoughts
+    repository keeps its own loop, unchanged.
+  - **Order documented on `TaskRepository.list`.** The container wiring comes with P4.5 (the
+    P3.6 precedent).
+- **Checks, a one-off integration run** (`supabase/.temp/p44`, git-ignored, deleted after):
+  - **Setup:** two throwaway users from the admin API, signed in with the publishable key (RLS
+    on), real `encryptField` ciphertext, and the keys passed by environment, never printed.
+  - **9/9 pass:** create with `HH:MM` and the source thought; deleting the thought clears the
+    link; B's thought refused; every view's order, with completed tasks only in Completed;
+    update, empty change, complete and reopen; B's task invisible, unchangeable and
+    undeletable; a double delete; paging past 1,000 (a plain request returns 1,000, `list`
+    returns 1,005 unique); reminders soonest first, dismiss, the task cascade, B's task refused
+    and B's reminder untouchable.
+  - **It caught a real bug first:** the query builder changes in place, so the shared
+    "not completed" filter also emptied the Completed view. Each view now starts from a fresh
+    query.
+  - **Seven deliberate breaks were all caught:** `HH:MM:SS`, untimed sorted first, "No date"
+    oldest first, each `23503` mapping removed, paging off, and dismissed reminders listed.
+  - **Afterwards:** local is back to 1 user, 3 thoughts, 0 tasks and 0 reminders.
+- lint, typecheck, 138 unit tests and the build pass.
+- **Commits:** `feat(tasks): add the task and reminder repositories (P4.4)`
+- **Next:** the P4.3 hosted push (on your go), then P4.5.
 
 ### 2026-11-05 — Session 5 (cont.): P4.3 tasks and reminders migration
 

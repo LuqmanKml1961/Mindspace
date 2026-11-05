@@ -56,6 +56,8 @@ export interface TaskRepository {
   // Throws NotFoundError if the source thought doesn't exist (any more) for this user.
   create(task: NewEncryptedTask): Promise<EncryptedTask>;
   findById(userId: string, id: string): Promise<EncryptedTask | null>;
+  // Today and Upcoming: by due date, then time (untimed last), then oldest first. No date:
+  // newest first. Completed: most recently completed first.
   list(userId: string, view: TaskView): Promise<EncryptedTask[]>;
   // Throws NotFoundError if there is no such task for this user.
   update(

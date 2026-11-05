@@ -455,7 +455,20 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     reminders) were all caught.
   - Advisors: no issues. No unindexed foreign keys.
   - **Hosted:** waiting for your approval (dry run first).
-- [ ] P4.4 Infrastructure repositories, wired into the composition root.
+- [x] P4.4 Infrastructure repositories, wired into the composition root. **Done 2026-11-05:**
+  - **The repositories:**
+    - `supabase-task-repository.ts`: views as documented on `TaskRepository.list`; `due_time`
+      comes back as `HH:MM`; `23503` becomes "That thought no longer exists.";
+    - `supabase-reminder-repository.ts`: `listActive` soonest first; `23503` becomes "That task
+      no longer exists.";
+    - a shared `fetch-all-rows.ts` pages past the 1,000-row limit.
+  - **The container wiring comes with the P4.5 use cases**, as in P3.6 and P3.7, so there's no
+    unused wiring.
+  - **Checks:**
+    - a one-off integration run against the local stack with two throwaway users (RLS on, real
+      ciphertext): 9/9 pass;
+    - seven deliberate breaks were all caught;
+    - the users and rows are gone afterwards.
 - [ ] P4.5 Use cases: create, edit, complete, reopen and delete a task; set due date and priority;
       add and dismiss a reminder; list Today (overdue plus today), Upcoming, No date and recently
       Completed. Unit tests.
