@@ -75,8 +75,9 @@ export function CategoryPicker({
     });
   }
 
+  // A typed name has its own field, so the error colour stays off the menu and Cancel.
   return (
-    <Field data-invalid={error ? true : undefined}>
+    <Field data-invalid={error && !adding ? true : undefined}>
       <FieldLabel htmlFor="category">Category</FieldLabel>
       <NativeSelect
         id="category"
@@ -120,35 +121,38 @@ export function CategoryPicker({
         <NativeSelectOption value={NEW}>New category…</NativeSelectOption>
       </NativeSelect>
       {adding && (
-        <div className="flex items-center gap-2">
-          <InputGroup>
-            <InputGroupInput
-              aria-label="New category name"
-              autoFocus
-              value={name}
-              readOnly={pending}
-              aria-invalid={error ? true : undefined}
-              onChange={(event) => setName(event.target.value)}
-              onKeyDown={(event) => {
-                // The picker sits inside the thought form: Enter adds the category instead.
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  if (name.trim()) create(name);
-                }
-              }}
-            />
-            <InputGroupAddon align="inline-end">
-              <InputGroupButton
-                variant="default"
-                size="sm"
-                disabled={pending || !name.trim()}
-                onClick={() => create(name)}
-              >
-                {pending && <Spinner data-icon="inline-start" />}
-                Add
-              </InputGroupButton>
-            </InputGroupAddon>
-          </InputGroup>
+        <div className="flex items-start gap-2">
+          <Field data-invalid={error ? true : undefined}>
+            <InputGroup>
+              <InputGroupInput
+                aria-label="New category name"
+                autoFocus
+                value={name}
+                readOnly={pending}
+                aria-invalid={error ? true : undefined}
+                onChange={(event) => setName(event.target.value)}
+                onKeyDown={(event) => {
+                  // The picker sits inside the thought form: Enter adds the category instead.
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (name.trim()) create(name);
+                  }
+                }}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton
+                  variant="default"
+                  size="sm"
+                  disabled={pending || !name.trim()}
+                  onClick={() => create(name)}
+                >
+                  {pending && <Spinner data-icon="inline-start" />}
+                  Add
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+            <FieldError>{error}</FieldError>
+          </Field>
           <Button
             type="button"
             variant="ghost"
@@ -166,7 +170,7 @@ export function CategoryPicker({
       {pending && !adding && (
         <FieldDescription>Adding the category…</FieldDescription>
       )}
-      <FieldError>{error}</FieldError>
+      {!adding && <FieldError>{error}</FieldError>}
     </Field>
   );
 }
