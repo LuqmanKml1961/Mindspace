@@ -5,7 +5,7 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 4 / 10 tasks done (P4.1–P4.4; P4.3 also hosted); next is P4.5      |
+| **Phase progress** | Phase 4: 5 / 10 tasks done (P4.1–P4.5; P4.3 also hosted); next is P4.6      |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
@@ -24,8 +24,8 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.5 next:** the task and reminder use cases (browser: encrypt, decrypt and the
-   views; server: records) and their container wiring.
+4. **Now: Phase 4, P4.6 next:** the Tasks screen. That means quick add, an edit sheet with due
+   date and time and priority, complete with undo, and the Server Actions behind it.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -157,6 +157,44 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.5 task and reminder use cases
+
+- **Phase:** 4 · **Task:** P4.5 (your "commit and go").
+- **The split:** anything with free text runs in the browser (D-021); anything without it runs on
+  the server, with the server's clock.
+- **Browser, `application/tasks/tasks.ts`:**
+  - `makeOpenTasks` decrypts against the signed-in user's id;
+  - `makeCreateTask` and `makeUpdateTask` apply `createTask` and `toTaskChanges` before
+    encrypting. Only the edited fields are sent, and the date and time always together;
+  - `makeDeleteTask`.
+- **Server, `records.ts`:**
+  - `makeListTaskRecords` turns a view name into a `TaskView`. Today and Upcoming use
+    `dateInTimeZone(clock(), profile zone)` (UTC with no profile). Completed uses the last 7
+    days, `RECENTLY_COMPLETED_DAYS`, which I chose as a default;
+  - get, create, update and delete record use cases. Create and update re-check the readable
+    date and time with `toTaskDue`;
+  - `makeCompleteTask` stamps the server's clock; `makeReopenTask` clears it.
+- **Server, `reminders.ts`:** `makeAddReminder` (`createReminder`), `makeListActiveReminders`,
+  and `makeDismissReminder` (the server's clock).
+- **`schemas.ts`:** `taskInputSchema`, and `taskEditsSchema` with no source thought, all fields
+  optional, and the date and time together. Also `reminderInputSchema` (`taskId` uuid,
+  `remindAt` Date).
+- **`ports.ts`:** `EncryptedTaskInput`, `EncryptedTaskEdits` (no `completedAt`), `TaskServer`,
+  `Clock`.
+- **Wiring:** `container.ts` (task and reminder repositories, `clock = () => new Date()`, ten use
+  cases) and `browser.ts` (`createTaskUseCases`).
+- **Found by the tests:** three server use cases threw validation errors synchronously instead
+  of rejecting. They are now `async`, like the rest.
+- **Verified:**
+  - 23 new tests, 161 in all. Lint, typecheck (23 s on a clean run; one earlier background run
+    was slow) and the build pass.
+  - Eleven deliberate breaks were all caught: the title encrypted as notes; plaintext notes; an
+    edit dropping the time; today ignoring the user's zone; the wrong Completed window; the
+    create and update date checks skipped; complete and dismiss without the clock; the date
+    and time allowed apart; the notes limit using the title's.
+- **Commits:** `feat(tasks): add the task and reminder use cases (P4.5)`
+- **Next:** P4.6 (the Tasks screen and its Server Actions).
 
 ### 2026-11-05 — Session 5 (cont.): P4.3 pushed to the hosted database
 

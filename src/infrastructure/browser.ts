@@ -16,6 +16,13 @@ import type {
   CategoryServer,
   ThoughtServer,
 } from "@/application/thoughts/ports";
+import type { TaskServer } from "@/application/tasks/ports";
+import {
+  makeCreateTask,
+  makeDeleteTask,
+  makeOpenTasks,
+  makeUpdateTask,
+} from "@/application/tasks/tasks";
 import {
   makeCaptureThought,
   makeDeleteThought,
@@ -64,5 +71,19 @@ export function createBrainDumpUseCases(servers: {
     createCategory: makeCreateCategory(deps),
     renameCategory: makeRenameCategory(deps),
     deleteCategory: makeDeleteCategory(deps),
+  };
+}
+
+export function createTaskUseCases(servers: { tasks: TaskServer }) {
+  const deps = {
+    crypto: webFieldCrypto,
+    device: indexedDbKeyStore,
+    ...servers,
+  };
+  return {
+    openTasks: makeOpenTasks(deps),
+    createTask: makeCreateTask(deps),
+    updateTask: makeUpdateTask(deps),
+    deleteTask: makeDeleteTask(deps),
   };
 }

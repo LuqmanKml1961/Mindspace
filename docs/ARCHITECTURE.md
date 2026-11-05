@@ -81,6 +81,7 @@ mindspace/
     │   ├── encryption/         # ports, errors, schemas, lock-data-key; set-up, unlock, recover, device-key (browser); user-keys (server)
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # thoughts.ts, categories.ts (browser: rules, encrypt, decrypt); records.ts (server: ciphertext only); ports, schemas, *.test.ts
+    │   ├── tasks/              # tasks.ts (browser: rules, encrypt, decrypt); records.ts (server: views by the user's today, complete/reopen) and reminders.ts (server); ports (TaskServer, Clock), schemas, *.test.ts
     │   ├── tasks/
     │   └── check-ins/
     ├── infrastructure/

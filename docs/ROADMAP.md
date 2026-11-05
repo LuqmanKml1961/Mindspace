@@ -470,9 +470,23 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
       ciphertext): 9/9 pass;
     - seven deliberate breaks were all caught;
     - the users and rows are gone afterwards.
-- [ ] P4.5 Use cases: create, edit, complete, reopen and delete a task; set due date and priority;
+- [x] P4.5 Use cases: create, edit, complete, reopen and delete a task; set due date and priority;
       add and dismiss a reminder; list Today (overdue plus today), Upcoming, No date and recently
-      Completed. Unit tests.
+      Completed. Unit tests. **Done 2026-11-05:**
+  - **Browser** (`application/tasks/tasks.ts`, D-021): `openTasks`, `createTask`, `updateTask`
+    (title, notes, due date and time together, priority) and `deleteTask`. The title and notes
+    are encrypted for their own fields.
+  - **Server** (`records.ts`, `reminders.ts`):
+    - `listTaskRecords(view)`, with "today" from the profile's zone (UTC if none) and Completed
+      covering the last **7 days** (`RECENTLY_COMPLETED_DAYS`, a default you can change);
+    - create and edit re-check the readable date and time with the domain rules;
+    - `completeTask` and `dismissReminder` use the server's clock; `reopenTask`;
+      `addReminder` (domain-checked); `listActiveReminders`.
+  - **Schemas** (`schemas.ts`): ciphertext shapes and sizes as the database checks them; the
+    date and time are sent together; completion and user ids are dropped.
+  - **Wiring:** the server use cases in `container.ts` and `createTaskUseCases` in
+    `browser.ts`. The Server Actions and screens come in P4.6.
+  - **Tests:** 23 unit tests. Eleven deliberate breaks were all caught (see the DEVLOG).
 - [ ] P4.6 Tasks UI: quick add (only the title is required), an edit sheet with due date/time and
       priority pickers, and complete with undo.
 - [ ] P4.7 Convert a thought into a task from Brain Dump: the title is pre-filled and linked through
