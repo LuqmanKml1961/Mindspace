@@ -5,6 +5,7 @@ import {
   isTaskPriority,
   TASK_NOTES_MAX,
   TASK_TITLE_MAX,
+  taskDraftFromThought,
   toTaskChanges,
   toTaskDue,
   toTaskNotes,
@@ -50,6 +51,48 @@ describe("createTask", () => {
     expect(() =>
       createTask({ userId: "user-a", title: "Call", dueTime: "10:00" }),
     ).toThrow(new ValidationError("Add a date for this time."));
+  });
+});
+
+describe("taskDraftFromThought", () => {
+  it("uses the thought's title, and keeps the whole text as notes", () => {
+    expect(
+      taskDraftFromThought({
+        title: "Landlord",
+        content: "Reply about the lease\nMention the boiler",
+      }),
+    ).toEqual({
+      title: "Landlord",
+      notes: "Reply about the lease\nMention the boiler",
+    });
+  });
+
+  it("uses the first line when there is no title", () => {
+    expect(
+      taskDraftFromThought({
+        title: null,
+        content: "\n  Call the bank  \nAsk about the fee",
+      }),
+    ).toEqual({
+      title: "Call the bank",
+      notes: "Call the bank  \nAsk about the fee",
+    });
+  });
+
+  it("leaves the notes empty when the text is only the title", () => {
+    expect(
+      taskDraftFromThought({ title: null, content: "  Renew passport " }),
+    ).toEqual({ title: "Renew passport", notes: null });
+  });
+
+  it("cuts a long first line to the title limit, counting an emoji as one", () => {
+    const draft = taskDraftFromThought({
+      title: null,
+      content: "😀".repeat(TASK_TITLE_MAX + 20),
+    });
+    expect([...draft.title]).toHaveLength(TASK_TITLE_MAX);
+    expect(() => toTaskTitle(draft.title)).not.toThrow();
+    expect(draft.notes).toBe("😀".repeat(TASK_TITLE_MAX + 20));
   });
 });
 

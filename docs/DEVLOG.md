@@ -5,7 +5,7 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 6 / 10 tasks done (P4.1–P4.6; P4.3 also hosted); next is P4.7      |
+| **Phase progress** | Phase 4: 7 / 10 tasks done (P4.1–P4.7; P4.3 also hosted); next is P4.8      |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
@@ -24,9 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.7 next:** turn a thought into a task from Brain Dump. The title is
-   pre-filled and linked through `source_thought_id`, and the thought is archived (Q-2). The
-   Tasks screen (P4.6) is ready to try locally.
+4. **Now: Phase 4, P4.8 next:** in-app reminders (D-008). Due reminders appear on Home and Tasks,
+   with a dismiss action; there is no push. Tasks (P4.6) and "Make it a task" (P4.7) are ready
+   to try locally.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -158,6 +158,51 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.7 turn a thought into a task
+
+- **Phase:** 4 · **Task:** P4.7 (your "go").
+- **Decision:** Q-2 is settled. **The thought is archived** (your choice) and the task links back
+  to it.
+- **Done:**
+  - **Domain `taskDraftFromThought`:**
+    - the title is the thought's own, or its first non-blank line cut to 500 code points;
+    - the notes hold the whole trimmed text, or none when the text is just that title;
+    - 4 tests.
+  - **Browser `makeConvertThoughtToTask`:**
+    - creates the task with `sourceThoughtId`, then sets the thought to `archived` through the
+      existing `ThoughtServer`;
+    - an archive failure keeps the task and returns `archived: false`;
+    - a broken rule touches neither;
+    - 3 tests;
+    - wired in `createTaskUseCases`, which now takes `{ tasks, thoughts }`; `brain-dump.ts`
+      exports its `thoughts` server.
+  - **UI:**
+    - `make-task-sheet.tsx`, and "Make it a task" in the thought editor (rendered outside its
+      form, since React events bubble through portals);
+    - the thought page passes `today`, from `getToday`, for the landing view (`viewForDue`);
+    - `TaskFields` was taken out of the edit sheet and is now shared by both.
+- **In Chrome (MYS231):**
+  - **Disabled while editing:** "Make it a task" turned off during an unsaved edit and back on
+    after.
+  - **Pre-fill:** a test thought with two lines and no title gave the title "Claude test: book
+    the car service" and the whole text as notes. With tomorrow as the date, Create led to
+    `/tasks?view=upcoming` with "Tomorrow" and "Task created. The thought is archived."
+  - **Database:** the task's `source_thought_id` is the thought, the thought is `archived`, and
+    the title and notes are `v1.` ciphertext.
+  - **Brain Dump:** the thought left Inbox and shows in Archived; its page shows Archived.
+  - **The edit sheet** still opens with the right values. No console errors after reloading.
+    Two earlier errors, at 5:37, came from a half-saved edit of the editor, and the final file
+    compiles.
+- **Verified:**
+  - 171 unit tests, lint, typecheck and the build pass.
+  - Six deliberate breaks were all caught: the title ignoring the thought's own; the notes
+    always empty; no cut; no link; no archive; the archive failure thrown.
+- **Acceptance (Phase 4):** "Converting a thought creates a linked task" holds.
+- **Left for you to look at:** the "Claude test …" tasks and the archived test thought (to delete
+  after your review).
+- **Commits:** `feat(tasks): make a task from a thought (P4.7)`
+- **Next:** P4.8 (in-app reminders).
 
 ### 2026-11-05 — Session 5 (cont.): P4.6 the Tasks screen
 

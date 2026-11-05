@@ -10,13 +10,16 @@ import type {
 } from "@/application/encryption/ports";
 import type { TaskServer } from "@/application/tasks/ports";
 import {
+  makeConvertThoughtToTask,
   makeCreateTask,
   makeDeleteTask,
   makeOpenTasks,
   makeUpdateTask,
 } from "@/application/tasks/tasks";
+import type { ThoughtServer } from "@/application/thoughts/ports";
 import { NotFoundError, ValidationError } from "@/domain/shared/errors";
 import type { EncryptedTask } from "@/domain/tasks/task-repository";
+import type { EncryptedThought } from "@/domain/thoughts/thought-repository";
 
 // Fake field crypto: the "ciphertext" names the field it was made for, and only opens there.
 const tag = (field: FieldContext) =>
@@ -75,15 +78,42 @@ function memoryTasks(): TaskServer & {
   };
 }
 
-function useCases(unlocked = true) {
+// Records the thought updates the conversion makes; `fail` makes the archive step fail.
+function recordingThoughts(
+  fail = false,
+): ThoughtServer & { updates: unknown[] } {
+  const updates: unknown[] = [];
+  return {
+    updates,
+    create: async () => {
+      throw new Error("not used");
+    },
+    async update(id, changes) {
+      if (fail) throw new NotFoundError("This thought no longer exists.");
+      updates.push([id, changes]);
+      return {} as EncryptedThought;
+    },
+    delete: async () => {},
+  };
+}
+
+function useCases(unlocked = true, archiveFails = false) {
   const tasks = memoryTasks();
-  const deps = { crypto: fakeCrypto, device: device(unlocked), tasks };
+  const thoughts = recordingThoughts(archiveFails);
+  const deps = {
+    crypto: fakeCrypto,
+    device: device(unlocked),
+    tasks,
+    thoughts,
+  };
   return {
     tasks,
+    thoughts,
     create: makeCreateTask(deps),
     update: makeUpdateTask(deps),
     open: makeOpenTasks(deps),
     remove: makeDeleteTask(deps),
+    convert: makeConvertThoughtToTask(deps),
   };
 }
 
@@ -218,6 +248,55 @@ describe("tasks (browser)", () => {
     await expect(open({ userId: "user-a", records: [theirs] })).rejects.toThrow(
       DecryptFailedError,
     );
+  });
+
+  it("turns a thought into a linked task, then archives the thought", async () => {
+    const { tasks, thoughts, convert } = useCases();
+    const { task, archived } = await convert({
+      userId: "user-a",
+      thoughtId: "thought-7",
+      task: {
+        title: "Call the bank",
+        notes: "Ask about the fee",
+        priority: "high",
+      },
+    });
+
+    expect(archived).toBe(true);
+    expect(task).toMatchObject({
+      title: "Call the bank",
+      notes: "Ask about the fee",
+      priority: "high",
+      sourceThoughtId: "thought-7",
+    });
+    expect(tasks.records.get(task.id)?.titleCiphertext).toBe(
+      "enc[tasks.title:user-a]Call the bank",
+    );
+    expect(thoughts.updates).toEqual([["thought-7", { status: "archived" }]]);
+  });
+
+  it("keeps the task and says so when the thought can't be archived", async () => {
+    const { tasks, convert } = useCases(true, true);
+    const { task, archived } = await convert({
+      userId: "user-a",
+      thoughtId: "thought-7",
+      task: { title: "Call the bank" },
+    });
+    expect(archived).toBe(false);
+    expect(tasks.records.has(task.id)).toBe(true);
+  });
+
+  it("leaves the thought alone when the task breaks a rule", async () => {
+    const { tasks, thoughts, convert } = useCases();
+    await expect(
+      convert({
+        userId: "user-a",
+        thoughtId: "thought-7",
+        task: { title: "Call", dueTime: "09:00" },
+      }),
+    ).rejects.toThrow(ValidationError);
+    expect(tasks.records.size).toBe(0);
+    expect(thoughts.updates).toEqual([]);
   });
 
   it("deletes through the server", async () => {

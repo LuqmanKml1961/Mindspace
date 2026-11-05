@@ -127,6 +127,23 @@ export function createTask(props: {
   };
 }
 
+// A thought turned into a task (P4.7): the title is the thought's own, or its first line cut to
+// the task limit; the notes keep the whole text, unless that text is just the title.
+export function taskDraftFromThought(thought: {
+  title: string | null;
+  content: string;
+}): { title: string; notes: string | null } {
+  const firstLine =
+    thought.content
+      .split("\n")
+      .map((line) => line.trim())
+      .find((line) => line.length > 0) ?? "";
+  const title =
+    thought.title ?? [...firstLine].slice(0, TASK_TITLE_MAX).join("").trim();
+  const content = thought.content.trim();
+  return { title, notes: content === title ? null : content };
+}
+
 // Validates only the fields being changed. The date and time change together, so the
 // time-needs-a-date rule never depends on what is already saved.
 export function toTaskChanges(input: {

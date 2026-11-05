@@ -5,6 +5,7 @@ import type {
   FieldCrypto,
 } from "@/application/encryption/ports";
 import type { EncryptedTaskEdits, TaskServer } from "@/application/tasks/ports";
+import type { ThoughtServer } from "@/application/thoughts/ports";
 import {
   createTask,
   toTaskChanges,
@@ -174,4 +175,40 @@ export function makeUpdateTask(deps: Deps & { tasks: TaskServer }) {
 
 export function makeDeleteTask(deps: { tasks: TaskServer }) {
   return ({ id }: { id: string }) => deps.tasks.delete(id);
+}
+
+// P4.7: a task made from a thought links back to it, and the thought is archived (Q-2), so it
+// leaves the inbox but is never lost. The task comes first; if archiving then fails, the task
+// still exists and `archived` says so.
+export function makeConvertThoughtToTask(
+  deps: Deps & { tasks: TaskServer; thoughts: ThoughtServer },
+) {
+  const createTask = makeCreateTask(deps);
+  return async ({
+    userId,
+    thoughtId,
+    task,
+  }: {
+    userId: string;
+    thoughtId: string;
+    task: {
+      title: string;
+      notes?: string | null;
+      dueDate?: string | null;
+      dueTime?: string | null;
+      priority?: TaskPriority;
+    };
+  }): Promise<{ task: Task; archived: boolean }> => {
+    const created = await createTask({
+      ...task,
+      userId,
+      sourceThoughtId: thoughtId,
+    });
+    try {
+      await deps.thoughts.update(thoughtId, { status: "archived" });
+      return { task: created, archived: true };
+    } catch {
+      return { task: created, archived: false };
+    }
+  };
 }

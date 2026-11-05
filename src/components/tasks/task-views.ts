@@ -38,6 +38,15 @@ export function tasksHref(view: TaskViewName): string {
   return view === "today" ? "/tasks" : `/tasks?view=${slugs[view]}`;
 }
 
+// The view an open task appears in, from its due date.
+export function viewForDue(
+  dueDate: string | null,
+  today: string,
+): TaskViewName {
+  if (dueDate === null) return "noDate";
+  return dueDate <= today ? "today" : "upcoming";
+}
+
 // Quick add keeps a new task where you are looking: today on Today, tomorrow on Upcoming, no
 // date on No date. There is no quick add on Completed.
 export function quickAddDate(

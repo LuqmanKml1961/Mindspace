@@ -14,7 +14,8 @@ import { createBrainDumpUseCases } from "@/infrastructure/browser";
 import { unwrap } from "@/lib/action-errors";
 
 // Only ciphertext goes to the server (D-021); the use cases encrypt before calling these.
-const thoughts: ThoughtServer = {
+// Exported for turning a thought into a task (task-use-cases.ts).
+export const thoughts: ThoughtServer = {
   create: async (thought) => unwrap(await createThoughtAction(thought)),
   update: async (id, changes) => unwrap(await updateThoughtAction(id, changes)),
   delete: async (id) => {

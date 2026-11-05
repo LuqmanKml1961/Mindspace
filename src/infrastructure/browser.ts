@@ -18,6 +18,7 @@ import type {
 } from "@/application/thoughts/ports";
 import type { TaskServer } from "@/application/tasks/ports";
 import {
+  makeConvertThoughtToTask,
   makeCreateTask,
   makeDeleteTask,
   makeOpenTasks,
@@ -74,7 +75,10 @@ export function createBrainDumpUseCases(servers: {
   };
 }
 
-export function createTaskUseCases(servers: { tasks: TaskServer }) {
+export function createTaskUseCases(servers: {
+  tasks: TaskServer;
+  thoughts: ThoughtServer;
+}) {
   const deps = {
     crypto: webFieldCrypto,
     device: indexedDbKeyStore,
@@ -85,5 +89,6 @@ export function createTaskUseCases(servers: { tasks: TaskServer }) {
     createTask: makeCreateTask(deps),
     updateTask: makeUpdateTask(deps),
     deleteTask: makeDeleteTask(deps),
+    convertThought: makeConvertThoughtToTask(deps),
   };
 }

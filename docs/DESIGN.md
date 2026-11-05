@@ -271,6 +271,13 @@ darken `input`.
   - **Edit sheet:** **Sheet** on the right, full width on phones. It has the title, notes, a
     native date and time pair (the time is disabled until there is a date; "Clear date" clears
     both), and **ToggleGroup** priority. Save, and Delete with the same confirmation as thoughts.
+  - **"Make it a task" (P4.7):**
+    - an outline button with the Tasks icon, beside Save on the thought page, disabled while
+      there are unsaved edits;
+    - it opens the same fields in a Sheet, pre-filled from the thought;
+    - the sheet's description says what will happen ("…the thought moves to Archived");
+    - **Create task** then shows "Task created. The thought is archived." and opens the view
+      where the task landed.
 
 ## 6a. App shell and navigation (P1.7)
 

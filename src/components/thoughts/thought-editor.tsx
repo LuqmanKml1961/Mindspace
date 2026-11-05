@@ -1,6 +1,6 @@
 "use client";
 
-import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { CheckListIcon, Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -12,6 +12,7 @@ import {
 import { brainDump } from "@/components/thoughts/brain-dump";
 import { errorMessage } from "@/lib/action-errors";
 import { CategoryPicker } from "@/components/thoughts/category-picker";
+import { MakeTaskSheet } from "@/components/thoughts/make-task-sheet";
 import { SaveShortcut } from "@/components/thoughts/save-shortcut";
 import {
   formatCaptured,
@@ -82,10 +83,13 @@ export function ThoughtEditor({
   userId,
   record,
   categoryRecords,
+  today,
 }: {
   userId: string;
   record: EncryptedThought;
   categoryRecords: EncryptedCategory[];
+  // The user's date, for where a new task lands (P4.7).
+  today: string;
 }) {
   const router = useRouter();
   const [saved, setSaved] = useState<Thought | null>(null);
@@ -94,6 +98,7 @@ export function ThoughtEditor({
   // Only for a thought that can't be opened; save and delete report through toasts.
   const [error, setError] = useState<string>();
   const [confirming, setConfirming] = useState(false);
+  const [makingTask, setMakingTask] = useState(false);
   const [pending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -167,139 +172,170 @@ export function ThoughtEditor({
   }
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        save();
-      }}
-    >
-      <FieldGroup>
-        <p className="text-sm text-muted-foreground">
-          Captured{" "}
-          <time dateTime={saved.createdAt.toISOString()}>
-            {formatCaptured(saved.createdAt)}
-          </time>
-        </p>
-        <FormField
-          id="title"
-          label="Title"
-          description="Optional."
-          value={draft.title}
-          readOnly={pending}
-          onChange={(event) => edit({ title: event.target.value })}
-        />
-        <Field>
-          <FieldLabel htmlFor="content">Thought</FieldLabel>
-          <Textarea
-            id="content"
-            value={draft.content}
+    <>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          save();
+        }}
+      >
+        <FieldGroup>
+          <p className="text-sm text-muted-foreground">
+            Captured{" "}
+            <time dateTime={saved.createdAt.toISOString()}>
+              {formatCaptured(saved.createdAt)}
+            </time>
+          </p>
+          <FormField
+            id="title"
+            label="Title"
+            description="Optional."
+            value={draft.title}
             readOnly={pending}
-            className="max-h-[60svh] min-h-32"
-            onChange={(event) => edit({ content: event.target.value })}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
-                event.preventDefault();
-                save();
-              }
+            onChange={(event) => edit({ title: event.target.value })}
+          />
+          <Field>
+            <FieldLabel htmlFor="content">Thought</FieldLabel>
+            <Textarea
+              id="content"
+              value={draft.content}
+              readOnly={pending}
+              className="max-h-[60svh] min-h-32"
+              onChange={(event) => edit({ content: event.target.value })}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+                  event.preventDefault();
+                  save();
+                }
+              }}
+            />
+            <SaveShortcut />
+          </Field>
+          <CategoryPicker
+            userId={userId}
+            categories={categories}
+            value={draft.categoryId}
+            disabled={pending}
+            onChange={(categoryId) => edit({ categoryId })}
+            onCreated={(category) => {
+              setCategories(
+                [...categories, category].sort((a, b) =>
+                  a.name.localeCompare(b.name),
+                ),
+              );
+              edit({ categoryId: category.id });
             }}
           />
-          <SaveShortcut />
-        </Field>
-        <CategoryPicker
-          userId={userId}
-          categories={categories}
-          value={draft.categoryId}
-          disabled={pending}
-          onChange={(categoryId) => edit({ categoryId })}
-          onCreated={(category) => {
-            setCategories(
-              [...categories, category].sort((a, b) =>
-                a.name.localeCompare(b.name),
-              ),
-            );
-            edit({ categoryId: category.id });
-          }}
-        />
-        <Field>
-          <FieldTitle id="status-label">Where it lives</FieldTitle>
-          <ToggleGroup
-            aria-labelledby="status-label"
-            variant="outline"
-            value={[draft.status]}
-            disabled={pending}
-            onValueChange={(value) => {
-              const next = value[0];
-              if (isThoughtStatus(next)) edit({ status: next });
-            }}
-          >
-            {THOUGHT_STATUSES.map((status) => (
-              <ToggleGroupItem key={status} value={status}>
-                {statusLabels[status]}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        </Field>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <SubmitButton
-            pending={pending && !confirming}
-            disabled={unchanged || pending}
-          >
-            Save changes
-          </SubmitButton>
-          <AlertDialog open={confirming} onOpenChange={setConfirming}>
-            <AlertDialogTrigger
-              render={
-                <Button type="button" variant="destructive" disabled={pending}>
-                  <HugeiconsIcon
-                    icon={Delete02Icon}
-                    strokeWidth={2}
-                    data-icon="inline-start"
-                    aria-hidden="true"
-                  />
-                  Delete
-                </Button>
-              }
-            />
-            <AlertDialogContent size="sm">
-              <AlertDialogHeader>
-                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
-                  <HugeiconsIcon
-                    icon={Delete02Icon}
-                    strokeWidth={2}
-                    aria-hidden="true"
-                  />
-                </AlertDialogMedia>
-                <AlertDialogTitle>Delete this thought?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  It will be gone for good, on every device.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel variant="ghost" disabled={pending}>
-                  Keep it
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  variant="destructive"
-                  disabled={pending}
-                  onClick={remove}
-                >
-                  {pending ? (
-                    <Spinner data-icon="inline-start" />
-                  ) : (
+          <Field>
+            <FieldTitle id="status-label">Where it lives</FieldTitle>
+            <ToggleGroup
+              aria-labelledby="status-label"
+              variant="outline"
+              value={[draft.status]}
+              disabled={pending}
+              onValueChange={(value) => {
+                const next = value[0];
+                if (isThoughtStatus(next)) edit({ status: next });
+              }}
+            >
+              {THOUGHT_STATUSES.map((status) => (
+                <ToggleGroupItem key={status} value={status}>
+                  {statusLabels[status]}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <SubmitButton
+                pending={pending && !confirming}
+                disabled={unchanged || pending}
+              >
+                Save changes
+              </SubmitButton>
+              <Button
+                type="button"
+                variant="outline"
+                // The task is made from the saved thought, so unsaved edits come first.
+                disabled={pending || !unchanged}
+                onClick={() => setMakingTask(true)}
+              >
+                <HugeiconsIcon
+                  icon={CheckListIcon}
+                  strokeWidth={2}
+                  data-icon="inline-start"
+                  aria-hidden="true"
+                />
+                Make it a task
+              </Button>
+            </div>
+            <AlertDialog open={confirming} onOpenChange={setConfirming}>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    disabled={pending}
+                  >
                     <HugeiconsIcon
                       icon={Delete02Icon}
                       strokeWidth={2}
                       data-icon="inline-start"
                       aria-hidden="true"
                     />
-                  )}
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      </FieldGroup>
-    </form>
+                    Delete
+                  </Button>
+                }
+              />
+              <AlertDialogContent size="sm">
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+                    <HugeiconsIcon
+                      icon={Delete02Icon}
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>Delete this thought?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    It will be gone for good, on every device.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel variant="ghost" disabled={pending}>
+                    Keep it
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    disabled={pending}
+                    onClick={remove}
+                  >
+                    {pending ? (
+                      <Spinner data-icon="inline-start" />
+                    ) : (
+                      <HugeiconsIcon
+                        icon={Delete02Icon}
+                        strokeWidth={2}
+                        data-icon="inline-start"
+                        aria-hidden="true"
+                      />
+                    )}
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </FieldGroup>
+      </form>
+      {/* Outside the form: React events bubble through portals, and its submit isn't a save. */}
+      <MakeTaskSheet
+        userId={userId}
+        thought={saved}
+        today={today}
+        open={makingTask}
+        onOpenChange={setMakingTask}
+      />
+    </>
   );
 }

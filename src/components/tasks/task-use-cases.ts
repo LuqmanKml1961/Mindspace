@@ -6,6 +6,7 @@ import {
   updateTaskAction,
 } from "@/app/(app)/tasks/actions";
 import type { TaskServer } from "@/application/tasks/ports";
+import { thoughts } from "@/components/thoughts/brain-dump";
 import { createTaskUseCases } from "@/infrastructure/browser";
 import { unwrap } from "@/lib/action-errors";
 
@@ -18,7 +19,7 @@ const tasks: TaskServer = {
   },
 };
 
-export const taskUseCases = createTaskUseCases({ tasks });
+export const taskUseCases = createTaskUseCases({ tasks, thoughts });
 
 // Completion holds no text, so the browser asks the server directly (it stamps its own clock).
 export async function completeTask(id: string): Promise<void> {

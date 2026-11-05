@@ -497,8 +497,19 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
   - Server Actions: create, update, delete, complete, reopen.
   - The shared `lib/action-result.ts` and `lib/action-errors.ts`; Brain Dump now uses them too.
   - `getToday` for the date labels.
-- [ ] P4.7 Convert a thought into a task from Brain Dump: the title is pre-filled and linked through
+- [x] P4.7 Convert a thought into a task from Brain Dump: the title is pre-filled and linked through
       `source_thought_id`. What happens to the thought is settled in DATA_MODEL.md, Q-2.
+      **Done 2026-11-05:**
+  - **"Make it a task"** on the thought page opens a sheet.
+    - The title is the thought's own, or its first line (cut to 500); the notes hold the whole
+      text (`taskDraftFromThought`).
+    - The date, time and priority are optional.
+  - **Create task:**
+    - makes the linked task, then archives the thought (Q-2, your choice);
+    - reports honestly if archiving fails;
+    - takes you to the view where the task landed.
+  - **Disabled while the thought has unsaved edits.**
+  - **Shared fields:** `TaskFields` is shared with the edit sheet.
 - [ ] P4.8 In-app reminders (D-008): due reminders appear on Home ("Upcoming reminders") and on
       Tasks, with a dismiss action. No push.
 - [ ] P4.9 Home: a summary of today's tasks and upcoming reminders. Overdue items look neutral, with
