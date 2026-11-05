@@ -96,3 +96,18 @@ export function toThoughtChanges(input: {
   }
   return changes;
 }
+
+const searchable = (text: string) => text.normalize("NFC").toLowerCase();
+
+// Search runs on the device (D-021): a case-insensitive match in the title or the text. An empty
+// query matches everything.
+export function thoughtMatches(
+  thought: Pick<Thought, "title" | "content">,
+  query: string,
+): boolean {
+  const needle = searchable(query.trim());
+  if (!needle) return true;
+  return [thought.title ?? "", thought.content].some((text) =>
+    searchable(text).includes(needle),
+  );
+}

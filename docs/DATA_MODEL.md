@@ -131,9 +131,17 @@ They live in `src/components/thoughts/category-suggestions.ts`. This list was co
 Indexes: `(user_id, created_at desc)`; `(user_id, status, created_at desc)`, so a status view is
 already newest first; and `(category_id, user_id)`, which covers the whole foreign key for category
 deletes (the advisors flagged `(category_id)` alone). `unique (id, user_id)`.
-**Search runs on the device**, over decrypted text. The server cannot search ciphertext. The
-Data API returns at most 1,000 rows per request (`max_rows` in `config.toml`), so a list longer
-than that needs paging. Decide this with the list UI (P3.9) and device search (P3.11).
+**Search runs on the device**, over decrypted text (P3.11, `thoughtMatches`). The server cannot
+search ciphertext, and the search text is never sent, not even in the URL.
+
+**Paging past the row cap:** the Data API returns at most 1,000 rows per request (`max_rows` in
+`config.toml`; the hosted limit may differ). The thought repository's `list` therefore asks
+with `count: "exact"` and keeps requesting from where the last page ended until it has the total,
+ordered by `created_at desc, id`.
+
+**Verified on 2026-11-05:** 1,050 thoughts for one user, read as that user. A plain request
+returns 1,000. `list` returns all 1,050, unique and newest first, and the status filter pages
+too (105 / 945). Turning paging off fails the check.
 
 **Ciphertext format and limits (D-021):** `v1.<IV base64, 16 chars>.<ciphertext base64>`. The
 maximum is computed from the character limit at 4 UTF-8 bytes per character, plus the 16-byte

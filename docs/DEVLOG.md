@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                          |
-| ------------------ | ------------------------------------------------------------------------------ |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                         |
-| **Phase progress** | Phase 3: 10 / 13 tasks done (P3.1–P3.10); next is P3.11 (search on the device) |
-| **Last updated**   | 2026-11-04 (Session 4)                                                         |
-| **Blocked on**     | Nothing                                                                        |
+| Item               | Value                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                                    |
+| **Phase progress** | Phase 3: 11 / 13 tasks done (P3.1–P3.11); next is P3.12 (loading, empty and error states) |
+| **Last updated**   | 2026-11-05 (Session 5)                                                                    |
+| **Blocked on**     | Nothing                                                                                   |
 
 **Next actions (in order)**
 
@@ -24,9 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.11, search on the device: a case-insensitive match on the decrypted titles
-   and contents. Decide its scope then: the current view, or all statuses. The 1,000-row API cap
-   (DATA_MODEL) matters here.
+4. **Next task:** P3.12, loading, empty and error states on every Brain Dump screen. Several
+   exist already (skeletons, `Empty`, the not-found page, errors in `Alert`s), so start with a
+   review of each screen.
    - Your local account has "Errands" (parked, no category) and the landlord thought (inbox,
      Home admin); the categories are Personal and Home admin.
    - Follow-up from P3.10: a UI to rename and delete categories (the use cases exist).
@@ -146,6 +146,44 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5: search on the device (P3.11)
+
+- **Phase:** 3 · **Tasks:** P3.11
+- **Start of session:** read the resume block, the ROADMAP and the open decisions. `main`
+  matched GitHub, and the local stack and dev server were still running.
+- **Scope:** search **every** thought, as suggested at the end of Session 4. The search text
+  stays in component state, never in the URL: a `?q=` would send it to the server, and into its
+  logs, as plaintext (D-021).
+- **Done:**
+  - **Domain:** `thoughtMatches(thought, query)`, a case-insensitive match after NFC in the title
+    or the text. It doesn't join the two, and an empty query matches everything. 4 tests.
+  - **Repository:** `list` pages with `count: "exact"` and `.range()`, ordered by
+    `created_at desc, id`, until it has the total. It stops on an empty page, and works whatever
+    the server's row cap is.
+  - **Page:** loads **all** thoughts plus the categories; the view and category come from the URL.
+  - **`ThoughtList`:**
+    - decrypts once, then filters by view and category, or searches everything;
+    - the search box is `type="search"` with `autoComplete="off"` and a hidden label;
+    - while searching, the view links and filter are replaced by a `role="status"` count
+      ("2 thoughts match."), and results show a status badge;
+    - the no-match state says "Nothing matches "…"";
+    - `StatusNav` moved into it; the nested ternaries were rewritten as `if`s and small
+      functions.
+- **Checks:**
+  - **Paging, against the local database:** a throwaway user with 1,050 thoughts. A plain
+    request returns 1,000; `list` returns 1,050, unique and newest first; parked 105 and inbox 945.
+    - Turning paging off fails the check; the file was restored byte-for-byte.
+    - The user and rows were deleted after (local: 1 user, 2 thoughts).
+    - The admin key could not insert, because `service_role` has no privileges on `thoughts`
+      (D-018), so the user inserted their own rows.
+  - **Chrome (MYS231, a separate tab):** the views still filter correctly. "errands" found the
+    parked thought from Inbox, with a Parked badge; "LEASE" found the landlord thought; "zzz"
+    showed the no-match state; counts were 0 and 2. Searching sent 0 requests and the URL
+    didn't change. Clearing brought the views back. No console errors.
+  - typecheck, lint, 95 unit tests and build pass.
+- **Commits:** `feat(thoughts): search Brain Dump on the device (P3.11)`
+- **Next:** P3.12.
 
 ### 2026-11-04 — Session 4 (cont.): categories UI (P3.10)
 

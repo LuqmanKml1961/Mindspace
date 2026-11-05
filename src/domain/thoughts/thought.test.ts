@@ -5,10 +5,39 @@ import {
   isThoughtStatus,
   THOUGHT_CONTENT_MAX,
   THOUGHT_TITLE_MAX,
+  thoughtMatches,
   toThoughtChanges,
   toThoughtContent,
   toThoughtTitle,
 } from "@/domain/thoughts/thought";
+
+describe("thoughtMatches", () => {
+  const thought = { title: "Errands", content: "Buy groceries\nCall Alaa" };
+
+  it("finds the query in the title or the text, ignoring case and outer spaces", () => {
+    expect(thoughtMatches(thought, "errands")).toBe(true);
+    expect(thoughtMatches(thought, "  GROCER ")).toBe(true);
+    expect(thoughtMatches(thought, "call alaa")).toBe(true);
+  });
+
+  it("matches however an accent was typed", () => {
+    expect(
+      thoughtMatches({ title: null, content: "Café at nine" }, "CAFÉ"),
+    ).toBe(true);
+  });
+
+  it("doesn't match across the title and the text, or text that isn't there", () => {
+    expect(thoughtMatches(thought, "errands buy")).toBe(false);
+    expect(thoughtMatches(thought, "docker")).toBe(false);
+    expect(thoughtMatches({ title: null, content: "plain" }, "null")).toBe(
+      false,
+    );
+  });
+
+  it("matches everything when the query is empty", () => {
+    expect(thoughtMatches(thought, "   ")).toBe(true);
+  });
+});
 
 describe("toThoughtContent", () => {
   it("trims, keeping line breaks inside", () => {

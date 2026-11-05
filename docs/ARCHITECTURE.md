@@ -155,9 +155,15 @@ CaptureBox (client component)
 Reading: a Server Component loads the records and the browser decrypts them.
 
 ```text
-page.tsx (Server Component) → useCases.listThoughtRecords(user.id, filter) → EncryptedThought[]
-  └─► client component → openThoughts({ userId, records }) → Thought[] (decrypted on the device)
+page.tsx (Server Component) → useCases.listThoughtRecords(user.id) → EncryptedThought[] (all)
+  └─► ThoughtList (client) → openThoughts({ userId, records }) → Thought[] (decrypted on the device)
+        └─ filter by view and category, or search everything (thoughtMatches); nothing is sent
 ```
+
+Since P3.11 the Brain Dump page loads all of the user's thoughts, paging past the API's row cap
+(DATA_MODEL.md). Search can then look through every view without ever sending the search text.
+The view (`?status=`) and category (`?category=`) stay in the URL; the search text stays in
+memory.
 
 **After a write (P3.9):**
 

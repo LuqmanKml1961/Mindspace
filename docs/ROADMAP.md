@@ -351,7 +351,15 @@ auth (gap G-2).
   - Tested in Chrome locally; the database holds only ciphertext names.
   - **Not built:** renaming and deleting categories. The use cases exist (P3.7); the UI is a
     follow-up.
-- [ ] P3.11 Search on the device: a case-insensitive match on the decrypted titles and contents.
+- [x] P3.11 Search on the device: a case-insensitive match on the decrypted titles and contents.
+      **Done 2026-11-05:**
+  - A search box above the list looks through **every** thought, all views and categories.
+    Results show a status badge and a match count.
+  - The search text stays in the browser: not in the URL, and no requests.
+  - `thoughtMatches` (domain) matches after NFC normalisation and lower-casing, in the title or
+    the text.
+  - The page now loads all thoughts and filters on the device. The repository pages past the
+    1,000-row API cap (checked with 1,050 rows).
 - [ ] P3.12 Loading, empty and error states on every Brain Dump screen. (The locked state is the
       app-wide lock screen from P3.4.)
 - [ ] P3.13 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,

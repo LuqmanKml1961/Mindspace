@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { FormMessages } from "@/components/forms/form-parts";
 import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
+import { StatusNav } from "@/components/thoughts/status-nav";
 import {
   formatCaptured,
+  statusLabels,
   thoughtsHref,
   type CategoryFilter,
 } from "@/components/thoughts/thought-status";
@@ -17,6 +19,8 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import {
   Item,
   ItemContent,
@@ -30,7 +34,11 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Category } from "@/domain/thoughts/category";
 import type { EncryptedCategory } from "@/domain/thoughts/category-repository";
-import type { Thought, ThoughtStatus } from "@/domain/thoughts/thought";
+import {
+  thoughtMatches,
+  type Thought,
+  type ThoughtStatus,
+} from "@/domain/thoughts/thought";
 import type { EncryptedThought } from "@/domain/thoughts/thought-repository";
 
 const emptyText: Record<ThoughtStatus, { title: string; description: string }> =
@@ -54,7 +62,58 @@ const filteredEmpty = {
   description: "No thoughts in this view match that category.",
 };
 
-// The server sends ciphertext (newest first); this device decrypts it for display (D-021).
+function emptyMessage(
+  query: string,
+  status: ThoughtStatus,
+  category: CategoryFilter,
+) {
+  if (query.trim()) {
+    return {
+      title: `Nothing matches “${query.trim()}”.`,
+      description: "Search looks through every thought, in all views.",
+    };
+  }
+  return category === undefined ? emptyText[status] : filteredEmpty;
+}
+
+// The filter select's values: "" for all categories, "none", or a category id.
+function filterFromChoice(choice: string): CategoryFilter {
+  if (choice === "") return undefined;
+  if (choice === "none") return null;
+  return choice;
+}
+
+function ThoughtItem({
+  thought,
+  categoryName,
+  showStatus,
+}: {
+  thought: Thought;
+  categoryName: string | undefined;
+  showStatus: boolean;
+}) {
+  return (
+    <Item variant="outline" render={<Link href={`/thoughts/${thought.id}`} />}>
+      <ItemContent>
+        <ItemTitle>{thought.title ?? thought.content}</ItemTitle>
+        {thought.title && <ItemDescription>{thought.content}</ItemDescription>}
+        <ItemDescription>
+          <time dateTime={thought.createdAt.toISOString()}>
+            {formatCaptured(thought.createdAt)}
+          </time>
+        </ItemDescription>
+      </ItemContent>
+      {showStatus && (
+        <Badge variant="outline">{statusLabels[thought.status]}</Badge>
+      )}
+      {categoryName && <Badge variant="secondary">{categoryName}</Badge>}
+    </Item>
+  );
+}
+
+// The server sends every thought as ciphertext, newest first. This device decrypts them, then
+// filters by view and category, or searches all of them. The search text never leaves the
+// browser (D-021), so it isn't in the URL either.
 export function ThoughtList({
   userId,
   records,
@@ -74,6 +133,7 @@ export function ThoughtList({
     categories: Category[];
   } | null>(null);
   const [error, setError] = useState<string>();
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     let current = true;
@@ -93,86 +153,102 @@ export function ThoughtList({
     };
   }, [userId, records, categoryRecords]);
 
-  if (error) return <FormMessages error={error} />;
-  if (!opened) {
-    return (
+  const searching = query.trim().length > 0;
+  const categories = opened?.categories ?? [];
+  const names = new Map(categories.map((c) => [c.id, c.name]));
+  const visible = (opened?.thoughts ?? []).filter((thought) =>
+    searching
+      ? thoughtMatches(thought, query)
+      : thought.status === status &&
+        (category === undefined || thought.categoryId === category),
+  );
+  let results: ReactNode;
+  if (error) {
+    results = <FormMessages error={error} />;
+  } else if (!opened) {
+    results = (
       <div role="status" className="flex flex-col gap-2">
         <span className="sr-only">Loading your thoughts…</span>
         <Skeleton className="h-16 w-full" />
         <Skeleton className="h-16 w-full" />
       </div>
     );
+  } else if (visible.length === 0) {
+    const empty = emptyMessage(query, status, category);
+    results = (
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>{empty.title}</EmptyTitle>
+          <EmptyDescription>{empty.description}</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    );
+  } else {
+    results = (
+      <ul className="flex flex-col gap-2">
+        {visible.map((thought) => (
+          <li key={thought.id}>
+            <ThoughtItem
+              thought={thought}
+              categoryName={
+                thought.categoryId ? names.get(thought.categoryId) : undefined
+              }
+              showStatus={searching}
+            />
+          </li>
+        ))}
+      </ul>
+    );
   }
-
-  const { thoughts, categories } = opened;
-  const names = new Map(categories.map((c) => [c.id, c.name]));
-  const empty = category === undefined ? emptyText[status] : filteredEmpty;
 
   return (
     <div className="flex flex-col gap-4">
-      {(categories.length > 0 || category !== undefined) && (
-        <NativeSelect
-          aria-label="Filter by category"
-          size="sm"
-          value={category === undefined ? "" : (category ?? "none")}
-          onChange={(event) => {
-            const choice = event.target.value;
-            router.push(
-              thoughtsHref(
-                status,
-                choice === "" ? undefined : choice === "none" ? null : choice,
-              ),
-            );
-          }}
-        >
-          <NativeSelectOption value="">All categories</NativeSelectOption>
-          <NativeSelectOption value="none">No category</NativeSelectOption>
-          {categories.map((c) => (
-            <NativeSelectOption key={c.id} value={c.id}>
-              {c.name}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-      )}
-      {thoughts.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>{empty.title}</EmptyTitle>
-            <EmptyDescription>{empty.description}</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+      <Field>
+        <FieldLabel htmlFor="thought-search" className="sr-only">
+          Search your thoughts
+        </FieldLabel>
+        <Input
+          id="thought-search"
+          type="search"
+          autoComplete="off"
+          placeholder="Search all your thoughts"
+          value={query}
+          disabled={!opened}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </Field>
+      {searching ? (
+        <p role="status" className="text-sm text-muted-foreground">
+          {visible.length === 1
+            ? "1 thought matches."
+            : `${visible.length} thoughts match.`}
+        </p>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {thoughts.map((thought) => {
-            const categoryName = thought.categoryId
-              ? names.get(thought.categoryId)
-              : undefined;
-            return (
-              <li key={thought.id}>
-                <Item
-                  variant="outline"
-                  render={<Link href={`/thoughts/${thought.id}`} />}
-                >
-                  <ItemContent>
-                    <ItemTitle>{thought.title ?? thought.content}</ItemTitle>
-                    {thought.title && (
-                      <ItemDescription>{thought.content}</ItemDescription>
-                    )}
-                    <ItemDescription>
-                      <time dateTime={thought.createdAt.toISOString()}>
-                        {formatCaptured(thought.createdAt)}
-                      </time>
-                    </ItemDescription>
-                  </ItemContent>
-                  {categoryName && (
-                    <Badge variant="secondary">{categoryName}</Badge>
-                  )}
-                </Item>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-wrap items-center gap-2">
+          <StatusNav current={status} category={category} />
+          {opened && (categories.length > 0 || category !== undefined) && (
+            <NativeSelect
+              aria-label="Filter by category"
+              size="sm"
+              value={category === undefined ? "" : (category ?? "none")}
+              onChange={(event) =>
+                router.push(
+                  thoughtsHref(status, filterFromChoice(event.target.value)),
+                )
+              }
+            >
+              <NativeSelectOption value="">All categories</NativeSelectOption>
+              <NativeSelectOption value="none">No category</NativeSelectOption>
+              {categories.map((c) => (
+                <NativeSelectOption key={c.id} value={c.id}>
+                  {c.name}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          )}
+        </div>
       )}
+      {results}
     </div>
   );
 }

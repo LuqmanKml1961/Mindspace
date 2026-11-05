@@ -16,6 +16,8 @@ import type {
 const COLUMNS =
   "id, user_id, title_ciphertext, content_ciphertext, category_id, status, created_at, updated_at";
 
+const PAGE_SIZE = 1000;
+
 type ThoughtRow = Pick<
   Tables<"thoughts">,
   | "id"
@@ -100,20 +102,31 @@ export function createSupabaseThoughtRepository(
       if (error) throw failure("Saving the thought", error);
       return toEncryptedThought(data);
     },
+    // The Data API returns at most max_rows per request (1,000 here; the hosted limit may
+    // differ), so this keeps asking from where the last page ended until it has the total.
     async list(userId, filter = {}) {
-      let query = supabase
-        .from("thoughts")
-        .select(COLUMNS)
-        .eq("user_id", userId);
-      if (filter.status) query = query.eq("status", filter.status);
-      if (filter.categoryId === null) query = query.is("category_id", null);
-      else if (filter.categoryId !== undefined)
-        query = query.eq("category_id", filter.categoryId);
-      const { data, error } = await query.order("created_at", {
-        ascending: false,
-      });
-      if (error) throw failure("Listing thoughts", error);
-      return data.map(toEncryptedThought);
+      const records: EncryptedThought[] = [];
+      let total = Infinity;
+      while (records.length < total) {
+        let query = supabase
+          .from("thoughts")
+          .select(COLUMNS, { count: "exact" })
+          .eq("user_id", userId);
+        if (filter.status) query = query.eq("status", filter.status);
+        if (filter.categoryId === null) query = query.is("category_id", null);
+        else if (filter.categoryId !== undefined)
+          query = query.eq("category_id", filter.categoryId);
+        const { data, error, count } = await query
+          .order("created_at", { ascending: false })
+          .order("id")
+          .range(records.length, records.length + PAGE_SIZE - 1);
+        if (error) throw failure("Listing thoughts", error);
+        // Rows deleted meanwhile can leave the total out of reach.
+        if (data.length === 0) break;
+        records.push(...data.map(toEncryptedThought));
+        total = count ?? records.length;
+      }
+      return records;
     },
     async update(userId, id, changes) {
       const row = toRowChanges(changes);

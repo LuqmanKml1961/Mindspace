@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { idSchema } from "@/application/thoughts/schemas";
 import { CaptureBox } from "@/components/thoughts/capture-box";
-import { StatusNav } from "@/components/thoughts/status-nav";
 import { ThoughtList } from "@/components/thoughts/thought-list";
 import type { CategoryFilter } from "@/components/thoughts/thought-status";
 import { isThoughtStatus } from "@/domain/thoughts/thought";
@@ -23,8 +22,9 @@ export default async function ThoughtsPage({
   const status = isThoughtStatus(params.status) ? params.status : "inbox";
   const category = categoryFilterFrom(params.category);
   const { user, useCases } = await getAppContext();
+  // Everything, so search on the device can look through every view; the browser filters.
   const [records, categoryRecords] = await Promise.all([
-    useCases.listThoughtRecords(user.id, { status, categoryId: category }),
+    useCases.listThoughtRecords(user.id),
     useCases.listCategoryRecords(user.id),
   ]);
 
@@ -44,7 +44,6 @@ export default async function ThoughtsPage({
         <h2 id="thoughts-heading" className="sr-only">
           Your thoughts
         </h2>
-        <StatusNav current={status} category={category} />
         <ThoughtList
           userId={user.id}
           records={records}
