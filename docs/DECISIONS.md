@@ -34,6 +34,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-019 | Sign-in methods                   | Accepted            | P2.6                                             |
 | D-020 | Email on the live site            | Accepted            | P6.10 (before the private beta)                  |
 | D-021 | End-to-end encryption             | Accepted            | P3.3 (before any thought is stored)              |
+| D-022 | Palette retune                    | Accepted            | —                                                |
 
 ---
 
@@ -275,7 +276,8 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
   like card-share's always-blue bars, so neither theme shows a mismatched strip. A manifest can't
   reliably follow the theme anyway (D-014).
 - **Decision:** Accepted. `theme-color` and the manifest's `theme_color` and `background_color`
-  are all Charcoal Blue `#2f3e46` (`systemBarColor` in `src/lib/theme-colors.ts`). This supersedes
+  are all the dark page colour (`systemBarColor` in `src/lib/theme-colors.ts`): Charcoal Blue
+  `#2f3e46` at first, `#25353b` since the D-022 retune. This supersedes
   the per-scheme `theme-color`, `color_scheme_dark` (D-014 follow-up) and `ThemeColorSync`
   (D-015), which were removed. Not yet tested on iOS.
 - **Date:** 2026-11-03
@@ -440,6 +442,28 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - The lock screen covers every signed-in page; after one unlock, navigation and reloads
     don't ask again.
   - Sign-out, from Settings or the lock screen, empties the device-key store.
+
+## D-022 — Palette retune: one hue family per theme
+
+- **Context:** In Checkpoint A, a thought box inside Home's card blended into the card, and you
+  asked for the right shades. The inventory (a local page, `docs/colours.html`, kept out of git)
+  showed four problems:
+  - dark mode used `#354f52` for five surface jobs;
+  - the dark layers were only 1.12–1.26:1 apart;
+  - light cards were 1.05:1 against the page;
+  - the hues swung from 128° to 232° (OKLCH).
+- **Decision:** Accepted, your proposal made in that page on 2026-11-05. Values and
+  reasons are in DESIGN.md §2.
+  - Your greens stay; light `primary` is nudged to `#4e756b`.
+  - Every text check passes except the Delete button inside the dark dialog (3.51:1, P6.4).
+- **System bars:** they stay always dark (D-016), now in the new dark page colour `#25353b`.
+  - **Following the theme:** your notes proposed letting the status bar follow the theme, and
+    fixing both bars to `#25353b` if Android's bottom bar won't follow. The 2026-11-03 test on
+    Android 17 (D-014) already showed that the bottom bar takes the install-time manifest
+    colour, so the fallback applies.
+  - **iOS:** the notes also suggested `black-translucent` for iOS. Sources say it makes the
+    status-bar text white even over a light page, so it isn't used. iOS is still untested.
+- **Date:** 2026-11-05
 
 ---
 

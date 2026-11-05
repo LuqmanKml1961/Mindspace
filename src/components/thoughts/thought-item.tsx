@@ -23,7 +23,12 @@ export function ThoughtItem({
   showStatus?: boolean;
 }) {
   return (
-    <Item variant="outline" render={<Link href={`/thoughts/${thought.id}`} />}>
+    <Item
+      variant="outline"
+      // An outline item has no fill, so inside a card it would share the card's colour.
+      className="in-data-[slot=card]:bg-background"
+      render={<Link href={`/thoughts/${thought.id}`} />}
+    >
       <ItemContent>
         <ItemTitle>{thought.title ?? thought.content}</ItemTitle>
         {thought.title && <ItemDescription>{thought.content}</ItemDescription>}

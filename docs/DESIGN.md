@@ -9,84 +9,112 @@ them. **Change values there, then update this file and re-check contrast.**
 
 ## 1. Palette
 
-| Name            | Hex       | Character                                      |
-| --------------- | --------- | ---------------------------------------------- |
-| Ash Grey        | `#cad2c5` | Earthy green-grey; subtle, understated         |
-| Muted Teal      | `#84a98c` | Soft blue-green; quiet freshness               |
-| Deep Teal       | `#52796f` | Calm ocean and forest blend; the main accent   |
-| Dark Slate Grey | `#354f52` | Dark, cool; mature                             |
-| Charcoal Blue   | `#2f3e46` | Deep navy-steel; text in light, canvas in dark |
+| Name            | Hex       | Character                                                                     |
+| --------------- | --------- | ----------------------------------------------------------------------------- |
+| Ash Grey        | `#cad2c5` | Earthy green-grey; subtle, understated                                        |
+| Muted Teal      | `#84a98c` | Soft blue-green; quiet freshness                                              |
+| Deep Teal       | `#52796f` | Calm ocean and forest blend; the main accent                                  |
+| Dark Slate Grey | `#354f52` | Dark, cool; mature                                                            |
+| Charcoal Blue   | `#2f3e46` | Deep navy-steel; text in light (the dark canvas is a deeper shade, `#25353b`) |
 
-The hex values are used as given (the shadcn skill's rule: keep hex when hex is given).
+The hex values are used as given (the shadcn skill's rule: keep hex when hex is given). One
+exception since 2026-11-05: light `primary` is Deep Teal nudged to `#4e756b`, which has the same
+OKLCH hue (177°) and chroma, 1.4 points darker, so links pass on the tinted page.
 
 ## 2. Token mapping
 
-**Derived** means the palette has no colour for that role, so the value was mixed in sRGB
-(like CSS `color-mix(in srgb, …)`) from palette colours, white or black.
+**Retuned on 2026-11-05** (D-022). You made the change in a local colour page,
+`docs/colours.html`, which is kept out of git. It lists every slot, what it paints, and the
+contrast checks, with a live preview.
 
-| Token                          | Light                                                    | Dark                                             |
-| ------------------------------ | -------------------------------------------------------- | ------------------------------------------------ |
-| `background`                   | `#f9faf8` derived: 12% Ash Grey + white                  | `#2f3e46` Charcoal Blue                          |
-| `foreground`                   | `#2f3e46` Charcoal Blue                                  | `#e6ece3` derived: Ash Grey lightened (raised)   |
-| `card`, `popover`              | `#ffffff`                                                | `#354f52` Dark Slate Grey                        |
-| `card-` / `popover-foreground` | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)                      |
-| `primary`                      | `#52796f` Deep Teal                                      | `#8eb095` derived: Muted Teal + 8% white         |
-| `primary-foreground`           | `#ffffff`                                                | `#1c252a` derived: 60% Charcoal Blue + black     |
-| `secondary`                    | `#cad2c5` Ash Grey                                       | `#354f52` Dark Slate Grey                        |
-| `secondary-foreground`         | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)                      |
-| `muted`                        | `#ecefeb` derived: 35% Ash Grey + white                  | `#32474c` derived: Slate/Charcoal 50/50          |
-| `muted-foreground`             | `#354f52` Dark Slate Grey                                | `#c3d1c3` derived: light sage (raised)           |
-| `accent`                       | `#e0eae2` derived: 25% Muted Teal + white                | `#354f52` Dark Slate Grey                        |
-| `accent-foreground`            | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)                      |
-| `destructive`                  | `#a8463a` **added** soft terracotta (not in the palette) | `#eaaea5` **added**: `#e08a7c` coral + 31% white |
-| `border`                       | `#cad2c5` Ash Grey                                       | `#465459` derived: 15% Ash Grey + Charcoal Blue  |
-| `input`                        | `#cad2c5` Ash Grey                                       | `#4e5c5f` derived: 20% Ash Grey + Charcoal Blue  |
-| `ring` (focus)                 | `#52796f` Deep Teal                                      | `#84a98c` Muted Teal                             |
-| `sidebar`                      | `#f2f4f1` derived: 25% Ash Grey + white                  | `#28353c` derived: 85% Charcoal Blue + black     |
-| `sidebar-*` (others)           | as the matching main token                               | as the matching main token                       |
-| `chart-1…5`                    | the five palette colours                                 | the palette colours that read on Charcoal Blue   |
+The old values swung between hues (OKLCH): the dark page was slate blue (232°), the dark card
+teal (205°), and the light greys yellow-green (128–138°). Each theme now keeps one family:
+
+- **Light:** the greys carry a faint sage tint (151–161°). Cards stay white.
+- **Dark:** the surfaces drift from slate at the bottom to teal at the top:
+  - navigation `#1e2c32` (226°);
+  - page `#25353b` (223°);
+  - card `#32494e` (213°);
+  - dialog `#385053` (206°);
+  - hover `#3f585a` (202°).
+- The five jobs that shared `#354f52` in dark mode now each have their own shade: the card, the
+  dialog, the category badge, the phone tab pill, and the current page in the navigation.
+
+| Token                          | Light                                                    | Dark                             |
+| ------------------------------ | -------------------------------------------------------- | -------------------------------- |
+| `background`                   | `#f2f6f3`                                                | `#25353b`                        |
+| `foreground`                   | `#2f3e46` Charcoal Blue                                  | `#e6ece3`                        |
+| `card`                         | `#ffffff`                                                | `#32494e`                        |
+| `popover`                      | `#ffffff`                                                | `#385053`                        |
+| `card-` / `popover-foreground` | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)      |
+| `primary`                      | `#4e756b` Deep Teal, nudged                              | `#98c0a2`                        |
+| `primary-foreground`           | `#ffffff`                                                | `#1c252a`                        |
+| `secondary`                    | `#d3e3d6`                                                | `#456256`                        |
+| `secondary-foreground`         | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)      |
+| `muted`                        | `#e6ede8`                                                | `#3f585a`                        |
+| `muted-foreground`             | `#4d6668`                                                | `#beccc0`                        |
+| `accent`                       | `#d4e9dd`                                                | `#3a5c4f`                        |
+| `accent-foreground`            | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)      |
+| `destructive`                  | `#a8463a` **added** soft terracotta (not in the palette) | `#f2b9b0` **added**, light coral |
+| `border`                       | `#d5ddd7`                                                | `#4e5e61`                        |
+| `input`                        | `#c5cfc7`                                                | `#5b6b6d`                        |
+| `ring` (focus)                 | `#4e756b` (as `primary`)                                 | `#98c0a2` (as `primary`)         |
+| `sidebar`                      | `#eaf0ec`                                                | `#1e2c32`                        |
+| `sidebar-accent`               | `#d4e9dd` (as `accent`)                                  | `#2e4b49`                        |
+| `sidebar-*` (others)           | as the matching main token                               | as the matching main token       |
+| `chart-1…5`                    | the five palette colours (unchanged, not used yet)       | unchanged, not used yet          |
 
 - `destructive` is the only colour outside the palette. It is used **only** for deleting, never
   for overdue or "missed" items. Those stay neutral (spec §3: no guilt-based productivity).
-- The dark `primary` was lifted just enough to pass contrast as text (found by search).
-- **Dark text raised on 2026-11-04** (your feedback: text looked dim). The `#cad2c5` text tokens
-  are now `#e6ece3`, so body text on a card is 7.31:1 (was 5.66:1). Muted text is `#c3d1c3`,
-  5.53:1 on a card (was 4.60:1, the old passing minimum). `destructive` gained 4 points of
-  white to reach 4.64:1 on a card (was 4.47:1).
+- **History:** on 2026-11-04 the dark text was raised to `#e6ece3`, with muted text at `#c3d1c3`,
+  after you said it looked dim. On 2026-11-05 the surfaces were retuned as above.
 
 ## 3. Contrast (WCAG 2.x)
 
-Checked 2026-11-03 with the WCAG relative-luminance formula. The method was validated against
-known values (21:1 for black on white; `#737373` on white is 4.74:1).
+Rechecked 2026-11-05 after the retune, with the WCAG relative-luminance formula. The method was
+validated against known values (21:1 for black on white; `#737373` on white is 4.74:1). The full
+list of checks, including see-through fills blended over what sits behind them, is in the local
+colour page (`docs/colours.html`, not in git).
 
-| Check                                      | Target | Light (lowest) | Dark (lowest) |
-| ------------------------------------------ | ------ | -------------- | ------------- |
-| Text pairs (14 per theme, rechecked 11-04) | 4.5:1  | 4.64:1         | 4.63:1        |
-| Body text on a card                        | 4.5:1  | 10.57:1 (page) | 7.31:1        |
-| Muted text on a card                       | 4.5:1  | 8.78:1         | 5.53:1        |
-| Note box (tinted Alert) text               | 4.5:1  | 9.27:1         | 5.94:1        |
-| Error box (tinted Alert) text              | 4.5:1  | 9.60:1         | 6.21:1        |
-| Alert border against the card              | —      | 1.84:1         | 1.90:1        |
-| Focus ring on background                   | 3:1    | 4.64:1         | 4.23:1        |
-| Border / input on background               | 3:1    | 1.48:1         | 1.41 / 1.59:1 |
+| Check                                         | Target | Light (lowest) | Dark (lowest) |
+| --------------------------------------------- | ------ | -------------- | ------------- |
+| Text pairs (18 per theme, on the colour page) | 4.5:1  | 4.65:1         | 4.57:1        |
+| Body text on a card                           | 4.5:1  | 11.06:1        | 7.95:1        |
+| Muted text on a card                          | 4.5:1  | 6.15:1         | 5.73:1        |
+| Note box (tinted Alert) text                  | 4.5:1  | 9.23:1         | 6.20:1        |
+| Error box (tinted Alert) text                 | 4.5:1  | 9.58:1         | 6.55:1        |
+| Alert border against the card                 | —      | 1.88:1         | 2.17:1        |
+| Focus ring on background                      | 3:1    | 4.72:1         | 6.30:1        |
+| Border / input on background                  | 3:1    | 1.27 / 1.47:1  | 1.88 / 2.28:1 |
 
 **Alerts (2026-11-04):** an Alert used to share the card's colour (1.00:1), so it was
 invisible. Its variants now tint the box: `bg-primary/14 border-primary/45` for notes, and
-`bg-destructive/10 border-destructive/45` for errors. Text uses `card-foreground` in both. In
-dark mode, red text on the red tint is only 3.8:1, so the colour comes from the box, not the
-text.
+`bg-destructive/10 border-destructive/45` for errors. Text uses `card-foreground` in both, so
+the colour comes from the box, not the text. (Red text on the red tint was 3.8:1 in dark mode
+before the retune; it is 4.62:1 now.)
 
-**Skeletons (2026-11-04):** `Skeleton` uses `bg-foreground/10` instead of `bg-muted`. Muted
-is only 1.13:1 against the dark page (1.11:1 light), so loading blocks were nearly invisible.
-The tint is 1.31:1 (dark) and 1.19:1 (light). `src/app/(app)/loading.tsx` shows them while a
-page that reads data loads.
+**Skeletons (2026-11-04):** `Skeleton` uses `bg-foreground/10` instead of `bg-muted`. In the
+old palette, muted was only 1.13:1 against the dark page, so loading blocks were nearly
+invisible. The tint is 1.32:1 (dark) and 1.18:1 (light). `src/app/(app)/loading.tsx` shows them
+while a page that reads data loads.
 
-**Known dark-mode gaps, not visible today:**
+**Boxes inside a card (2026-11-05):** a box must not reuse the colour of the card it sits in.
+The thought box is an outline `Item` with no fill. Inside Home's card it took the card's colour
+(1.00:1). In the old dark palette its border was only 1.12:1, so it disappeared.
 
-- Sage as text on a card is 3.68:1. This is the link-style Button, used only in the hidden email
-  code step. Fix it before P6.10 brings that screen back.
-- The destructive Button (text on its own 20% tint) is 3.3–4.0:1. No destructive buttons exist
-  yet; fix in P6.4.
+- **`ThoughtItem`** now takes the page colour inside a card
+  (`in-data-[slot=card]:bg-background`).
+  - Dark: 1.33:1 against the card.
+  - Light: 1.09:1, plus a border at 1.39:1.
+  - Its text stays at 5.64:1 or more.
+  - On the page it is unchanged.
+- **`Kbd`** uses `bg-foreground/10`, like Skeleton, instead of `bg-muted`.
+  - The tint is 1.32:1 (dark) and 1.18:1 (light) against the page.
+  - Its text is 5.77:1 and 4.76:1.
+
+**Known gap (dark mode):** the Delete button inside the delete dialog is 3.51:1: red text on its
+own 20% tint over the dialog colour. On the page it passes (4.79:1), and in light mode it is
+5.05:1. Fix in P6.4.
 
 The border and input lines are decorative and below WCAG 1.4.11's 3:1, like shadcn's defaults.
 **Review in P6.4:** confirm that inputs are still identifiable (Maia inputs also have a fill), or
@@ -107,10 +135,10 @@ darken `input`.
     uses `useSyncExternalStore`, not the README's `useEffect` + `setState`, which the
     eslint-config-next 16 hooks rules reject. A 40px placeholder prevents layout shift.
   - Verified in Chrome on 2026-11-03 (system dark): System is the default. Choosing Light switches
-    `<html>` to `light` and the page to `#f9faf8`, and survives reload. Dark and System switch back
-    correctly. No console errors.
-  - The status and Android navigation bars are **always Charcoal Blue**, whatever the theme
-    (D-016, §7a), so they need no syncing with the choice.
+    `<html>` to `light` and the page to the light background, and survives reload. Dark and System
+    switch back correctly. No console errors.
+  - The status and Android navigation bars are **always the dark page colour**, whatever the
+    theme (D-016, §7a), so they need no syncing with the choice.
   - **Change animation:** the pressed **pill button morphs into a circle** centred on it, which
     grows until it covers the whole screen (450ms, `cubic-bezier(0.4, 0, 0.2, 1)`).
     - History, from your feedback: v1 was a 600ms circle from the button's centre point, "too
@@ -258,7 +286,7 @@ tab bar.
 
 | Technique                                                     | Where                                         | Why                                                                                                                                                         |
 | ------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `theme-color` **`#2f3e46` always** (D-016)                    | `viewport` in `src/app/layout.tsx`            | The status and browser bars are Charcoal Blue in both themes, like card-share's always-blue bars                                                            |
+| `theme-color` **`#25353b` always** (D-016)                    | `viewport` in `src/app/layout.tsx`            | The status and browser bars are the dark page colour in both themes, like card-share's always-blue bars                                                     |
 | `appleWebApp` (`capable`, title, `statusBarStyle: "default"`) | `metadata` in `src/app/layout.tsx`            | An iOS home-screen launch opens as an app with a solid status bar                                                                                           |
 | Web app manifest (`display: "standalone"`, colours, icons)    | `src/app/manifest.ts`                         | The installed app has no browser bars on Android or iOS                                                                                                     |
 | `html` and `body` background (`bg-background`)                | `globals.css` base layer                      | Over-scroll and the edges show the app colour                                                                                                               |
@@ -271,7 +299,8 @@ tab bar.
   edge-to-edge guide says: "Don't set the `padding` to a safe-area-inset value", because it
   causes layout thrashing and stops the chin sliding away
   (developer.chrome.com/docs/css-ui/edge-to-edge).
-- **System bars are always Charcoal Blue `#2f3e46` (D-016).** Android paints an installed app's
+- **System bars are always the dark page colour, `#25353b` (D-016; Charcoal Blue `#2f3e46`
+  before the D-022 retune).** Android paints an installed app's
   navigation bar from the **manifest** colours, fixed at install, not from the page. It uses
   `theme_color` up to Android 14 and `background_color` behind a transparent bar from Android 15
   (as reported by other projects; Google's docs don't cover it). A manifest can't follow a

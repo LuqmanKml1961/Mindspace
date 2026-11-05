@@ -47,6 +47,8 @@
 | ---------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | 2026-11-05 | "Lacks toast … error message or success message. All I see is a static 'Saved' until I refresh." | Toasts for every action result (2026-11-05 session entry); field errors stay inline. |
 | 2026-11-05 | "You didn't use shadcn components to the fullest … audit everything."                            | Full audit: Card, Empty, Kbd, InputGroup, Breadcrumb and button icons (DESIGN.md).   |
+| 2026-11-05 | "Why does the box colour now match the background … we already fixed this before."               | The thought box in Home's card takes the page colour; Kbd uses the skeleton tint.    |
+| 2026-11-05 | "We need to use perfect shades of colour … so I can fix it."                                     | A local colour page lists every colour; your proposal from it is applied (D-022).    |
 
 **Open questions (yours to decide)**
 
@@ -156,6 +158,81 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): palette retune and the colour page (Checkpoint A)
+
+- **Phase:** Checkpoint A · **From your feedback:** "we need to use perfect shades of colour.
+  list out how many colour we have and for what, so i can fix it", then "make in this folder".
+- **The colour page, `docs/colours.html`:** open it straight from disk. It stays local and out of
+  git, at your request.
+  - It lists all 31 slots per theme (21 used), with what each paints in plain words, light and
+    dark pickers, and a note where two slots share a shade.
+  - It has a live preview of the app, 38 contrast checks, the see-through fills, the fixed
+    colours, and Copy CSS.
+  - Checked against `globals.css` by script.
+- **Your proposal (made in the page, with notes):**
+  - one hue family per theme;
+  - dark layers from slate up to teal;
+  - the five jobs that shared `#354f52` each get their own shade;
+  - light primary nudged to `#4e756b`.
+- **Checked before wiring:**
+  - All 62 values are valid.
+  - Your notes' claims hold: the old hues 232°/205°/128–138° (OKLCH, method checked on pure
+    red); every one of the page's 18 text checks at 4.5:1 or more; no shared surface shades
+    left.
+  - Two points needed qualifying:
+    - the dark steps are 1.13 / 1.33 / 1.11 / 1.13, not exactly even;
+    - a light card is 1.09:1 on the page, up from 1.05:1, so cards still lean on their outline.
+  - One gap the page didn't list: the Delete button inside the dark dialog is 3.51:1 (it was
+    3.31:1). It is noted in DESIGN.md §3 for P6.4.
+- **Status bar:**
+  - **Your notes:** let the bars follow the theme, falling back to fixed `#25353b` if Android's
+    bottom bar won't follow.
+  - **What applies:** the 2026-11-03 Android 17 test (D-014) already showed the bottom bar
+    takes the install-time manifest colour. So D-016 stays, and `systemBarColor` is now
+    `#25353b`.
+  - **iOS:** the `black-translucent` idea was not applied. Sources say it makes the status-bar
+    text white even over a light page.
+  - Recorded in D-022.
+- **Wired:**
+  - `globals.css`: all 62 values, written by script from your `PROPOSED` set and compared back
+    to it as identical.
+  - `theme-colors.ts`.
+  - The page's own "app values" now equal the new palette.
+- **Dev server note:** Turbopack missed the script's write to `globals.css` (and a `touch`). An
+  edit through the editor tool was picked up at once.
+- **In Chrome (MYS231):**
+  - Dark: page `#25353b`, card `#32494e`, navigation `#1e2c32`, the thought box in a card
+    `#25353b`, and the `theme-color` meta `#25353b`.
+  - Light (class switched temporarily): page `#f2f6f3` with white cards.
+  - Screens: Home, Brain Dump and Settings in both themes.
+- **On your phone after you push:** remove the home-screen app and add it again, because the
+  manifest colours are read at install.
+- **Commits:** `feat(ui): retune the colour palette (Checkpoint A)`
+
+### 2026-11-05 — Session 5 (cont.): boxes inside cards (Checkpoint A)
+
+- **Phase:** Checkpoint A · **From your feedback:** "why the box colour now match the background
+  like before. i think we already fix this before."
+- **Cause:** the audit put Home's thought list inside a Card. A thought box is an outline `Item`
+  with no fill, so it took the card's colour (1.00:1), and its dark border was only 1.12:1
+  against the card. This is the same problem as the 2026-11-04 note box.
+- **Fix:**
+  - `ThoughtItem` uses `in-data-[slot=card]:bg-background`, so inside a card it takes the page
+    colour: 1.26:1 dark, and 1.05:1 light plus a 1.55:1 border. Brain Dump is unchanged.
+  - `Kbd` uses `bg-foreground/10`, the skeleton tint, instead of `bg-muted`: 1.31:1 instead of
+    1.13:1 on the dark page.
+  - The ratios come from a script, checked against known values (21:1 and 4.74:1). DESIGN.md
+    §3 has the rule.
+- **In Chrome (MYS231, verified by a probe):**
+  - Home, dark: card `#354f52`, box `#2f3e46`.
+  - Home, light, switched temporarily without saving the setting: box `#f9faf8`, border
+    `#cad2c5`.
+  - Brain Dump: the box is still transparent, and the Kbd tint is applied.
+  - No console errors after a reload.
+- lint, typecheck, format and 95 unit tests pass.
+- The ratios above are for the old palette; DESIGN.md §3 has them for the retune.
+- **Commits:** with the palette retune, in `feat(ui): retune the colour palette (Checkpoint A)`
 
 ### 2026-11-05 — Session 5 (cont.): shadcn component audit (Checkpoint A)
 
