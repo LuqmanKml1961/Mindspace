@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(12);
 
 -- User A is 1111…, user B is 2222…; 3333… belongs to nobody.
 insert into auth.users (id, email) values
@@ -13,6 +13,13 @@ select results_eq(
   $$ values ('11111111-1111-1111-1111-111111111111'::uuid, 'UTC'),
             ('22222222-2222-2222-2222-222222222222'::uuid, 'UTC') $$,
   'Signing up creates a profile with the default timezone'
+);
+
+-- The app reads "never changed since sign-up" from this (DATA_MODEL Q-5).
+select ok(
+  (select bool_and(created_at = updated_at) from public.profiles
+   where id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222')),
+  'Signing up leaves updated_at equal to created_at'
 );
 
 -- Act as user A.

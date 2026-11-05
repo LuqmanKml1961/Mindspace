@@ -7,6 +7,7 @@ import {
   makeReplaceUserKeys,
 } from "@/application/encryption/user-keys";
 import { makeGetProfile } from "@/application/profiles/get-profile";
+import { makeSaveDetectedTimezone } from "@/application/profiles/save-detected-timezone";
 import { makeUpdateTimezone } from "@/application/profiles/update-timezone";
 import {
   makeCreateCategoryRecord,
@@ -47,6 +48,7 @@ export async function getAppContext() {
     useCases: {
       getProfile: makeGetProfile({ profiles }),
       updateTimezone: makeUpdateTimezone({ profiles }),
+      saveDetectedTimezone: makeSaveDetectedTimezone({ profiles }),
       getUserKeys: makeGetUserKeys({ userKeys }),
       createUserKeys: makeCreateUserKeys({ userKeys }),
       replaceUserKeys: makeReplaceUserKeys({ userKeys }),

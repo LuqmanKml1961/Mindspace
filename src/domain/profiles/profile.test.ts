@@ -1,10 +1,44 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_TIMEZONE,
+  shouldDetectTimezone,
   timezoneOptions,
   toTimezone,
+  type Profile,
 } from "@/domain/profiles/profile";
 import { ValidationError } from "@/domain/shared/errors";
+
+describe("shouldDetectTimezone", () => {
+  const signedUp: Profile = {
+    id: "user-a",
+    displayName: null,
+    timezone: "UTC",
+    changedSinceSignUp: false,
+  };
+
+  it("is true only for a profile still as sign-up left it", () => {
+    expect(shouldDetectTimezone(signedUp)).toBe(true);
+  });
+
+  it("leaves any zone other than the sign-up default alone", () => {
+    expect(shouldDetectTimezone({ ...signedUp, timezone: "Asia/Tokyo" })).toBe(
+      false,
+    );
+  });
+
+  it("never overrides a saved zone, UTC included", () => {
+    expect(
+      shouldDetectTimezone({ ...signedUp, changedSinceSignUp: true }),
+    ).toBe(false);
+    expect(
+      shouldDetectTimezone({
+        ...signedUp,
+        timezone: "Asia/Kuala_Lumpur",
+        changedSinceSignUp: true,
+      }),
+    ).toBe(false);
+  });
+});
 
 describe("toTimezone", () => {
   it("returns the canonical IANA name", () => {

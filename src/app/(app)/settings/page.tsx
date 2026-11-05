@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
-import { DEFAULT_TIMEZONE, timezoneOptions } from "@/domain/profiles/profile";
+import {
+  DEFAULT_TIMEZONE,
+  shouldDetectTimezone,
+  timezoneOptions,
+} from "@/domain/profiles/profile";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { TimezoneForm } from "@/components/settings/timezone-form";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -52,6 +56,7 @@ export default async function SettingsPage() {
         <CardContent>
           <TimezoneForm
             saved={profile?.timezone ?? DEFAULT_TIMEZONE}
+            suggestDevice={profile ? shouldDetectTimezone(profile) : false}
             options={timezoneOptions()}
             labelledBy="timezone-heading"
           />

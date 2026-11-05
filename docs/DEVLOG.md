@@ -5,7 +5,7 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 1 / 10 tasks done (P4.1); next is P4.2                             |
+| **Phase progress** | Phase 4: 2 / 10 tasks done (P4.1, P4.2); next is P4.3                       |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
@@ -24,7 +24,8 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.2 next** (dates and time zones, plus saving the device zone once, Q-5).
+4. **Now: Phase 4, P4.3 next:** the `tasks` and `reminders` migration, with RLS and pgTAP tests.
+   It goes to the hosted database only with your approval.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -157,6 +158,47 @@ Template — copy it above the newest entry:
 - **Next:** <first task for the next session>
 -->
 
+### 2026-11-05 — Session 5 (cont.): P4.2 dates and time zones
+
+- **Phase:** 4 · **Task:** P4.2 (your "go").
+- **"Today":** `dateInTimeZone(instant, zone)` (`domain/shared/calendar.ts`) uses
+  `Intl.DateTimeFormat(...).formatToParts`, so no date library is needed.
+  - Tests: Kuala Lumpur and Los Angeles at local midnight; the New York daylight-saving change
+    (8 March 2026); Kolkata (+5:30) and Kathmandu (+5:45); the same moment on three dates at
+    +14 (Kiritimati), UTC and −11 (Pago Pago); the new year.
+  - **Correction to P4.1's note:** "today" is worked out from the profile's time zone and passed
+    to the repository; it does not come from the device.
+- **Q-5, saving the device zone once:**
+  - **The rule:** `shouldDetectTimezone` is true while the profile is on UTC and unchanged since
+    sign-up.
+  - **"Unchanged" needs no new column.** Sign-up sets `created_at` and `updated_at` to the same
+    `now()`, and every save moves `updated_at`. The repository maps that to
+    `changedSinceSignUp`, and a new pgTAP check guards it (profiles plan 11 → 12).
+  - **The flow:**
+    - the `(app)` layout renders `TimezoneDetector` only while the rule holds;
+    - it sends the device zone once to `saveDetectedTimezoneAction`;
+    - `saveDetectedTimezone` checks the rule again on the server and ignores a device on UTC;
+    - after a save, `refresh()` updates the page, and a toast says "Time zone set to … You can
+      change it in Settings."
+  - **Found while testing:** Settings suggested the device zone whenever the saved zone was UTC,
+    even after you deliberately saved UTC. It now uses the same rule (`suggestDevice`).
+- **In Chrome (MYS231), on your local profile, which ended as before (`Asia/Kuala_Lumpur`):**
+  - **Automatic save:** I reset your profile to a fresh UTC state, in one atomic `do` block that
+    briefly switched off the timestamp trigger; it was confirmed back on (`O`). Loading Home
+    made one POST, showed the toast, and saved `Asia/Kuala_Lumpur`.
+  - **Once only:** a reload made no POST and showed no toast.
+  - **Deliberate UTC:** saving UTC in Settings and reloading made no automatic save, and
+    Settings now shows "Saved: UTC." Then Kuala Lumpur was restored through Settings.
+  - No console errors.
+- **Verified:**
+  - 138 unit tests, 59 pgTAP tests, lint, typecheck and the build pass.
+  - **Mutation check:** six breaks were all caught: today ignoring the zone, day and month
+    swapped, the rule ignoring a saved choice, the rule for any zone, the use case skipping its
+    re-check, and a device on UTC still saving. The fourth first survived, which led to a new
+    test: an unchanged profile on another zone is left alone.
+- **Commits:** `feat(profiles): work out today by time zone and save the device zone once (P4.2)`
+- **Next:** P4.3 (the tasks and reminders migration).
+
 ### 2026-11-05 — Session 5 (cont.): P4.1 task and reminder domain
 
 - **Phase:** 4 · **Task:** P4.1 (your "go").
@@ -178,7 +220,8 @@ Template — copy it above the newest entry:
   - **Ports:**
     - `TaskRepository`, with `EncryptedTask` (the title and notes are ciphertext, D-021) and
       `TaskView`: Today including overdue, Upcoming, No date, or Completed since a moment.
-      `today` comes from the device (P4.2), so the server never guesses a time zone;
+      `today` is worked out from the profile's time zone (P4.2), so the repository never has to
+      guess one;
     - `ReminderRepository`: create, listActive (not dismissed, soonest first), dismiss.
 - **Verified:**
   - 30 new tests; the suite is 125, and lint and typecheck pass.

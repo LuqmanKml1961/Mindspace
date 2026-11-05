@@ -7,10 +7,19 @@ import type {
   Tables,
 } from "@/infrastructure/supabase/database.types";
 
-type ProfileRow = Pick<Tables<"profiles">, "id" | "display_name" | "timezone">;
+type ProfileRow = Pick<
+  Tables<"profiles">,
+  "id" | "display_name" | "timezone" | "created_at" | "updated_at"
+>;
 
 function toProfile(row: ProfileRow): Profile {
-  return { id: row.id, displayName: row.display_name, timezone: row.timezone };
+  return {
+    id: row.id,
+    displayName: row.display_name,
+    timezone: row.timezone,
+    // Sign-up sets both to the same now(); the trigger moves updated_at on every save.
+    changedSinceSignUp: row.updated_at !== row.created_at,
+  };
 }
 
 // Errors carry only the Postgres code: the details can contain row values.
@@ -21,7 +30,7 @@ export function createSupabaseProfileRepository(
     async findById(id) {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, timezone")
+        .select("id, display_name, timezone, created_at, updated_at")
         .eq("id", id)
         .maybeSingle();
       if (error) throw new Error(`Reading the profile failed (${error.code})`);

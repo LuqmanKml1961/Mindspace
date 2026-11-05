@@ -7,7 +7,6 @@ import {
   useSyncExternalStore,
 } from "react";
 import { updateTimezoneAction } from "@/app/(app)/settings/actions";
-import { DEFAULT_TIMEZONE } from "@/domain/profiles/profile";
 import { SubmitButton } from "@/components/forms/form-parts";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
 import {
@@ -18,16 +17,19 @@ import { notify } from "@/lib/notify";
 
 const subscribe = () => () => {};
 const deviceTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
-const label = (zone: string) => zone.replaceAll("_", " ");
+export const timezoneLabel = (zone: string) => zone.replaceAll("_", " ");
 
 type TimezoneFormProps = {
   saved: string;
+  // True while the profile is as sign-up left it (shouldDetectTimezone).
+  suggestDevice: boolean;
   options: string[];
   labelledBy: string;
 };
 
 export function TimezoneForm({
   saved,
+  suggestDevice,
   options,
   labelledBy,
 }: TimezoneFormProps) {
@@ -42,11 +44,10 @@ export function TimezoneForm({
     if (state.error) notify.error(state.error);
   }, [state]);
 
-  // A profile still on the default is pre-filled with the device's zone (not saved yet).
+  // Normally saved automatically (TimezoneDetector); if that didn't happen, the device's zone is
+  // pre-filled here instead. A zone you saved, UTC included, is shown as saved.
   const suggested =
-    saved === DEFAULT_TIMEZONE && detected && detected !== saved
-      ? detected
-      : null;
+    suggestDevice && detected && detected !== saved ? detected : null;
   const value = choice ?? suggested ?? saved;
   // The server's list can lack a zone the browser reports, so add any that are missing.
   const missing = [...new Set([value, saved])].filter(
@@ -67,14 +68,14 @@ export function TimezoneForm({
           >
             {zones.map((zone) => (
               <NativeSelectOption key={zone} value={zone}>
-                {label(zone)}
+                {timezoneLabel(zone)}
               </NativeSelectOption>
             ))}
           </NativeSelect>
           <FieldDescription>
             {value === suggested
               ? "Detected from this device. Save to use it."
-              : `Saved: ${label(saved)}.`}
+              : `Saved: ${timezoneLabel(saved)}.`}
           </FieldDescription>
         </Field>
         <div>

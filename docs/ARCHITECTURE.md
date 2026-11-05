@@ -70,7 +70,7 @@ mindspace/
 │   └── tests/                  # pgTAP RLS tests
 └── src/
     ├── domain/
-    │   ├── shared/             # errors.ts (Validation, NotFound, Conflict), text.ts (characterCount)
+    │   ├── shared/             # errors.ts (Validation, NotFound, Conflict), text.ts (characterCount), calendar.ts (dateInTimeZone)
     │   ├── encryption/         # passphrase.ts, user-keys.ts, user-keys-repository.ts (D-021)
     │   ├── profiles/           # profile.ts (Profile, toTimezone), profile-repository.ts
     │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts (ports), *.test.ts (P3.2)

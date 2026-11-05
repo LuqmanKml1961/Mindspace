@@ -428,10 +428,21 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
       notes as ciphertext.
   - **Tests:** 30 new unit tests. Deliberate breaks to the rules were each caught (see the
     DEVLOG).
-- [ ] P4.2 Dates and timezones: compute "today" in the profile's timezone. Add a small date library
+- [x] P4.2 Dates and timezones: compute "today" in the profile's timezone. Add a small date library
       only if `Intl` is not enough. Test the boundaries (late at night, timezone offsets). Also
       save the device zone once while the profile is still on `UTC` (DATA_MODEL Q-5, settled
-      2026-11-05).
+      2026-11-05). **Done 2026-11-05:**
+  - `dateInTimeZone(instant, zone)` in `src/domain/shared/calendar.ts`. `Intl` was enough, so
+    no library was added. Tested at local midnight both ways, across the New York
+    daylight-saving change, at +5:30 and +5:45, at +14 and −11, and over the new year.
+  - **Q-5:**
+    - `shouldDetectTimezone` (domain): on UTC and unchanged since sign-up;
+    - `saveDetectedTimezone` (use case), which checks the rule again on the server;
+    - `saveDetectedTimezoneAction`;
+    - `TimezoneDetector`, rendered by the app layout only while the rule holds, saves the
+      device zone once and shows a toast.
+    - Settings pre-fills the device zone under the same rule, so a UTC you saved shows as
+      saved.
 - [ ] P4.3 Migration: `tasks` and `reminders`, with indexes, ownership FKs and RLS. pgTAP tests,
       including a cross-user FK attempt that must be rejected. Regenerate the types. The task
       title and notes are ciphertext (D-021, DATA_MODEL.md), encrypted and decrypted in the

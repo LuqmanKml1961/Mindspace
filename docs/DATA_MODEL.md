@@ -40,19 +40,24 @@ Common rules:
 
 ### profiles (Phase 2)
 
-| Column         | Type        | Notes                                                                                                                                                                                                                                                  |
-| -------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `id`           | uuid PK     | `references auth.users(id) on delete cascade`                                                                                                                                                                                                          |
-| `display_name` | text null   | optional; `check (char_length(btrim(display_name)) between 1 and 100)`                                                                                                                                                                                 |
-| `timezone`     | text        | not null, default `'UTC'`, `check (char_length(timezone) between 1 and 64)`. Settings pre-fills the device zone while it is still `UTC` (P2.9); automatic setting at first sign-in is Q-5. Validated and canonicalised by `toTimezone()` in the domain |
-| `created_at`   | timestamptz | not null, default `now()`                                                                                                                                                                                                                              |
-| `updated_at`   | timestamptz | not null, default `now()`; kept current by `private.set_updated_at()`                                                                                                                                                                                  |
+| Column         | Type        | Notes                                                                                                                                                                                                                                                                 |
+| -------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`           | uuid PK     | `references auth.users(id) on delete cascade`                                                                                                                                                                                                                         |
+| `display_name` | text null   | optional; `check (char_length(btrim(display_name)) between 1 and 100)`                                                                                                                                                                                                |
+| `timezone`     | text        | not null, default `'UTC'`, `check (char_length(timezone) between 1 and 64)`. The device zone is saved once, automatically, while the profile is unchanged since sign-up (Q-5, P4.2); Settings changes it. Validated and canonicalised by `toTimezone()` in the domain |
+| `created_at`   | timestamptz | not null, default `now()`                                                                                                                                                                                                                                             |
+| `updated_at`   | timestamptz | not null, default `now()`; kept current by `private.set_updated_at()`                                                                                                                                                                                                 |
 
 The row is created by the `private.handle_new_user()` trigger (AFTER INSERT ON `auth.users`,
 `security definer`, `set search_path = ''`). RLS allows select and update only where
 `id = (select auth.uid())`. There is no insert or delete policy: rows are created by the trigger
 and removed by the cascade. **Grants:** `authenticated` has `select, update`; `anon` and
 `service_role` have nothing.
+
+**"Unchanged since sign-up" (P4.2):** sign-up sets `created_at` and `updated_at` to the same
+`now()`, and the trigger moves `updated_at` on every save. The profile repository maps
+`updated_at = created_at` to `changedSinceSignUp: false`. No column is needed, and a test in
+`profiles_rls_test.sql` guards the assumption.
 
 Verified locally on 2026-11-04 through the real Auth and REST APIs, with two users: the
 sign-up trigger creates the profile; each user sees only their own row; cross-user updates
