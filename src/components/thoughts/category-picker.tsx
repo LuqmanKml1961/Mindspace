@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/native-select";
 import { Spinner } from "@/components/ui/spinner";
 import { isSameCategoryName, type Category } from "@/domain/thoughts/category";
+import { notify } from "@/lib/notify";
 
 const NEW = "new";
 const SUGGESTION = "suggestion:";
@@ -62,6 +63,7 @@ export function CategoryPicker({
         setAdding(false);
         setName("");
         setError(undefined);
+        notify.success(`Added “${category.name}”.`);
       } catch (cause) {
         setError(errorMessage(cause));
       }

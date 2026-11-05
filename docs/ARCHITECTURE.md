@@ -188,7 +188,11 @@ The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.
   `userId` explicitly, which keeps them testable.
 - **Errors (P3.12):** there are three layers.
   - **Expected errors** (`ValidationError`, `ConflictError`, `NotFoundError`, a locked device,
-    offline) are caught where they happen and shown in place. Typed text is never lost.
+    offline) are caught where they happen. Typed text is never lost.
+    - The result of an **action** is a toast (`notify` in `src/lib/notify.ts`, with `<Toaster>` in
+      the root layout, added after Checkpoint A feedback): success briefly, failures until
+      closed.
+    - Errors about a **field** (a duplicate name, a passphrase rule) stay next to the field.
   - **Server Actions** return `{ ok: false, error }` with a safe message instead of throwing.
   - **Anything thrown while a page or the signed-in layout renders** reaches `src/app/error.tsx`.
     It sits at the root because an `error.js` doesn't catch its own folder's layout, and

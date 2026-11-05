@@ -35,6 +35,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { notify } from "@/lib/notify";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { Category } from "@/domain/thoughts/category";
 import type { EncryptedCategory } from "@/domain/thoughts/category-repository";
@@ -85,8 +86,8 @@ export function ThoughtEditor({
   const [saved, setSaved] = useState<Thought | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  // Only for a thought that can't be opened; save and delete report through toasts.
   const [error, setError] = useState<string>();
-  const [notice, setNotice] = useState<string>();
   const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
 
@@ -126,10 +127,7 @@ export function ThoughtEditor({
   const changes = changesBetween(saved, draft);
   const unchanged = Object.keys(changes).length === 0;
   const listHref = thoughtsHref(saved.status);
-  const edit = (next: Partial<Draft>) => {
-    setDraft({ ...draft, ...next });
-    setNotice(undefined);
-  };
+  const edit = (next: Partial<Draft>) => setDraft({ ...draft, ...next });
 
   function save() {
     if (pending || unchanged) return;
@@ -142,11 +140,10 @@ export function ThoughtEditor({
         });
         setSaved(thought);
         setDraft(draftOf(thought));
-        setError(undefined);
-        setNotice("Saved.");
+        notify.success("Changes saved.");
       } catch (cause) {
         // The draft stays as typed, so nothing is lost.
-        setError(errorMessage(cause));
+        notify.error(errorMessage(cause));
       }
     });
   }
@@ -155,10 +152,11 @@ export function ThoughtEditor({
     startTransition(async () => {
       try {
         await brainDump.deleteThought({ id: record.id });
+        notify.success("Thought deleted.");
         router.push(listHref);
       } catch (cause) {
         setConfirming(false);
-        setError(errorMessage(cause));
+        notify.error(errorMessage(cause));
       }
     });
   }
@@ -177,7 +175,6 @@ export function ThoughtEditor({
             {formatCaptured(saved.createdAt)}
           </time>
         </p>
-        <FormMessages error={error} />
         <FormField
           id="title"
           label="Title"
@@ -237,17 +234,12 @@ export function ThoughtEditor({
           </ToggleGroup>
         </Field>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <SubmitButton
-              pending={pending && !confirming}
-              disabled={unchanged || pending}
-            >
-              Save changes
-            </SubmitButton>
-            <p role="status" className="text-sm text-muted-foreground">
-              {notice}
-            </p>
-          </div>
+          <SubmitButton
+            pending={pending && !confirming}
+            disabled={unchanged || pending}
+          >
+            Save changes
+          </SubmitButton>
           <AlertDialog open={confirming} onOpenChange={setConfirming}>
             <AlertDialogTrigger
               render={

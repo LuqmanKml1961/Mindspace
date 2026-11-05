@@ -24,9 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next: Checkpoint A (spec §17 step 10).** Push, then use Brain Dump yourself on the live site,
-   on desktop and phone, for a while. Note what helped and what caused friction here, and adjust
-   Phases 4–5 if needed. Then Phase 4 (External Memory: tasks and reminders).
+4. **Now: Checkpoint A (spec §17 step 10), in progress.** Use Brain Dump yourself on the live site,
+   on desktop and phone. Note what helped and what caused friction (see "Checkpoint A notes"
+   below), and adjust Phases 4–5 if needed. Then Phase 4 (External Memory: tasks and reminders).
    - Your local account has "Errands" (parked, no category) and the landlord thought (inbox,
      Home admin); the categories are Personal and Home admin.
    - **Follow-ups:**
@@ -40,6 +40,12 @@
    database already has the `profiles` migration. After every new migration, run
    `pnpm db:types` and `pnpm db:test` with the local stack running, then
    `pnpm supabase db push --dry-run` before the real push.
+
+**Checkpoint A notes (your feedback while using it)**
+
+| Date       | Friction or help                                                                                 | Response                                                                             |
+| ---------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| 2026-11-05 | "Lacks toast … error message or success message. All I see is a static 'Saved' until I refresh." | Toasts for every action result (2026-11-05 session entry); field errors stay inline. |
 
 **Open questions (yours to decide)**
 
@@ -149,6 +155,42 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): toasts for action feedback (Checkpoint A)
+
+- **Phase:** Checkpoint A · **From your feedback:** "this PWA lacks toast … error message or success
+  message. All I see is a static 'Saved' until I refresh."
+- **Checked first:**
+  - The shadcn skill says a Base UI project uses the `toast` component, not Sonner.
+  - Read with the CLI before adding: a global `toast` manager plus one `<Toaster>`.
+  - Base UI **1.9.0** types (installed): `timeout` defaults to 5000, `0` never auto-dismisses;
+    `priority` is `'low'` (polite) by default, `'high'` is urgent.
+- **Done:**
+  - **`toast.tsx`** added with the CLI. It overwrote `button.tsx` again, restored from git (no
+    diff). The viewport sits above the phone tab bar (`bottom-[calc(5rem+…)]`, `md:bottom-4`).
+  - **`<Toaster>`** in the root layout, so toasts survive navigation.
+  - **`src/lib/notify.ts`:** `notify.success`, and `notify.error` (`timeout: 0`,
+    `priority: "high"`).
+  - **Wired in:**
+    - capture: "Thought saved."; the static "Saved." line and the inline Alert were removed;
+    - editor: "Changes saved." and "Thought deleted."; errors as toasts, so they're visible even
+      when scrolled; a thought that can't be opened still shows inline;
+    - new category: "Added "…"."; field errors stay inline;
+    - Settings time zone: the result as a toast, through `useEffect` on the action state.
+  - Unchanged: the lock-screen and sign-in errors, which are field-level and part of the flow.
+- **In Chrome (MYS231, separate tab; screenshots saved for you):**
+  - "Thought saved." bottom-right, gone after 5 s.
+  - Offline (simulated): an error toast still there after 7 s, with the draft kept.
+  - "Changes saved." while the Save button was below the fold.
+  - "Thought deleted." shown on the list after navigating.
+  - **Phone width:** the window couldn't be resized (maximized), so the page was loaded in a
+    420px frame, where the breakpoints follow the frame. The toast sits **12px above the tab
+    bar**: computed `bottom` 80px, toast bottom 662, bar top 675. A first reading mid-animation
+    looked overlapping; re-measured after the slide-in.
+  - **Cleanup:** 2 test thoughts deleted in the app and 4 with SQL (checked by time first). Your
+    two thoughts are as before. The window size was restored.
+- typecheck, lint, 95 unit tests and build pass.
+- **Commits:** `feat(ui): add toasts for action feedback (Checkpoint A)`
 
 ### 2026-11-05 — Session 5 (cont.): Home "Your mind, right now" (P3.13); Phase 3 complete
 

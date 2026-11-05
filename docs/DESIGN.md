@@ -187,8 +187,19 @@ darken `input`.
 - **Delete confirmation:** `AlertDialog` with `size="sm"`. Focus starts on the safe choice
   ("Keep it"), and the confirm button is `variant="destructive"`. The copy is honest and calm:
   "It will be gone for good, on every device."
-- **shadcn CLI caution:** adding `alert-dialog` or `item` wants to overwrite `button.tsx`
-  (dropping the 40px heights) and `separator.tsx`. Restore both from git after adding.
+- **shadcn CLI caution:** adding `alert-dialog`, `item` or `toast` wants to overwrite
+  `button.tsx` (dropping the 40px heights) and, for some, `separator.tsx`. Restore both from git
+  after adding.
+- **Feedback (toasts, after Checkpoint A):** the shadcn `toast` (Base UI 1.9.0), mounted once in
+  the root layout.
+  - **Success** ("Thought saved.", "Changes saved.", "Thought deleted.", "Added "Work".", "Time
+    zone saved.") auto-dismisses after 5 s and is announced politely.
+  - **Failed actions** stay until closed (`timeout: 0`) and are announced urgently
+    (`priority: "high"`). The text is kept.
+  - **Field errors** stay inline. The static "Saved." lines were removed.
+  - **Placement:** the viewport sits above the phone tab bar, at
+    `bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]`, computed as 80px with a 12px gap above
+    the 67px bar. From `md` up it is `bottom-4`. Checked in a 420px frame.
 
 ## 6a. App shell and navigation (P1.7)
 

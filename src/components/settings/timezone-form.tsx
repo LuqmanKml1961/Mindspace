@@ -1,14 +1,20 @@
 "use client";
 
-import { useActionState, useState, useSyncExternalStore } from "react";
+import {
+  useActionState,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { updateTimezoneAction } from "@/app/(app)/settings/actions";
 import { DEFAULT_TIMEZONE } from "@/domain/profiles/profile";
-import { FormMessages, SubmitButton } from "@/components/forms/form-parts";
+import { SubmitButton } from "@/components/forms/form-parts";
 import { Field, FieldDescription, FieldGroup } from "@/components/ui/field";
 import {
   NativeSelect,
   NativeSelectOption,
 } from "@/components/ui/native-select";
+import { notify } from "@/lib/notify";
 
 const subscribe = () => () => {};
 const deviceTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -30,6 +36,12 @@ export function TimezoneForm({
   const detected = useSyncExternalStore(subscribe, deviceTimezone, () => null);
   const [choice, setChoice] = useState<string | null>(null);
 
+  // Each result is a new object, so every save reports once.
+  useEffect(() => {
+    if (state.notice) notify.success(state.notice);
+    if (state.error) notify.error(state.error);
+  }, [state]);
+
   // A profile still on the default is pre-filled with the device's zone (not saved yet).
   const suggested =
     saved === DEFAULT_TIMEZONE && detected && detected !== saved
@@ -45,7 +57,6 @@ export function TimezoneForm({
   return (
     <form action={formAction}>
       <FieldGroup>
-        <FormMessages error={state.error} notice={state.notice} />
         <Field>
           <NativeSelect
             name="timezone"

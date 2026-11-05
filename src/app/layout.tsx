@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Figtree } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toast";
 import { siteConfig } from "@/lib/site";
 import { systemBarColor } from "@/lib/theme-colors";
 import { cn } from "@/lib/utils";
@@ -48,7 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <Toaster>{children}</Toaster>
         </ThemeProvider>
       </body>
     </html>
