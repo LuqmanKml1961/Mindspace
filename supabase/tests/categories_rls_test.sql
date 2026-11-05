@@ -89,7 +89,8 @@ select results_eq(
 );
 
 select results_eq(
-  $$ select user_id from public.categories $$,
+  $$ select user_id from public.categories
+     where user_id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222') $$,
   $$ values ('22222222-2222-2222-2222-222222222222'::uuid) $$,
   'A''s unfiltered delete removes only A''s own category'
 );

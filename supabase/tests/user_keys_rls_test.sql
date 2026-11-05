@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(14);
 
 -- User A is 1111…, user B is 2222…. A well-formed salt is 24 base64 characters, a wrapped key 56.
 insert into auth.users (id, email) values
@@ -40,10 +40,10 @@ select results_eq(
   'A can update their own keys (a passphrase change)'
 );
 
-select is_empty(
-  $$ update public.user_keys set passphrase_wrapped_key = repeat('C', 54) || '=='
-     where user_id = '22222222-2222-2222-2222-222222222222' returning user_id $$,
-  'A cannot update B''s keys'
+-- No WHERE or RETURNING, so only the UPDATE policy limits it (DATA_MODEL §4). B's check is below.
+select lives_ok(
+  $$ update public.user_keys set passphrase_wrapped_key = repeat('C', 54) || '==' $$,
+  'A''s unfiltered update reaches only A''s own keys'
 );
 
 select throws_ok(
@@ -97,6 +97,13 @@ select throws_ok(
 );
 
 reset role;
+
+select results_eq(
+  $$ select passphrase_wrapped_key from public.user_keys
+     where user_id = '22222222-2222-2222-2222-222222222222' $$,
+  $$ values (repeat('B', 54) || '==') $$,
+  'A''s unfiltered update leaves B''s keys unchanged'
+);
 
 -- now() is fixed for the whole transaction, so the trigger must replace the old value with it.
 update public.user_keys set updated_at = '2000-01-01'

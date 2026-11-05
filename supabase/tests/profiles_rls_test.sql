@@ -32,10 +32,10 @@ select results_eq(
   'A can update their own profile'
 );
 
-select is_empty(
-  $$ update public.profiles set display_name = 'Taken over'
-     where id = '22222222-2222-2222-2222-222222222222' returning id $$,
-  'A cannot update B''s profile'
+-- No WHERE or RETURNING, so only the UPDATE policy limits it (DATA_MODEL §4). B's check is below.
+select lives_ok(
+  $$ update public.profiles set display_name = 'Taken over' $$,
+  'A''s unfiltered update reaches only A''s own profile'
 );
 
 select throws_ok(

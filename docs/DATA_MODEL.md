@@ -327,7 +327,11 @@ For every table, with two test users A and B:
   `reset role` and check that B's row is unchanged.
 - Wrap the unfiltered UPDATE in `lives_ok`, so a policy that reaches B's row fails as a named
   test.
-- The P2/P3.4 tests (`profiles`, `user_keys`) still use the old form.
+- All four test files use this form. `profiles` and `user_keys` were converted on 2026-11-05.
+  Breaking each UPDATE policy (`using (true)`) then failed their "B unchanged" checks.
+- A check that runs as `postgres` (after `reset role`) sees every row, including the real data
+  of your local account. Limit it to the test users (`where user_id in (A, B)`), or it fails as
+  soon as the local database has data.
 
 ## 5. Open questions
 

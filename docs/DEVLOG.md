@@ -29,11 +29,7 @@
    below), and adjust Phases 4–5 if needed. Then Phase 4 (External Memory: tasks and reminders).
    - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
      toast" (inbox, test). The categories are Home admin, Personal, test and Zambaroni.
-   - **Follow-ups:**
-     - in the category picker, Cancel turns red when there is an error (fixed in the
-       category page by moving Cancel out of the `Field`);
-     - the `profiles` / `user_keys` pgTAP update checks in the unfiltered form (DATA_MODEL §4);
-     - time PBKDF2 on a phone.
+   - **Follow-up:** time PBKDF2 on a phone.
 
    In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
@@ -159,6 +155,34 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): two follow-ups (Checkpoint A)
+
+- **Phase:** Checkpoint A · **From you:** "you can continue".
+- **Category picker, Cancel no longer turns red:**
+  - A typed new name now has its own `Field`, with its error under the text box. The menu's
+    `Field` turns invalid only when no name is being typed, for example when a suggestion fails
+    to save.
+  - In Chrome, on your landlord thought, without saving: "home ADMIN" was refused with its
+    message. Cancel and the "Category" label stayed the normal colour, and only the text box
+    turned red. Cancel then closed the box and cleared the error, and the thought stayed on
+    Home admin with nothing to save.
+- **RLS tests (DATA_MODEL §4):**
+  - **`profiles` and `user_keys`:** A's update now runs with no `WHERE` or `RETURNING`, in
+    `lives_ok`. B's row is then checked as unchanged (for `user_keys`, a new check after
+    `reset role`; plan 13 → 14).
+  - **Mutation check:** temporary copies broke each policy inside the test's transaction (so it
+    was rolled back). Every one failed:
+    - `profiles` (UPDATE `using (true)`): "B … unchanged by A";
+    - `user_keys`: "leaves B's keys unchanged";
+    - `categories` and `thoughts` (DELETE `using (true)`): their unfiltered-delete checks.
+      The copies were deleted, and `pg_policies` still shows the original rules.
+  - **A test bug found on the way:** `categories` test 11 and `thoughts` test 17 listed every
+    row as `postgres`, so they failed once your local account had data. Both are now limited
+    to the two test users.
+  - `pnpm db:test`: 58/58 pass.
+- **Commits:** `fix(thoughts): keep Cancel out of the category picker's error colour`, then
+  `test(db): check profile and key updates without filters`
 
 ### 2026-11-05 — Session 5 (cont.): rename and delete categories (Checkpoint A follow-up)
 
