@@ -46,6 +46,7 @@
 | Date       | Friction or help                                                                                 | Response                                                                             |
 | ---------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
 | 2026-11-05 | "Lacks toast … error message or success message. All I see is a static 'Saved' until I refresh." | Toasts for every action result (2026-11-05 session entry); field errors stay inline. |
+| 2026-11-05 | "You didn't use shadcn components to the fullest … audit everything."                            | Full audit: Card, Empty, Kbd, InputGroup, Breadcrumb and button icons (DESIGN.md).   |
 
 **Open questions (yours to decide)**
 
@@ -155,6 +156,44 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): shadcn component audit (Checkpoint A)
+
+- **Phase:** Checkpoint A · **From your feedback:** "I feel like you didn't use shadcn components to
+  the fullest"; then "use everything we needed from shadcn. audit everything".
+- **Audit:**
+  - Listed the registry (`shadcn list @shadcn`, about 60 UI components) against the 19
+    installed, all of which were in use.
+  - Searched the presentation code for hand-written markup, then went screen by screen through
+    sign-in, the lock screen, Home, Brain Dump, the thought page, Settings, the placeholders and
+    the error pages.
+- **Done** (the table is in DESIGN.md):
+  - Settings and Home use **Card**; Tasks and Mind Clarity use **Empty**.
+  - The save hint uses **Kbd**, in a shared `save-shortcut.tsx`, now in the editor too.
+  - Search, new category and the recovery code use **InputGroup**. The recovery code is a
+    read-only text area so it wraps on a phone, with Copy inside, which also toasts.
+  - The thought page uses **Breadcrumb**.
+  - Button icons via `data-icon`: Delete, Copy, Sign out, plus `AlertDialogMedia`.
+- **CLI:** `kbd`, `input-group` and `breadcrumb` were added. They overwrote `button.tsx`,
+  `input.tsx` (`h-10` → `h-9`) and `textarea.tsx`; all three were restored from git with no diff.
+  `InputGroup` was set to `h-10`.
+- **Kept, with reasons:** the app navigation (the bottom tab bar suits a PWA better than
+  shadcn's Sidebar sheet), the native selects (phone pickers), and the view links (URLs).
+  **Deferred:** InputOTP to P6.10 (the email code is hidden until then).
+- **In Chrome (MYS231, separate tab; screenshots saved):**
+  - Home card; Brain Dump search and Kbd; the thought page breadcrumb; Add inside the category
+    input (cancelled, nothing created); the delete dialog with its icon (focus on Keep it,
+    cancelled); Settings cards and Sign out; the Tasks empty state; Mind Clarity's text.
+  - **Heights:** the search group 40px, the Save button 40px, the category group 40px.
+  - **The lock screen and the recovery-code card**, reached by one more recovery on your local
+    account with your same passphrase. The code wraps; Copy shows "Copied" and a toast.
+  - **The new local code** is in Claude's scratchpad `local-recovery-code.txt`, replacing the
+    old one.
+  - No console errors.
+  - Screenshots sometimes timed out because Chrome pauses rendering for windows that aren't
+    visible; a standalone retry worked each time.
+- typecheck, lint, 95 unit tests and build pass.
+- **Commits:** `refactor(ui): use shadcn components across the app (Checkpoint A)`
 
 ### 2026-11-05 — Session 5 (cont.): toasts for action feedback (Checkpoint A)
 

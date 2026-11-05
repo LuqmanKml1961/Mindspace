@@ -4,7 +4,14 @@ import { notFound } from "next/navigation";
 import { idSchema } from "@/application/thoughts/schemas";
 import { ThoughtEditor } from "@/components/thoughts/thought-editor";
 import { thoughtsHref } from "@/components/thoughts/thought-status";
-import { buttonVariants } from "@/components/ui/button";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { getAppContext } from "@/infrastructure/container";
 
 // The title is encrypted, so the browser tab shows a generic name.
@@ -25,15 +32,21 @@ export default async function ThoughtPage({
   return (
     <>
       <header className="flex flex-col gap-3">
-        <Link
-          href={thoughtsHref(record.status)}
-          className={buttonVariants({
-            variant: "link",
-            className: "w-fit px-0",
-          })}
-        >
-          ← Brain Dump
-        </Link>
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink
+                render={<Link href={thoughtsHref(record.status)} />}
+              >
+                Brain Dump
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>This thought</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
         <h1 className="text-3xl font-semibold tracking-tight">Your thought</h1>
       </header>
       <ThoughtEditor

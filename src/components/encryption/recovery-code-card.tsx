@@ -1,7 +1,8 @@
 "use client";
 
+import { Copy01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useState } from "react";
-import { FormMessages } from "@/components/forms/form-parts";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,6 +13,13 @@ import {
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "@/components/ui/input-group";
+import { notify } from "@/lib/notify";
 
 // Shown once, after setup or after a recovery. The code is never stored or sent anywhere.
 export function RecoveryCodeCard({
@@ -23,15 +31,16 @@ export function RecoveryCodeCard({
   replacesOld: boolean;
   onDone: () => void;
 }) {
-  const [copy, setCopy] = useState<"idle" | "copied" | "failed">("idle");
+  const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
 
   async function copyCode() {
     try {
       await navigator.clipboard.writeText(code);
-      setCopy("copied");
+      setCopied(true);
+      notify.success("Recovery code copied.");
     } catch {
-      setCopy("failed");
+      notify.error("Couldn’t copy. Select the code and copy it yourself.");
     }
   }
 
@@ -54,17 +63,32 @@ export function RecoveryCodeCard({
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
-        <p className="rounded-xl bg-muted p-4 font-mono text-lg tracking-wide select-all">
-          {code}
-        </p>
-        {copy === "failed" && (
-          <FormMessages error="Couldn’t copy. Select the code and copy it yourself." />
-        )}
-        <div>
-          <Button variant="outline" onClick={copyCode}>
-            {copy === "copied" ? "Copied" : "Copy code"}
-          </Button>
-        </div>
+        <Field>
+          <FieldLabel htmlFor="recovery-code-value" className="sr-only">
+            Your recovery code
+          </FieldLabel>
+          <InputGroup>
+            {/* A text area, not an input, so the code wraps at its dashes on a phone. */}
+            <InputGroupTextarea
+              id="recovery-code-value"
+              readOnly
+              value={code}
+              className="font-mono text-lg tracking-wide md:text-lg"
+              onFocus={(event) => event.currentTarget.select()}
+            />
+            <InputGroupAddon align="block-end">
+              <InputGroupButton variant="outline" size="sm" onClick={copyCode}>
+                <HugeiconsIcon
+                  icon={copied ? Tick02Icon : Copy01Icon}
+                  strokeWidth={2}
+                  data-icon="inline-start"
+                  aria-hidden="true"
+                />
+                {copied ? "Copied" : "Copy code"}
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </Field>
         <Field orientation="horizontal">
           <Checkbox
             id="recovery-code-saved"

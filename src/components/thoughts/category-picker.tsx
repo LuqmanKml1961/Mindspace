@@ -10,7 +10,12 @@ import {
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   NativeSelect,
   NativeSelectOptGroup,
@@ -115,31 +120,35 @@ export function CategoryPicker({
         <NativeSelectOption value={NEW}>New category…</NativeSelectOption>
       </NativeSelect>
       {adding && (
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            aria-label="New category name"
-            className="w-auto flex-1"
-            autoFocus
-            value={name}
-            readOnly={pending}
-            aria-invalid={error ? true : undefined}
-            onChange={(event) => setName(event.target.value)}
-            onKeyDown={(event) => {
-              // The picker sits inside the thought form: Enter adds the category instead.
-              if (event.key === "Enter") {
-                event.preventDefault();
-                if (name.trim()) create(name);
-              }
-            }}
-          />
-          <Button
-            type="button"
-            disabled={pending || !name.trim()}
-            onClick={() => create(name)}
-          >
-            {pending && <Spinner data-icon="inline-start" />}
-            Add
-          </Button>
+        <div className="flex items-center gap-2">
+          <InputGroup>
+            <InputGroupInput
+              aria-label="New category name"
+              autoFocus
+              value={name}
+              readOnly={pending}
+              aria-invalid={error ? true : undefined}
+              onChange={(event) => setName(event.target.value)}
+              onKeyDown={(event) => {
+                // The picker sits inside the thought form: Enter adds the category instead.
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  if (name.trim()) create(name);
+                }
+              }}
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton
+                variant="default"
+                size="sm"
+                disabled={pending || !name.trim()}
+                onClick={() => create(name)}
+              >
+                {pending && <Spinner data-icon="inline-start" />}
+                Add
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
           <Button
             type="button"
             variant="ghost"

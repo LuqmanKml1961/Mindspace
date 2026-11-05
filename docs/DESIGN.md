@@ -200,6 +200,29 @@ darken `input`.
   - **Placement:** the viewport sits above the phone tab bar, at
     `bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]`, computed as 80px with a 12px gap above
     the 67px bar. From `md` up it is `bottom-4`. Checked in a 420px frame.
+- **shadcn audit (after Checkpoint A, 2026-11-05).** Hand-written markup was swapped for the
+  shadcn component that covers it:
+
+  | Where                       | Component                                                                                                                         |
+  | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+  | Settings                    | **Card** per section (Appearance, Time zone, Account; Sign out in the footer)                                                     |
+  | Home "Your mind, right now" | **Card** (count as the description, "See all" in the footer), **Empty** when the inbox is clear                                   |
+  | Tasks, Mind Clarity         | **Empty** ("Coming soon")                                                                                                         |
+  | Save shortcut hint          | **Kbd** / **KbdGroup**, in a shared `save-shortcut.tsx` (capture box and editor)                                                  |
+  | Search                      | **InputGroup** with a search-icon addon                                                                                           |
+  | New category                | **InputGroup** with the Add button inside (`InputGroupButton`), Cancel beside it                                                  |
+  | Recovery code               | **InputGroup** with a read-only **InputGroupTextarea** (so the code wraps at its dashes on a phone) and Copy inside (`block-end`) |
+  | Thought page                | **Breadcrumb** (Brain Dump › This thought) instead of a back-link button                                                          |
+  | Buttons                     | Icons with `data-icon`: Delete (trash), Copy (copy, then a tick), Sign out (log-out); `AlertDialogMedia` on the delete dialog     |
+  - **`InputGroup` was set to `h-10`** (the CLI ships `h-9`), so it matches the 40px controls.
+    Measured at 40px in Chrome.
+  - **Kept on purpose:**
+    - **App navigation:** shadcn `Sidebar` gives phones a slide-out sheet, and our bottom tab bar
+      (6a) suits a one-handed PWA better.
+    - **NativeSelect** for the category picker and filter, which uses the phone's own picker.
+    - **Links** for the Brain Dump views (each has a URL; `Tabs` swap panels in place).
+  - **Deferred:** **InputOTP** for the 6-digit email code, to P6.10, when email sign-in returns
+    and can be tested.
 
 ## 6a. App shell and navigation (P1.7)
 

@@ -3,7 +3,8 @@
 import { useRef, useState, useTransition } from "react";
 import { SubmitButton } from "@/components/forms/form-parts";
 import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
-import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { SaveShortcut } from "@/components/thoughts/save-shortcut";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { notify } from "@/lib/notify";
 
@@ -58,9 +59,7 @@ export function CaptureBox({ userId }: { userId: string }) {
             }
           }}
         />
-        <FieldDescription className="hidden md:block">
-          Press Ctrl+Enter (⌘+Enter on a Mac) to save.
-        </FieldDescription>
+        <SaveShortcut />
       </Field>
       <div>
         <SubmitButton pending={pending} disabled={empty}>

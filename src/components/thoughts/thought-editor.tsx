@@ -1,5 +1,7 @@
 "use client";
 
+import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import {
@@ -9,6 +11,7 @@ import {
 } from "@/components/forms/form-parts";
 import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
 import { CategoryPicker } from "@/components/thoughts/category-picker";
+import { SaveShortcut } from "@/components/thoughts/save-shortcut";
 import {
   formatCaptured,
   statusLabels,
@@ -22,6 +25,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
@@ -198,6 +202,7 @@ export function ThoughtEditor({
               }
             }}
           />
+          <SaveShortcut />
         </Field>
         <CategoryPicker
           userId={userId}
@@ -244,12 +249,25 @@ export function ThoughtEditor({
             <AlertDialogTrigger
               render={
                 <Button type="button" variant="destructive" disabled={pending}>
+                  <HugeiconsIcon
+                    icon={Delete02Icon}
+                    strokeWidth={2}
+                    data-icon="inline-start"
+                    aria-hidden="true"
+                  />
                   Delete
                 </Button>
               }
             />
             <AlertDialogContent size="sm">
               <AlertDialogHeader>
+                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20">
+                  <HugeiconsIcon
+                    icon={Delete02Icon}
+                    strokeWidth={2}
+                    aria-hidden="true"
+                  />
+                </AlertDialogMedia>
                 <AlertDialogTitle>Delete this thought?</AlertDialogTitle>
                 <AlertDialogDescription>
                   It will be gone for good, on every device.
@@ -264,7 +282,16 @@ export function ThoughtEditor({
                   disabled={pending}
                   onClick={remove}
                 >
-                  {pending && <Spinner data-icon="inline-start" />}
+                  {pending ? (
+                    <Spinner data-icon="inline-start" />
+                  ) : (
+                    <HugeiconsIcon
+                      icon={Delete02Icon}
+                      strokeWidth={2}
+                      data-icon="inline-start"
+                      aria-hidden="true"
+                    />
+                  )}
                   Delete
                 </AlertDialogAction>
               </AlertDialogFooter>

@@ -505,7 +505,9 @@ and then the private beta.
       Reset password templates show `{{ .Token }}`, and set the email code length to 6 and the
       minimum password length to 8. Turn the hosted Email provider back on, and set
       `emailSignInEnabled = true` in `src/lib/features.ts`. Then test email sign-up and password
-      reset on the live site. Also review the hosted security advisor "Leaked password protection
+      reset on the live site. Use the shadcn **InputOTP** for the 6-digit code in
+      `email-code-form.tsx` (deferred from the 2026-11-05 shadcn audit). Also review the hosted
+      security advisor "Leaked password protection
       disabled" (an Auth setting; it only matters once passwords are used).
 
 **Acceptance**

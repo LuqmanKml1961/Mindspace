@@ -1,5 +1,7 @@
 "use client";
 
+import { Search01Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { FormMessages } from "@/components/forms/form-parts";
@@ -17,7 +19,11 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -170,15 +176,24 @@ export function ThoughtList({
         <FieldLabel htmlFor="thought-search" className="sr-only">
           Search your thoughts
         </FieldLabel>
-        <Input
-          id="thought-search"
-          type="search"
-          autoComplete="off"
-          placeholder="Search all your thoughts"
-          value={query}
-          disabled={!opened}
-          onChange={(event) => setQuery(event.target.value)}
-        />
+        <InputGroup data-disabled={!opened || undefined}>
+          <InputGroupInput
+            id="thought-search"
+            type="search"
+            autoComplete="off"
+            placeholder="Search all your thoughts"
+            value={query}
+            disabled={!opened}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+          <InputGroupAddon>
+            <HugeiconsIcon
+              icon={Search01Icon}
+              strokeWidth={2}
+              aria-hidden="true"
+            />
+          </InputGroupAddon>
+        </InputGroup>
       </Field>
       {searching ? (
         <p role="status" className="text-sm text-muted-foreground">

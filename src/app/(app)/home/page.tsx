@@ -27,19 +27,11 @@ export default async function HomePage() {
           Brain Dump
         </Link>
       </div>
-      <section
-        aria-labelledby="right-now-heading"
-        className="flex flex-col gap-3"
-      >
-        <h2 id="right-now-heading" className="text-lg font-semibold">
-          Your mind, right now
-        </h2>
-        <InboxPreview
-          userId={user.id}
-          records={inbox.records}
-          total={inbox.total}
-        />
-      </section>
+      <InboxPreview
+        userId={user.id}
+        records={inbox.records}
+        total={inbox.total}
+      />
     </>
   );
 }
