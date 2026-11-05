@@ -1,7 +1,8 @@
 "use client";
 
-import { Search01Icon } from "@hugeicons/core-free-icons";
+import { PencilEdit02Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { FormMessages } from "@/components/forms/form-parts";
@@ -12,6 +13,7 @@ import {
   thoughtsHref,
   type CategoryFilter,
 } from "@/components/thoughts/thought-status";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Empty,
   EmptyDescription,
@@ -223,6 +225,24 @@ export function ThoughtList({
                 </NativeSelectOption>
               ))}
             </NativeSelect>
+          )}
+          {opened && categories.length > 0 && (
+            <Link
+              href="/thoughts/categories"
+              className={buttonVariants({
+                variant: "ghost",
+                size: "sm",
+                className: "ml-auto",
+              })}
+            >
+              <HugeiconsIcon
+                icon={PencilEdit02Icon}
+                strokeWidth={2}
+                data-icon="inline-start"
+                aria-hidden="true"
+              />
+              Edit categories
+            </Link>
           )}
         </div>
       )}

@@ -27,10 +27,11 @@
 4. **Now: Checkpoint A (spec §17 step 10), in progress.** Use Brain Dump yourself on the live site,
    on desktop and phone. Note what helped and what caused friction (see "Checkpoint A notes"
    below), and adjust Phases 4–5 if needed. Then Phase 4 (External Memory: tasks and reminders).
-   - Your local account has "Errands" (parked, no category) and the landlord thought (inbox,
-     Home admin); the categories are Personal and Home admin.
+   - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
+     toast" (inbox, test). The categories are Home admin, Personal, test and Zambaroni.
    - **Follow-ups:**
-     - a UI to rename and delete categories (the use cases exist);
+     - in the category picker, Cancel turns red when there is an error (fixed in the
+       category page by moving Cancel out of the `Field`);
      - the `profiles` / `user_keys` pgTAP update checks in the unfiltered form (DATA_MODEL §4);
      - time PBKDF2 on a phone.
 
@@ -158,6 +159,40 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): rename and delete categories (Checkpoint A follow-up)
+
+- **Phase:** Checkpoint A · **Task:** the P3.10 follow-up, which you approved ("go").
+- **Done:**
+  - **New page `/thoughts/categories`**, with the breadcrumb "Brain Dump › Categories". You
+    reach it from **Edit categories** at the end of Brain Dump's filter row, which shows once
+    you have a category.
+  - `CategoryManager` (`components/thoughts/category-manager.tsx`) decrypts the names on the
+    device. Each category is an outline `Item` with **Rename** and **Delete**.
+  - **Rename** opens an `InputGroup` in place:
+    - Save sits inside the field; Enter saves; Escape and Cancel close it.
+    - An unchanged name closes the field without a request.
+    - A duplicate or invalid name shows its message under the field and keeps what you typed.
+    - Success shows a toast, and the list stays alphabetical.
+  - **Delete** asks first, in the same `AlertDialog` as deleting a thought: "Its thoughts stay,
+    with no category." Focus starts on Keep it. Success shows a toast.
+  - No new use cases or actions: it uses the P3.7 ones, which already had tests. The database
+    clears the category from its thoughts (`on delete set null (category_id)`).
+  - Cancel sits outside the `Field`, because the field's error colour was turning it red.
+- **In Chrome (MYS231, verified by a probe), with a temporary thought and category of mine,
+  deleted afterwards:**
+  - The link opens the page, and the navigation keeps Brain Dump current.
+  - Renaming to "home ADMIN" is refused with "You already have a category called “Home
+    admin”."
+  - A real rename gives a toast.
+  - The database holds 5/5 names as `v1.` ciphertext, with no plaintext matches.
+  - Keep it changes nothing, and focus returns to Delete.
+  - Delete removes the category; the test thought is kept, with `category_id` null.
+  - Escape and an unchanged Save send no request.
+  - Checked in dark mode (temporary class) and at 390px wide: no sideways scrolling.
+  - No console errors.
+- format, lint, typecheck, 95 unit tests and build pass.
+- **Commits:** `feat(thoughts): rename and delete categories (Checkpoint A)`
 
 ### 2026-11-05 — Session 5 (cont.): palette retune and the colour page (Checkpoint A)
 

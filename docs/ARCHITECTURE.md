@@ -94,7 +94,7 @@ mindspace/
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
-    │   ├── (app)/home | thoughts (+ [id]) | tasks | clarity | settings/, encryption/actions.ts
+    │   ├── (app)/home | thoughts (+ [id], categories) | tasks | clarity | settings/, encryption/actions.ts
     │   ├── (app)/layout.tsx    # the lock screen (EncryptionGate) around the whole signed-in app
     │   └── layout.tsx
     ├── components/             # presentation
@@ -102,7 +102,7 @@ mindspace/
     │   ├── layout/             # app shell, navigation, brand-frame.tsx (sign-in and lock screen)
     │   ├── forms/              # shared form parts (field, messages, submit button)
     │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
-    │   ├── thoughts/           # capture-box, thought-list, thought-item, thought-editor, category-picker, status-nav, save-shortcut, inbox-preview (Home); brain-dump.ts (Server Actions as ports)
+    │   ├── thoughts/           # capture-box, thought-list, thought-item, thought-editor, category-picker, category-manager, status-nav, save-shortcut, inbox-preview (Home); brain-dump.ts (Server Actions as ports)
     │   └── auth | settings | tasks | clarity/   # feature UI components
     └── lib/
         └── utils.ts            # presentation helpers only (e.g. shadcn's cn())

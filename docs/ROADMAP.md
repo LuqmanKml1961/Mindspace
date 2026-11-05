@@ -349,8 +349,8 @@ auth (gap G-2).
   - **On the list:** a badge on each card, and a category filter (All, No category, or one
     category) kept in the URL alongside the status.
   - Tested in Chrome locally; the database holds only ciphertext names.
-  - **Not built:** renaming and deleting categories. The use cases exist (P3.7); the UI is a
-    follow-up.
+  - **Renaming and deleting** were added on 2026-11-05 as a Checkpoint A follow-up. The page is
+    `/thoughts/categories`, opened from "Edit categories" on Brain Dump. It uses the P3.7 use cases.
 - [x] P3.11 Search on the device: a case-insensitive match on the decrypted titles and contents.
       **Done 2026-11-05:**
   - A search box above the list looks through **every** thought, all views and categories.
