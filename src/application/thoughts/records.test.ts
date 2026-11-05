@@ -4,6 +4,7 @@ import {
   makeCreateCategoryRecord,
   makeCreateThoughtRecord,
   makeDeleteThoughtRecord,
+  makeGetInboxPreview,
   makeListThoughtRecords,
   makeUpdateThoughtRecord,
 } from "@/application/thoughts/records";
@@ -25,6 +26,7 @@ function recordingRepository() {
       create: record("create"),
       findById: record("findById"),
       list: record("list"),
+      listNewest: record("listNewest"),
       update: record("update"),
       delete: record("delete"),
     } as unknown as ThoughtRepository,
@@ -60,6 +62,7 @@ describe("record use cases", () => {
   it("scope reads and writes to the session's user", async () => {
     const repo = recordingRepository();
     await makeListThoughtRecords(repo)("session-user", { status: "parked" });
+    await makeGetInboxPreview(repo)("session-user", 3);
     await makeUpdateThoughtRecord(repo)("session-user", "t1", {
       status: "archived",
     });
@@ -67,6 +70,7 @@ describe("record use cases", () => {
 
     expect(repo.calls).toEqual([
       ["list", "session-user", { status: "parked" }],
+      ["listNewest", "session-user", { status: "inbox" }, 3],
       ["update", "session-user", "t1", { status: "archived" }],
       ["delete", "session-user", "t1"],
     ]);

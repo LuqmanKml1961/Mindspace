@@ -40,6 +40,12 @@ export interface ThoughtRepository {
   findById(userId: string, id: string): Promise<EncryptedThought | null>;
   // Newest first.
   list(userId: string, filter?: ThoughtFilter): Promise<EncryptedThought[]>;
+  // The newest few, and how many match in total, without loading the rest.
+  listNewest(
+    userId: string,
+    filter: ThoughtFilter,
+    limit: number,
+  ): Promise<{ records: EncryptedThought[]; total: number }>;
   // Throws NotFoundError if the thought, or the category it moves to, doesn't exist.
   update(
     userId: string,

@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                                  |
-| ------------------ | -------------------------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                                 |
-| **Phase progress** | Phase 3: 12 / 13 tasks done (P3.1–P3.12); next is P3.13 (Home: "Your mind, right now") |
-| **Last updated**   | 2026-11-05 (Session 5)                                                                 |
-| **Blocked on**     | Nothing                                                                                |
+| Item               | Value                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------- |
+| **Current phase**  | Checkpoint A — personal use (Phases 0–3 done)                                       |
+| **Phase progress** | Phase 3: 13 / 13 tasks done; acceptance checked; next is Checkpoint A, then Phase 4 |
+| **Last updated**   | 2026-11-05 (Session 5)                                                              |
+| **Blocked on**     | Nothing                                                                             |
 
 **Next actions (in order)**
 
@@ -24,12 +24,15 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.13, Home: "Your mind, right now" shows a few recent thoughts and how many
-   wait in the inbox, with no urgency styling. It is the last Phase 3 task; then Checkpoint A
-   (personal use).
+4. **Next: Checkpoint A (spec §17 step 10).** Push, then use Brain Dump yourself on the live site,
+   on desktop and phone, for a while. Note what helped and what caused friction here, and adjust
+   Phases 4–5 if needed. Then Phase 4 (External Memory: tasks and reminders).
    - Your local account has "Errands" (parked, no category) and the landlord thought (inbox,
      Home admin); the categories are Personal and Home admin.
-   - Follow-up from P3.10: a UI to rename and delete categories (the use cases exist).
+   - **Follow-ups:**
+     - a UI to rename and delete categories (the use cases exist);
+     - the `profiles` / `user_keys` pgTAP update checks in the unfiltered form (DATA_MODEL §4);
+     - time PBKDF2 on a phone.
 
    In Settings, save your time zone (it is
    pre-filled from your device). Local dev needs `pnpm db:start`
@@ -146,6 +149,47 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): Home "Your mind, right now" (P3.13); Phase 3 complete
+
+- **Phase:** 3 · **Tasks:** P3.13; Phase 3 acceptance
+- **Spec §7, read first:** "Your mind, right now" means showing a small number of recently
+  captured thoughts, indicating how many are waiting for review, and not making every item look
+  urgent. DESIGN.md's tone table gives "3 thoughts waiting · no rush".
+- **Interpretation:** the newest **inbox** thoughts (captured and still waiting) and the inbox
+  count. Parked and archived thoughts are settled, so they don't belong in "right now".
+- **Done:**
+  - **Domain port:** `listNewest(userId, filter, limit) → { records, total }`.
+  - **Repository:** a shared `newestPage` helper (filter, order, range, exact count). `list` loops
+    over it; `listNewest` uses one page.
+  - **Application:** `makeGetInboxPreview` (inbox, limit), wired in the container as
+    `getInboxPreview`. The records test checks it.
+  - **Presentation:**
+    - `thought-item.tsx`: the card, now shared by Brain Dump and Home.
+    - `inbox-preview.tsx`: decrypts the few records, shows a muted count, skeletons while
+      decrypting, and "See all N in Brain Dump" when there are more. An empty inbox says
+      "Nothing is waiting. Your inbox is clear.".
+    - `/home`: the greeting, then Brain Dump, then the "Your mind, right now" section with an h2.
+      It loads 3.
+- **Checks:**
+  - **The local database, one-off:** a throwaway user with 5 inbox and 2 parked. `listNewest`
+    made **1 request** (counted through a custom `fetch`): total 5, the 3 newest inbox ids in
+    order; archived gave `{ records: [], total: 0 }`. Ignoring the filter fails the check; the
+    file was restored and the user deleted.
+  - **Chrome (MYS231, separate tab):**
+    - your account: "1 thought waiting · no rush" with the landlord card;
+    - after capturing 3 test thoughts: "4 thoughts waiting · no rush", the 3 newest (three, two,
+      one) and "See all 4 in Brain Dump" → `/thoughts`;
+    - the empty case (the landlord thought parked briefly with SQL): "Nothing is waiting. Your
+      inbox is clear.";
+    - no console errors. Screenshots timed out (the tab was in the background), so everything was
+      checked through the DOM.
+  - **Cleanup:** the 3 test thoughts were deleted (only rows created after the noted database
+    time), and the landlord thought went back to the inbox. Its `updated_at` moved.
+  - typecheck, lint, 95 unit tests and build pass.
+- **Phase 3 acceptance** is met (see ROADMAP). It is deployed once you push.
+- **Commits:** `feat(home): show "Your mind, right now" (P3.13)`
+- **Next:** Checkpoint A, using Brain Dump yourself; then Phase 4.
 
 ### 2026-11-05 — Session 5 (cont.): loading, empty and error states (P3.12)
 

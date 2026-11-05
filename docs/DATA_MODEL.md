@@ -143,6 +143,12 @@ ordered by `created_at desc, id`.
 returns 1,000. `list` returns all 1,050, unique and newest first, and the status filter pages
 too (105 / 945). Turning paging off fails the check.
 
+**`listNewest(userId, filter, limit)`** (P3.13, Home) returns the newest `limit` rows and the
+total that match, in one request (`count: "exact"` and `.range(0, limit - 1)`), with the same
+filter and order as `list`. **Verified on 2026-11-05:** 5 inbox and 2 parked thoughts → 1
+request, total 5, the 3 newest inbox ids in order; an empty status gives total 0. Ignoring the
+filter fails the check.
+
 **Ciphertext format and limits (D-021):** `v1.<IV base64, 16 chars>.<ciphertext base64>`. The
 maximum is computed from the character limit at 4 UTF-8 bytes per character, plus the 16-byte
 GCM tag: `3 + 16 + 1 + 4·⌈(4·chars + 16)/3⌉`. That gives 53,376 for content, 1,108 for a title

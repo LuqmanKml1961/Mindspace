@@ -1,18 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { FormMessages } from "@/components/forms/form-parts";
 import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
 import { StatusNav } from "@/components/thoughts/status-nav";
+import { ThoughtItem } from "@/components/thoughts/thought-item";
 import {
-  formatCaptured,
-  statusLabels,
   thoughtsHref,
   type CategoryFilter,
 } from "@/components/thoughts/thought-status";
-import { Badge } from "@/components/ui/badge";
 import {
   Empty,
   EmptyDescription,
@@ -21,12 +18,6 @@ import {
 } from "@/components/ui/empty";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "@/components/ui/item";
 import {
   NativeSelect,
   NativeSelectOption,
@@ -81,34 +72,6 @@ function filterFromChoice(choice: string): CategoryFilter {
   if (choice === "") return undefined;
   if (choice === "none") return null;
   return choice;
-}
-
-function ThoughtItem({
-  thought,
-  categoryName,
-  showStatus,
-}: {
-  thought: Thought;
-  categoryName: string | undefined;
-  showStatus: boolean;
-}) {
-  return (
-    <Item variant="outline" render={<Link href={`/thoughts/${thought.id}`} />}>
-      <ItemContent>
-        <ItemTitle>{thought.title ?? thought.content}</ItemTitle>
-        {thought.title && <ItemDescription>{thought.content}</ItemDescription>}
-        <ItemDescription>
-          <time dateTime={thought.createdAt.toISOString()}>
-            {formatCaptured(thought.createdAt)}
-          </time>
-        </ItemDescription>
-      </ItemContent>
-      {showStatus && (
-        <Badge variant="outline">{statusLabels[thought.status]}</Badge>
-      )}
-      {categoryName && <Badge variant="secondary">{categoryName}</Badge>}
-    </Item>
-  );
 }
 
 // The server sends every thought as ciphertext, newest first. This device decrypts them, then

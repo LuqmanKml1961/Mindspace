@@ -15,6 +15,12 @@ export function makeListThoughtRecords(deps: { thoughts: ThoughtRepository }) {
     deps.thoughts.list(userId, filter);
 }
 
+// Home's "Your mind, right now": the newest few waiting in the inbox, and how many wait.
+export function makeGetInboxPreview(deps: { thoughts: ThoughtRepository }) {
+  return (userId: string, limit: number) =>
+    deps.thoughts.listNewest(userId, { status: "inbox" }, limit);
+}
+
 export function makeGetThoughtRecord(deps: { thoughts: ThoughtRepository }) {
   return (userId: string, id: string) => deps.thoughts.findById(userId, id);
 }

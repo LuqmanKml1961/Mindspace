@@ -5,6 +5,7 @@ import { isThoughtStatus } from "@/domain/thoughts/thought";
 import type {
   EncryptedThought,
   EncryptedThoughtChanges,
+  ThoughtFilter,
   ThoughtRepository,
 } from "@/domain/thoughts/thought-repository";
 import type {
@@ -85,6 +86,27 @@ export function createSupabaseThoughtRepository(
     return data ? toEncryptedThought(data) : null;
   }
 
+  // One page of the user's thoughts, newest first, with how many match in total.
+  function newestPage(
+    userId: string,
+    filter: ThoughtFilter,
+    from: number,
+    size: number,
+  ) {
+    let query = supabase
+      .from("thoughts")
+      .select(COLUMNS, { count: "exact" })
+      .eq("user_id", userId);
+    if (filter.status) query = query.eq("status", filter.status);
+    if (filter.categoryId === null) query = query.is("category_id", null);
+    else if (filter.categoryId !== undefined)
+      query = query.eq("category_id", filter.categoryId);
+    return query
+      .order("created_at", { ascending: false })
+      .order("id")
+      .range(from, from + size - 1);
+  }
+
   return {
     findById,
     async create(thought) {
@@ -108,18 +130,12 @@ export function createSupabaseThoughtRepository(
       const records: EncryptedThought[] = [];
       let total = Infinity;
       while (records.length < total) {
-        let query = supabase
-          .from("thoughts")
-          .select(COLUMNS, { count: "exact" })
-          .eq("user_id", userId);
-        if (filter.status) query = query.eq("status", filter.status);
-        if (filter.categoryId === null) query = query.is("category_id", null);
-        else if (filter.categoryId !== undefined)
-          query = query.eq("category_id", filter.categoryId);
-        const { data, error, count } = await query
-          .order("created_at", { ascending: false })
-          .order("id")
-          .range(records.length, records.length + PAGE_SIZE - 1);
+        const { data, error, count } = await newestPage(
+          userId,
+          filter,
+          records.length,
+          PAGE_SIZE,
+        );
         if (error) throw failure("Listing thoughts", error);
         // Rows deleted meanwhile can leave the total out of reach.
         if (data.length === 0) break;
@@ -127,6 +143,14 @@ export function createSupabaseThoughtRepository(
         total = count ?? records.length;
       }
       return records;
+    },
+    async listNewest(userId, filter, limit) {
+      const { data, error, count } = await newestPage(userId, filter, 0, limit);
+      if (error) throw failure("Listing thoughts", error);
+      return {
+        records: data.map(toEncryptedThought),
+        total: count ?? data.length,
+      };
     },
     async update(userId, id, changes) {
       const row = toRowChanges(changes);

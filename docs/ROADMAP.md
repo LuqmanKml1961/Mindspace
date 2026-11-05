@@ -370,10 +370,26 @@ auth (gap G-2).
     keep the text.
   - **Checked in Chrome:** switching views keeps an unsaved draft; the offline message; and the
     error page and recovery, with PostgREST stopped locally and then started again.
-- [ ] P3.13 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
-      with no urgency styling.
+- [x] P3.13 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
+      with no urgency styling. **Done 2026-11-05:**
+  - **What Home shows:** the 3 newest **inbox** thoughts (captured and still waiting), decrypted
+    on the device, and a muted count ("4 thoughts waiting · no rush", or "Nothing is waiting.
+    Your inbox is clear."). A "See all N in Brain Dump" link appears when there are more.
+  - **`listNewest`** returns the newest few and the total in **one request**, so Home doesn't
+    load the whole inbox.
+  - The thought card is shared with Brain Dump (`thought-item.tsx`).
 
-**Acceptance**
+**Acceptance** (checked 2026-11-05):
+
+- **Met:** capture is one field and one action. Create, edit, delete, search and categorise
+  work, and failed saves keep the text (P3.8–P3.12).
+- **Met:** RLS and pgTAP pass for `thoughts` and `categories` (57 tests), and the domain and
+  application tests pass (95).
+- **Met:** the database holds only ciphertext for titles, contents and category names (checked
+  with SQL). A wrong passphrase unlocks nothing; recovery resets the passphrase and the thoughts
+  still open (P3.4).
+- **Deployed:** the hosted database has all three migrations; the live site updates when you
+  push.
 
 - From the capture screen, a thought is saved in a few seconds: one field, one action.
 - Create, edit, delete, search and categorise all work. Text is never lost on a failed save.

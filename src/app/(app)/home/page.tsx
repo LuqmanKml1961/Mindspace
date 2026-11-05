@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { InboxPreview } from "@/components/thoughts/inbox-preview";
 import { buttonVariants } from "@/components/ui/button";
+import { getAppContext } from "@/infrastructure/container";
 
 export const metadata: Metadata = { title: "Home" };
 
-export default function HomePage() {
+const PREVIEW_SIZE = 3;
+
+export default async function HomePage() {
+  const { user, useCases } = await getAppContext();
+  const inbox = await useCases.getInboxPreview(user.id, PREVIEW_SIZE);
+
   return (
     <>
       <header className="flex flex-col gap-2">
@@ -20,6 +27,19 @@ export default function HomePage() {
           Brain Dump
         </Link>
       </div>
+      <section
+        aria-labelledby="right-now-heading"
+        className="flex flex-col gap-3"
+      >
+        <h2 id="right-now-heading" className="text-lg font-semibold">
+          Your mind, right now
+        </h2>
+        <InboxPreview
+          userId={user.id}
+          records={inbox.records}
+          total={inbox.total}
+        />
+      </section>
     </>
   );
 }
