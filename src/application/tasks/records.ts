@@ -19,7 +19,23 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export type TaskViewName = TaskView["view"];
 
-// "Today" is the date in the user's own time zone (P4.2), never the server's.
+// "Today" is the date in the user's own time zone (P4.2), never the server's; UTC with no profile.
+async function userToday(
+  profiles: ProfileRepository,
+  userId: string,
+  now: Date,
+): Promise<string> {
+  const profile = await profiles.findById(userId);
+  return dateInTimeZone(now, profile?.timezone ?? DEFAULT_TIMEZONE);
+}
+
+export function makeGetToday(deps: {
+  profiles: ProfileRepository;
+  clock: Clock;
+}) {
+  return (userId: string) => userToday(deps.profiles, userId, deps.clock());
+}
+
 export function makeListTaskRecords(deps: {
   tasks: TaskRepository;
   profiles: ProfileRepository;
@@ -34,9 +50,7 @@ export function makeListTaskRecords(deps: {
       const since = new Date(now.getTime() - RECENTLY_COMPLETED_DAYS * DAY_MS);
       view = { view: "completed", since };
     } else {
-      const profile = await deps.profiles.findById(userId);
-      const today = dateInTimeZone(now, profile?.timezone ?? DEFAULT_TIMEZONE);
-      view = { view: name, today };
+      view = { view: name, today: await userToday(deps.profiles, userId, now) };
     }
     return deps.tasks.list(userId, view);
   };

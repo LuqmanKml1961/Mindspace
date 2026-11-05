@@ -5,7 +5,7 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 5 / 10 tasks done (P4.1–P4.5; P4.3 also hosted); next is P4.6      |
+| **Phase progress** | Phase 4: 6 / 10 tasks done (P4.1–P4.6; P4.3 also hosted); next is P4.7      |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
@@ -24,8 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.6 next:** the Tasks screen. That means quick add, an edit sheet with due
-   date and time and priority, complete with undo, and the Server Actions behind it.
+4. **Now: Phase 4, P4.7 next:** turn a thought into a task from Brain Dump. The title is
+   pre-filled and linked through `source_thought_id`, and the thought is archived (Q-2). The
+   Tasks screen (P4.6) is ready to try locally.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -157,6 +158,60 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.6 the Tasks screen
+
+- **Phase:** 4 · **Task:** P4.6 (your "go").
+- **Done:**
+  - **`/tasks`** (Server Component): the view from `?view=` (today, upcoming, no-date or
+    completed; the default is Today), with `listTaskRecords` and `getToday` side by side.
+  - **`QuickAdd`:** an InputGroup with Add inside. It dates the task by the view (`quickAddDate`)
+    and shows "Added for today." / "Added for tomorrow." / "Task added." There is none on
+    Completed.
+  - **`TaskViewNav`:** links, as in StatusNav.
+  - **`TaskList`:**
+    - decrypts on the device;
+    - an Empty state per view, in calm wording;
+    - a Checkbox to complete ("Task completed." with **Undo**) or reopen ("Task reopened.");
+    - while the server saves, the box shows the new state.
+  - **`TaskItem`:** an outline Item button with the due label (`dueLabel`: Today, Tomorrow, a
+    short date or "Waiting since …", plus the time), a High or Low badge, and "Completed …" on
+    Completed.
+  - **`TaskSheet`:** a shadcn Sheet, added through the CLI. `button.tsx` was overwritten again
+    and restored from git. The sheet has the title, notes, date and time (the time needs a
+    date; "Clear date" clears both), ToggleGroup priority, Save (sends only the changes), and
+    Delete with confirmation.
+  - **Server Actions** `app/(app)/tasks/actions.ts`: create, update, delete, complete and
+    reopen. Each checks the session and the input, and calls `refresh()`.
+  - **Shared helpers lifted out of Brain Dump:**
+    - `lib/action-result.ts` (`failure` now also passes on `ValidationError`, since the server
+      re-checks dates);
+    - `lib/action-errors.ts` (`ServerActionError`, `unwrap`, `errorMessage`);
+    - the thought actions, `brain-dump.ts` and six components now import them. Behaviour is
+      unchanged.
+  - **Also:** `notify.success(title, action?)` (Base UI `actionProps`; the action closes its
+    toast), `addDays` in the calendar module (with tests), and `getToday` (application, with a
+    test, in the container).
+- **In Chrome (MYS231, verified by a probe), with test tasks named "Claude test …":**
+  - **Quick add:** Today ×2 gives "Today" and two toasts.
+  - **Edit:** notes, 09:30 and High give "Today · 9:30 AM" and a High badge.
+  - **Complete and Undo:** the task leaves Today; Undo brings it back and closes the toast.
+  - **Completed view:** newest first, "Completed Nov 5, 2026, 5:15 PM", no quick add, and
+    reopening works.
+  - **Other views:** Upcoming quick add gives "Tomorrow"; No date quick add has no label;
+    yesterday gives "Waiting since Wed, Nov 4" in muted text.
+  - **Delete:** focus starts on Keep it; confirming deletes and closes the sheet.
+  - **Database:** 4/4 titles and the one note are `v1.` ciphertext, with no plaintext matches.
+  - **Phone (390px frame):** no overflow, and the sheet is full width.
+  - **Brain Dump still loads after the refactor.** No console errors.
+  - **Not done:** visual screenshots. Chrome had paused rendering for its window (1 animation
+    frame in 500 ms), so screenshots timed out and animations froze at their start. The checks
+    above read the page directly.
+- format, lint, typecheck, 164 unit tests and the build pass.
+- **Left for you to look at:** three test tasks ("Claude test: …") on your local account, to be
+  deleted after your review.
+- **Commits:** `feat(tasks): add the Tasks screen (P4.6)`
+- **Next:** P4.7 (convert a thought into a task).
 
 ### 2026-11-05 — Session 5 (cont.): P4.5 task and reminder use cases
 

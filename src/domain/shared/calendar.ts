@@ -12,3 +12,11 @@ export function dateInTimeZone(instant: Date, timeZone: string): string {
     parts.find((p) => p.type === type)?.value;
   return `${part("year")}-${part("month")}-${part("day")}`;
 }
+
+// A calendar date (YYYY-MM-DD) moved by whole days. Dates have no time zone, so UTC arithmetic
+// is exact here.
+export function addDays(date: string, days: number): string {
+  const moved = new Date(`${date}T00:00:00Z`);
+  moved.setUTCDate(moved.getUTCDate() + days);
+  return moved.toISOString().slice(0, 10);
+}

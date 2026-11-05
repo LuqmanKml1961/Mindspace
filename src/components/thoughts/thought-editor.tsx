@@ -9,7 +9,8 @@ import {
   FormMessages,
   SubmitButton,
 } from "@/components/forms/form-parts";
-import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
+import { brainDump } from "@/components/thoughts/brain-dump";
+import { errorMessage } from "@/lib/action-errors";
 import { CategoryPicker } from "@/components/thoughts/category-picker";
 import { SaveShortcut } from "@/components/thoughts/save-shortcut";
 import {

@@ -215,7 +215,7 @@ darken `input`.
 - **Delete confirmation:** `AlertDialog` with `size="sm"`. Focus starts on the safe choice
   ("Keep it"), and the confirm button is `variant="destructive"`. The copy is honest and calm:
   "It will be gone for good, on every device."
-- **shadcn CLI caution:** adding `alert-dialog`, `item` or `toast` wants to overwrite
+- **shadcn CLI caution:** adding `alert-dialog`, `item`, `toast` or `sheet` wants to overwrite
   `button.tsx` (dropping the 40px heights) and, for some, `separator.tsx`. Restore both from git
   after adding.
 - **Feedback (toasts, after Checkpoint A):** the shadcn `toast` (Base UI 1.9.0), mounted once in
@@ -251,6 +251,26 @@ darken `input`.
     - **Links** for the Brain Dump views (each has a URL; `Tabs` swap panels in place).
   - **Deferred:** **InputOTP** for the 6-digit email code, to P6.10, when email sign-in returns
     and can be tested.
+
+- **Tasks screen (P4.6):**
+  - **Views:** links for Today, Upcoming, No date and Completed, like the Brain Dump views; each
+    has its own URL (`?view=`).
+  - **Quick add:** an **InputGroup** with Add inside. Only the title is needed. The date follows
+    the view:
+    - Today: today;
+    - Upcoming: tomorrow;
+    - No date: none;
+    - Completed: no quick add.
+  - **A task:** a **Checkbox** (complete or reopen) beside an outline **Item** button that opens
+    the edit sheet. The due day reads "Today", "Tomorrow" or a short date, with the time if any.
+    High and Low show a **Badge**; Normal shows none.
+  - **A past due date reads "Waiting since Wed, Nov 4"**, in muted text, never "overdue" in red
+    (§8).
+  - **Complete:** "Task completed." with an **Undo** action (`notify.success(title, action)`
+    uses Base UI's `actionProps`; Undo also closes the toast).
+  - **Edit sheet:** **Sheet** on the right, full width on phones. It has the title, notes, a
+    native date and time pair (the time is disabled until there is a date; "Clear date" clears
+    both), and **ToggleGroup** priority. Save, and Delete with the same confirmation as thoughts.
 
 ## 6a. App shell and navigation (P1.7)
 

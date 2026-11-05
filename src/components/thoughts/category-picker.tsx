@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
+import { brainDump } from "@/components/thoughts/brain-dump";
+import { errorMessage } from "@/lib/action-errors";
 import { SUGGESTED_CATEGORY_NAMES } from "@/components/thoughts/category-suggestions";
 import { Button } from "@/components/ui/button";
 import {

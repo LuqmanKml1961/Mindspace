@@ -6,7 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { FormMessages } from "@/components/forms/form-parts";
-import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
+import { brainDump } from "@/components/thoughts/brain-dump";
+import { errorMessage } from "@/lib/action-errors";
 import { StatusNav } from "@/components/thoughts/status-nav";
 import { ThoughtItem } from "@/components/thoughts/thought-item";
 import {

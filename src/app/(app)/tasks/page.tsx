@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty";
+import { QuickAdd } from "@/components/tasks/quick-add";
+import { TaskList } from "@/components/tasks/task-list";
+import { TaskViewNav } from "@/components/tasks/task-view-nav";
+import { taskViewFromParam } from "@/components/tasks/task-views";
+import { getAppContext } from "@/infrastructure/container";
 
 export const metadata: Metadata = { title: "Tasks" };
 
-export default function TasksPage() {
+export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
+  const view = taskViewFromParam((await searchParams).view);
+  const { user, useCases } = await getAppContext();
+  const [records, today] = await Promise.all([
+    useCases.listTaskRecords(user.id, view),
+    useCases.getToday(user.id),
+  ]);
+
   return (
     <>
       <header className="flex flex-col gap-2">
@@ -17,14 +23,19 @@ export default function TasksPage() {
           An external memory for the things you need to do.
         </p>
       </header>
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>Coming soon</EmptyTitle>
-          <EmptyDescription>
-            Tasks and gentle reminders are next on the list.
-          </EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <QuickAdd userId={user.id} view={view} today={today} />
+      <section aria-labelledby="tasks-heading" className="flex flex-col gap-4">
+        <h2 id="tasks-heading" className="sr-only">
+          Your tasks
+        </h2>
+        <TaskViewNav current={view} />
+        <TaskList
+          userId={user.id}
+          records={records}
+          today={today}
+          view={view}
+        />
+      </section>
     </>
   );
 }

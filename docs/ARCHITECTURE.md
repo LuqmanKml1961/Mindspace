@@ -104,9 +104,13 @@ mindspace/
     │   ├── forms/              # shared form parts (field, messages, submit button)
     │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
     │   ├── thoughts/           # capture-box, thought-list, thought-item, thought-editor, category-picker, category-manager, status-nav, save-shortcut, inbox-preview (Home); brain-dump.ts (Server Actions as ports)
-    │   └── auth | settings | tasks | clarity/   # feature UI components
+    │   ├── tasks/              # quick-add, task-list, task-item, task-sheet, task-view-nav, task-views.ts (labels, hrefs, due wording); task-use-cases.ts (Server Actions as ports)
+    │   └── auth | settings | clarity/   # feature UI components
     └── lib/
-        └── utils.ts            # presentation helpers only (e.g. shadcn's cn())
+        ├── utils.ts            # presentation helpers only (e.g. shadcn's cn())
+        ├── action-result.ts    # ActionResult, attempt and failure, shared by every Server Action
+        ├── action-errors.ts    # browser side: unwrap and errorMessage
+        └── notify.ts           # toasts, with an optional action such as Undo
 ```
 
 Session refresh and route protection live in `src/proxy.ts` (Next.js 16 renamed `middleware` to

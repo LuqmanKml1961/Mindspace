@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   makeCompleteTask,
   makeCreateTaskRecord,
+  makeGetToday,
   makeListTaskRecords,
   makeReopenTask,
   makeUpdateTaskRecord,
@@ -66,6 +67,19 @@ const encryptedTask = {
   priority: "normal" as const,
   sourceThoughtId: null,
 };
+
+describe("getToday", () => {
+  it("is the date in the user's own time zone, or UTC without a profile", async () => {
+    await expect(
+      makeGetToday({ profiles: profiles("Asia/Kuala_Lumpur"), clock })(
+        "user-a",
+      ),
+    ).resolves.toBe("2026-11-06");
+    await expect(
+      makeGetToday({ profiles: profiles(null), clock })("user-a"),
+    ).resolves.toBe("2026-11-05");
+  });
+});
 
 describe("listTaskRecords", () => {
   it("uses today in the user's own time zone for Today and Upcoming", async () => {

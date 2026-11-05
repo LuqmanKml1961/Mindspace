@@ -1,5 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { dateInTimeZone } from "@/domain/shared/calendar";
+import { addDays, dateInTimeZone } from "@/domain/shared/calendar";
+
+describe("addDays", () => {
+  it("moves across months, years and leap days", () => {
+    expect(addDays("2026-11-05", 1)).toBe("2026-11-06");
+    expect(addDays("2026-11-30", 1)).toBe("2026-12-01");
+    expect(addDays("2026-12-31", 1)).toBe("2027-01-01");
+    expect(addDays("2028-02-28", 1)).toBe("2028-02-29");
+    expect(addDays("2026-03-01", -1)).toBe("2026-02-28");
+  });
+
+  it("is unaffected by daylight saving, since dates have no time zone", () => {
+    expect(addDays("2026-03-07", 1)).toBe("2026-03-08");
+    expect(addDays("2026-03-08", 1)).toBe("2026-03-09");
+  });
+});
 
 const at = (iso: string) => new Date(iso);
 

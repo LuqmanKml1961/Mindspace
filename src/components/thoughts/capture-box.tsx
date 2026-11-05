@@ -2,7 +2,8 @@
 
 import { useRef, useState, useTransition } from "react";
 import { SubmitButton } from "@/components/forms/form-parts";
-import { brainDump, errorMessage } from "@/components/thoughts/brain-dump";
+import { brainDump } from "@/components/thoughts/brain-dump";
+import { errorMessage } from "@/lib/action-errors";
 import { SaveShortcut } from "@/components/thoughts/save-shortcut";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";

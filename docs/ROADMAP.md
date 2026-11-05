@@ -487,8 +487,16 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
   - **Wiring:** the server use cases in `container.ts` and `createTaskUseCases` in
     `browser.ts`. The Server Actions and screens come in P4.6.
   - **Tests:** 23 unit tests. Eleven deliberate breaks were all caught (see the DEVLOG).
-- [ ] P4.6 Tasks UI: quick add (only the title is required), an edit sheet with due date/time and
-      priority pickers, and complete with undo.
+- [x] P4.6 Tasks UI: quick add (only the title is required), an edit sheet with due date/time and
+      priority pickers, and complete with undo. **Done 2026-11-05** (local; layout details in
+      DESIGN.md §6):
+  - `/tasks` with Today, Upcoming, No date and Completed (`?view=`).
+  - Quick add dated by the view.
+  - A checkbox to complete, with an Undo toast, or to reopen.
+  - An edit sheet with title, notes, date and time, priority, and delete.
+  - Server Actions: create, update, delete, complete, reopen.
+  - The shared `lib/action-result.ts` and `lib/action-errors.ts`; Brain Dump now uses them too.
+  - `getToday` for the date labels.
 - [ ] P4.7 Convert a thought into a task from Brain Dump: the title is pre-filled and linked through
       `source_thought_id`. What happens to the thought is settled in DATA_MODEL.md, Q-2.
 - [ ] P4.8 In-app reminders (D-008): due reminders appear on Home ("Upcoming reminders") and on
