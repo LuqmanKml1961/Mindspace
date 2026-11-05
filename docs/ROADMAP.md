@@ -454,7 +454,8 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
   - **Ten deliberate breaks** (each policy, both ownership FKs, the time rule, a delete grant on
     reminders) were all caught.
   - Advisors: no issues. No unindexed foreign keys.
-  - **Hosted:** waiting for your approval (dry run first).
+  - **Hosted:** pushed on 2026-11-05 with your approval, after a dry run that listed only this
+    migration. It matches local.
 - [x] P4.4 Infrastructure repositories, wired into the composition root. **Done 2026-11-05:**
   - **The repositories:**
     - `supabase-task-repository.ts`: views as documented on `TaskRepository.list`; `due_time`

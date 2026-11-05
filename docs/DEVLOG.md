@@ -5,16 +5,16 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 4 / 10 tasks done (P4.1–P4.4, P4.3 local only); next is P4.5       |
+| **Phase progress** | Phase 4: 4 / 10 tasks done (P4.1–P4.4; P4.3 also hosted); next is P4.5      |
 | **Last updated**   | 2026-11-05 (Session 5)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
 **Next actions (in order)**
 
-1. **Hosted database:** has the first three migrations (`profiles`, `user_keys`,
-   `categories` and `thoughts`). **P4.3's `tasks` and `reminders` migration is local only**, until
-   you approve the push (dry run first). After deploying, set up the passphrase on the live
-   site and time PBKDF2 on a phone.
+1. **Hosted database:** up to date with all four migrations (`profiles`, `user_keys`,
+   `categories` and `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on
+   2026-11-05. RLS, policies, grants, constraints, indexes and the trigger match local. After
+   deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -25,8 +25,7 @@
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
 4. **Now: Phase 4, P4.5 next:** the task and reminder use cases (browser: encrypt, decrypt and the
-   views; server: records) and their container wiring. P4.3's hosted push waits for your go;
-   the dry run was clean (item 1).
+   views; server: records) and their container wiring.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -158,6 +157,22 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): P4.3 pushed to the hosted database
+
+- **From you:** "commit and push the migration" (after the clean dry run below).
+- **`db push --linked --yes`** applied only `20261105080758_create_tasks_and_reminders.sql`.
+  `migration list --linked` shows all four migrations on both sides.
+- **Read-only checks on the hosted database (`db query --linked`) match local:**
+  - RLS is on for both tables;
+  - 4 `tasks` policies and 3 `reminders` policies, all for `authenticated` and own rows only;
+  - grants: `authenticated` only (no delete on `reminders`); `anon` and `service_role` have
+    none;
+  - the named constraints (`tasks_time_needs_date`, both ownership FKs, the ciphertext and
+    priority checks), the four indexes and `tasks_set_updated_at`.
+- **Hosted advisors:** only the known "Leaked password protection disabled" (an Auth setting for
+  email sign-in, P6.10). Nothing was changed.
+- **Commits:** `docs: record the hosted tasks migration (P4.3)`
 
 ### 2026-11-05 — Session 5 (cont.): P4.4 repositories, and the P4.3 hosted dry run
 
