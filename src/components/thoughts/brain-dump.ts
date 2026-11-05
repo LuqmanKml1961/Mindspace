@@ -62,6 +62,10 @@ export function errorMessage(error: unknown): string {
   ) {
     return error.message;
   }
+  // A Server Action without a connection fails like this; the text stays where it was.
+  if (!navigator.onLine) {
+    return "You’re offline. Your text is still here, so try again once you’re connected.";
+  }
   console.error(error instanceof Error ? error.name : "Brain Dump step failed");
   return "Something went wrong. Please try again.";
 }

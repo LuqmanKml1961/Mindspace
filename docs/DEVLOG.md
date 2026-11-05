@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                                     |
-| ------------------ | ----------------------------------------------------------------------------------------- |
-| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                                    |
-| **Phase progress** | Phase 3: 11 / 13 tasks done (P3.1–P3.11); next is P3.12 (loading, empty and error states) |
-| **Last updated**   | 2026-11-05 (Session 5)                                                                    |
-| **Blocked on**     | Nothing                                                                                   |
+| Item               | Value                                                                                  |
+| ------------------ | -------------------------------------------------------------------------------------- |
+| **Current phase**  | Phase 3 — Brain Dump (Phases 0–2 done)                                                 |
+| **Phase progress** | Phase 3: 12 / 13 tasks done (P3.1–P3.12); next is P3.13 (Home: "Your mind, right now") |
+| **Last updated**   | 2026-11-05 (Session 5)                                                                 |
+| **Blocked on**     | Nothing                                                                                |
 
 **Next actions (in order)**
 
@@ -24,9 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Next task:** P3.12, loading, empty and error states on every Brain Dump screen. Several
-   exist already (skeletons, `Empty`, the not-found page, errors in `Alert`s), so start with a
-   review of each screen.
+4. **Next task:** P3.13, Home: "Your mind, right now" shows a few recent thoughts and how many
+   wait in the inbox, with no urgency styling. It is the last Phase 3 task; then Checkpoint A
+   (personal use).
    - Your local account has "Errands" (parked, no category) and the landlord thought (inbox,
      Home admin); the categories are Personal and Home admin.
    - Follow-up from P3.10: a UI to rename and delete categories (the use cases exist).
@@ -146,6 +146,42 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-05 — Session 5 (cont.): loading, empty and error states (P3.12)
+
+- **Phase:** 3 · **Tasks:** P3.12
+- **Review of every Brain Dump screen:**
+  - **Already in place:**
+    - loading: `(app)/loading.tsx` while the server works, and skeletons while the list and
+      editor decrypt;
+    - empty: per view, filtered, no search match, and the thought not-found page;
+    - errors in actions: capture, save, delete and category creation keep the text, with an
+      `Alert` or `FieldError`.
+  - **Gap 1:** no `error.tsx` anywhere, so a server failure showed Next's default page.
+  - **Gap 2:** an offline save said only "Something went wrong.".
+- **Checked first (Next.js 16 docs):**
+  - Error boundaries get **`retry()`** (re-fetch and re-render), not the older `reset`.
+  - `error.js` doesn't catch its own folder's layout, and `(app)/layout.tsx` reads `user_keys`,
+    so the boundary sits at `src/app/error.tsx`.
+  - In production `error.message` is generic; only `error.digest` matches the server log.
+- **Done:**
+  - **`src/app/error.tsx`:** the BrandFrame with a card ("This didn't load / Something went
+    wrong on our side. It's usually brief…") and **Try again** → `retry()`. It logs only the
+    digest.
+  - **`errorMessage`** (Brain Dump): when `navigator.onLine` is false, it says "You're offline.
+    Your text is still here, so try again once you're connected.".
+- **In Chrome (MYS231, local, separate tabs):**
+  - **Switching views keeps an unsaved draft.** A DOM observer saw no skeleton and the capture
+    box was never removed.
+  - **Offline**, simulated with `navigator.onLine` false and the request rejected as
+    `TypeError`: the message showed, and the text, focus and editing were kept.
+  - **A real server failure:** `docker stop supabase_rest_Mindspace`, then reloading Brain Dump
+    showed the error page. After `docker start`, **Try again** brought back Brain Dump and the
+    list in the same document, still unlocked. The console logged only `Page failed to load
+(<digest>)`. All 7 containers are up again.
+- typecheck, lint, 95 unit tests and build pass.
+- **Commits:** `feat(app): add a calm error page and offline message (P3.12)`
+- **Next:** P3.13.
 
 ### 2026-11-05 — Session 5: search on the device (P3.11)
 

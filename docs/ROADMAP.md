@@ -360,8 +360,16 @@ auth (gap G-2).
     the text.
   - The page now loads all thoughts and filters on the device. The repository pages past the
     1,000-row API cap (checked with 1,050 rows).
-- [ ] P3.12 Loading, empty and error states on every Brain Dump screen. (The locked state is the
-      app-wide lock screen from P3.4.)
+- [x] P3.12 Loading, empty and error states on every Brain Dump screen. (The locked state is the
+      app-wide lock screen from P3.4.) **Done 2026-11-05.** A review of every screen found two
+      gaps, now fixed:
+  - **`src/app/error.tsx`:** a calm "This didn't load" page with **Try again** (`retry()`) for
+    server errors in any page or the signed-in layout. It logs only the digest.
+  - **Offline:** a failed save offline says so, and the text stays.
+  - **Already in place:** loading skeletons, the empty states, the not-found page, and errors that
+    keep the text.
+  - **Checked in Chrome:** switching views keeps an unsaved draft; the offline message; and the
+    error page and recovery, with PostgREST stopped locally and then started again.
 - [ ] P3.13 Home: "Your mind, right now" shows a few recent thoughts and how many wait in the inbox,
       with no urgency styling.
 

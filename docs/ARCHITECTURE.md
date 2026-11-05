@@ -186,6 +186,15 @@ The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.
 - **Use cases are factory functions** that take their dependencies and return an async function:
   `makeCaptureThought({ crypto, device, thoughts }) => (input) => Promise<Thought>`. They take
   `userId` explicitly, which keeps them testable.
+- **Errors (P3.12):** there are three layers.
+  - **Expected errors** (`ValidationError`, `ConflictError`, `NotFoundError`, a locked device,
+    offline) are caught where they happen and shown in place. Typed text is never lost.
+  - **Server Actions** return `{ ok: false, error }` with a safe message instead of throwing.
+  - **Anything thrown while a page or the signed-in layout renders** reaches `src/app/error.tsx`.
+    It sits at the root because an `error.js` doesn't catch its own folder's layout, and
+    `(app)/layout.tsx` reads the keys. Next.js 16 passes `retry()` (re-fetch and re-render) for
+    recovery. In production `error.message` is generic, so the page shows calm copy and logs
+    only `error.digest`.
 - **Auth** (D-019) goes through the `AuthService` port in `src/application/auth/`, which
   `getAuthService()` in the container provides. There are no use-case wrappers, because they would only
   forward the call. The adapter maps Supabase error codes to the port's `AuthFailure` values, so
