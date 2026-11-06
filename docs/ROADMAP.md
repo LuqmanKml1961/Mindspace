@@ -627,8 +627,32 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     - a one-off end-to-end run on the local stack (8/8): two throwaway users, RLS on, real Web
       Crypto, through the Server Action's schema. 7 deliberate repository breaks were all
       caught, including the two-device race. The users and rows are gone afterwards.
-- [ ] P5.4 Check-in flow UI: one prompt per step (spec §4.6). Every step can be skipped and the
-      flow can end early. Separates "act on now" from "can wait".
+- [x] P5.4 Check-in flow UI: one prompt per step (spec §4.6). Every step can be skipped and the
+      flow can end early. Separates "act on now" from "can wait". **Done 2026-11-06** (your
+      choices: the priority is the last step, each step saves as you go, and the end is a
+      grouped recap):
+  - **The Mind Clarity page:**
+    - "Start check-in" when today has none;
+    - five question steps and then "the one thing" (one of today's tasks, or a few words);
+    - Back, Skip for now, Finish for now and Next on every step;
+    - the recap groups the answers into on your mind, within your control (act on now), can
+      wait, and today's one thing, with **Edit answers**.
+  - **Saving:** each move saves only a changed answer (encrypted, D-021), so stopping halfway
+    keeps it. Skip leaves the saved answer alone, and a failed save keeps the text.
+  - **New:** the Server Actions (start, update), `check-in-use-cases.ts`, and the components in
+    `src/components/clarity/`.
+  - **Shared:** `validationMessage` moved to `form-parts.tsx`, and `formatDay` is exported from
+    `task-views.ts`.
+  - **Checked in Chrome** (the probe confirmed MYS231):
+    - start, Next, Skip, Back (which saves), Finish for now, the recap and Edit answers;
+    - a task and words replace each other as the priority;
+    - the 2,000 and 500 limits disable the buttons;
+    - a reload shows the same recap, decrypted from the server;
+    - the database holds only ciphertext, plus the linked task;
+    - no console errors;
+    - Tasks still shows its validation.
+  - **Visual check:** Chrome's screenshots timed out (rendering paused), so the layout still
+    needs your look.
 - [ ] P5.5 One Thing at a Time: today's priority is prominent on Home, and every other task is
       still one tap away (spec §4.7).
 - [ ] P5.6 Thought review flow: go through inbox thoughts one at a time and choose park, convert to

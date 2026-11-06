@@ -5,7 +5,7 @@
 | Item               | Value                                                                  |
 | ------------------ | ---------------------------------------------------------------------- |
 | **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                     |
-| **Phase progress** | Phase 5: 3 / 8 done (P5.1–P5.3); next is P5.4. Phase 4 done 2026-11-06 |
+| **Phase progress** | Phase 5: 4 / 8 done (P5.1–P5.4); next is P5.5. Phase 4 done 2026-11-06 |
 | **Last updated**   | 2026-11-06 (Session 6)                                                 |
 | **Blocked on**     | Nothing                                                                |
 
@@ -14,8 +14,9 @@
 1. **Hosted database:** has the first four migrations (`profiles`, `user_keys`, `categories` and
    `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on 2026-11-05.
    **`daily_checkins` (P5.2) is local only.** It waits for your approval, with
-   `pnpm supabase db push --dry-run` first. No page reads it yet, so pushing the code is safe.
-   It must reach the hosted database before the check-in screens (P5.4) go live.
+   `pnpm supabase db push --dry-run` first. **Push it before you push the P5.4 commit:** the
+   Mind Clarity page reads it, and without the table that page shows the error page on the live
+   site.
    After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
@@ -26,9 +27,10 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.4 next:** the check-in flow UI, one prompt per step, every step skippable.
-   P5.1–P5.3 (the domain, the table and the use cases) are done. Phase 4 is done (acceptance met
-   2026-11-06). Tasks, "Make it a task",
+4. **Now: Phase 5, P5.5 next:** One Thing at a Time, with today's priority prominent on Home.
+   P5.1–P5.4 are done: the daily check-in works locally on the Mind Clarity page. Please look
+   at its layout, because screenshots timed out. Phase 4 is done (acceptance met 2026-11-06).
+   Tasks, "Make it a task",
    reminders and the Home summary are ready to try, locally and on the live site once you push.
    **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
    and phone, and tell me what helps or gets in
@@ -165,6 +167,46 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.4 the check-in flow
+
+- **Phase:** 5 · **Task:** P5.4 (your "go").
+- **Your choices:** the one thing is the last step; each step saves as you go; the end is a
+  grouped recap.
+- **Done:**
+  - **`/clarity`:** "Coming soon" is replaced by `CheckIn`.
+    - the page loads today's check-in (if any), today's open tasks, and the chosen task if it
+      has left today's list;
+    - `CheckIn` decrypts on the device, then shows the start card, a step, or the recap.
+  - **Steps:** `check-in-step.tsx` (the five questions) and `check-in-priority.tsx` (a task or
+    words, each clearing the other).
+    - Next, Back and Finish for now save a changed answer; Skip leaves it.
+    - The limits are inline, and a failed save keeps the text.
+    - Focus moves to each new heading.
+  - **`check-in-recap.tsx`:** on your mind, within your control (act on now), can wait, and
+    today's one thing, then Edit answers.
+  - **`clarity/actions.ts`:** start and update, with `checkInEditsSchema`, the user from the
+    session, and a refresh. `check-in-use-cases.ts` is the browser adapter.
+  - **Shared:** `validationMessage` moved to `form-parts.tsx` (Tasks updated); `formatDay` is
+    exported.
+- **In Chrome** (the probe confirmed MYS231):
+  - **The flow:** start; Next; Skip; Back saves question 3; Finish for now; the recap groups;
+    Edit answers fills the saved text back in.
+  - **The one thing:** step 6 lists today's six tasks, and a task and words replace each other.
+  - **Limits:** 501 and 2,001 characters show the limit and disable the saving buttons; 500 and
+    2,000 pass.
+  - **Saved data:** Skip keeps the saved answer; a reload shows the same recap, decrypted. The
+    database has ciphertext only and the linked task.
+  - **No regressions:** no console errors, and Tasks still shows its validation.
+- **Not done:** a visual check, because Chrome's screenshots timed out (rendering paused).
+- **Local test data:** today's check-in on your local account has "Claude test" answers and
+  "dentist appointment" as the one thing. There is no delete in the app, so I can remove it with
+  SQL if you like.
+- **Checks:** format, lint, typecheck and 221 unit tests pass. The build was skipped, because
+  memory was low.
+- **Hosted:** `daily_checkins` must be pushed before this commit goes live (Resume here).
+- **Commits:** `feat(clarity): add the daily check-in flow (P5.4)`
+- **Next:** P5.5, today's one thing on Home.
 
 ### 2026-11-06 — Session 6 (cont.): P5.3 the check-in use cases
 

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { TaskViewName } from "@/application/tasks/records";
-import { validationMessage } from "@/components/tasks/task-fields";
+import { validationMessage } from "@/components/forms/form-parts";
 import { taskUseCases } from "@/components/tasks/task-use-cases";
 import { quickAddDate } from "@/components/tasks/task-views";
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";

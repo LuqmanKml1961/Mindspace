@@ -307,6 +307,39 @@ darken `input`.
       only keeps Add disabled) and "Task titles can be up to 500 characters."
     - **Notes:** "Notes can be up to 10,000 characters." replaces "Optional." while it applies.
 
+- **Mind Clarity check-in (P5.4):** each stage is one **Card** on the Mind Clarity page.
+  - **Start:** "Today's check-in": "A couple of minutes to notice what's on your mind. Every
+    question is optional, and you can stop at any point." and **Start check-in**.
+  - **One question per step:**
+    - the spec §4.6 prompt as the heading, with "N of 6" in muted text above it (no progress bar,
+      no score);
+    - a **Textarea** described "Optional. A word is enough.";
+    - **Back** and **Finish for now** (ghost) on the left, **Skip for now** (outline) and
+      **Next** (primary) on the right.
+  - **Saving:**
+    - Next, Back and Finish for now save the step's answer if it changed, and a blank one is
+      saved as skipped;
+    - Skip for now leaves the saved answer as it was;
+    - a failed save stays on the step with the text kept.
+  - **The last step (spec §4.7):** "What's the one thing you'd like to focus on?" ("Just one.
+    Everything else stays where it is.").
+    - a **NativeSelect** of today's open tasks, or "Or in your own words" (**Input**);
+    - choosing one clears the other;
+    - **Finish** (primary).
+  - **The recap:** "Today's check-in" with the date, grouped so that what can be acted on now
+    stands apart from what can wait:
+    - On your mind;
+    - Within your control ("What you can act on now.");
+    - Can wait ("Until tomorrow, or later.");
+    - Today's one thing.
+
+    Skipped questions don't appear. **Edit answers** (or "Continue check-in" when nothing is
+    written yet) starts again at question 1 with the answers filled in.
+
+  - **Focus:** each move focuses the new heading, so a screen reader reads the question.
+  - **Limits:** inline, as in Tasks: "Answers can be up to 2,000 characters." and "Your
+    priority can be up to 500 characters.".
+
 ## 6a. App shell and navigation (P1.7)
 
 - `src/components/layout/app-nav.tsx`: a sidebar on desktop (`md` and up, 256px, sticky) and a

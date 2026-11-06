@@ -94,7 +94,7 @@ mindspace/
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
-    │   ├── (app)/home | thoughts (+ [id], categories) | tasks | clarity | settings/, encryption/actions.ts
+    │   ├── (app)/home | thoughts (+ [id], categories) | tasks | clarity | settings/ (each with its actions.ts), encryption/actions.ts
     │   ├── (app)/layout.tsx    # the lock screen (EncryptionGate) around the whole signed-in app
     │   └── layout.tsx
     ├── components/             # presentation
@@ -104,7 +104,8 @@ mindspace/
     │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
     │   ├── thoughts/           # capture-box, thought-list, thought-item, thought-editor, make-task-sheet (P4.7), category-picker, category-manager, status-nav, save-shortcut, inbox-preview (Home); brain-dump.ts (Server Actions as ports)
     │   ├── tasks/              # quick-add, task-list, task-item, task-sheet, task-fields (shared with make-task-sheet), task-reminders (in the sheet), reminder-list (Home and Tasks), today-preview (Home), task-view-nav, task-views.ts (labels, hrefs, due and reminder wording); task-use-cases.ts (Server Actions as ports)
-    │   └── auth | settings | clarity/   # feature UI components
+    │   ├── clarity/            # check-in (flow and stages), check-in-step, check-in-priority, check-in-recap, check-in-prompts.ts (spec wording); check-in-use-cases.ts (Server Actions as ports)
+    │   └── auth | settings/    # feature UI components
     └── lib/
         ├── utils.ts            # presentation helpers only (e.g. shadcn's cn())
         ├── action-result.ts    # ActionResult, attempt and failure, shared by every Server Action

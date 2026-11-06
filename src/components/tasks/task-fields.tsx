@@ -1,6 +1,6 @@
 "use client";
 
-import { FormField } from "@/components/forms/form-parts";
+import { FormField, validationMessage } from "@/components/forms/form-parts";
 import { priorityLabels } from "@/components/tasks/task-views";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ValidationError } from "@/domain/shared/errors";
 import {
   isTaskPriority,
   TASK_PRIORITIES,
@@ -31,16 +30,6 @@ export type TaskDraft = {
   time: string;
   priority: TaskPriority;
 };
-
-// The domain's own message when a rule is broken, or undefined.
-export function validationMessage(check: () => unknown): string | undefined {
-  try {
-    check();
-    return undefined;
-  } catch (error) {
-    return error instanceof ValidationError ? error.message : undefined;
-  }
-}
 
 // Shown as the person types, so a title or notes over the limit never reach Save.
 export function taskDraftErrors(draft: TaskDraft) {

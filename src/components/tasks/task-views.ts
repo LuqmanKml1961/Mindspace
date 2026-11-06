@@ -80,7 +80,7 @@ const timeFormat = new Intl.DateTimeFormat(undefined, {
   timeZone: "UTC",
 });
 
-function formatDay(date: string, today: string): string {
+export function formatDay(date: string, today: string): string {
   const format =
     date.slice(0, 4) === today.slice(0, 4) ? dayFormat : dayWithYearFormat;
   return format.format(new Date(`${date}T00:00:00Z`));

@@ -9,6 +9,17 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { ValidationError } from "@/domain/shared/errors";
+
+// The domain's own message when a rule is broken, or undefined.
+export function validationMessage(check: () => unknown): string | undefined {
+  try {
+    check();
+    return undefined;
+  } catch (error) {
+    return error instanceof ValidationError ? error.message : undefined;
+  }
+}
 
 type FormFieldProps = ComponentProps<typeof Input> & {
   id: string;
