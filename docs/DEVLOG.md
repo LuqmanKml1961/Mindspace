@@ -11,13 +11,10 @@
 
 **Next actions (in order)**
 
-1. **Hosted database:** has the first four migrations (`profiles`, `user_keys`, `categories` and
-   `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on 2026-11-05.
-   **`daily_checkins` (P5.2) is local only.** It waits for your approval, with
-   `pnpm supabase db push --dry-run` first. **Push it before you push the P5.4 and P5.5
-   commits:** Mind Clarity and Home both read it. Without the table, both show the error page
-   on the live site.
-   After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
+1. **Hosted database:** up to date with all five migrations (`profiles`, `user_keys`,
+   `categories` and `thoughts`, `tasks` and `reminders`, `daily_checkins`). P5.2 was pushed
+   with your approval on 2026-11-06, so the commits up to P5.5 are safe to push. After
+   deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -168,6 +165,25 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.2 pushed to the hosted database
+
+- **From you:** "run the dry run", then "yes please".
+- **Dry run** (`db push --linked --dry-run`): only
+  `20261106040822_create_daily_checkins.sql`, with no seeds or roles. `migration list --linked`
+  showed the other four on both sides.
+- **`db push --linked --yes`** applied it. `migration list --linked` now shows all five on both
+  sides.
+- **Read-only checks on the hosted database (`db query --linked`) match local:**
+  - RLS on, and three own-row policies (select, insert, update) for `authenticated`;
+  - grants: `authenticated` has insert, select and update; `anon` and `service_role` have none;
+  - all 11 constraints, including the five answer checks, the priority-text check,
+    `daily_checkins_one_priority`, the unique day and the ownership FK;
+  - the three indexes and `daily_checkins_set_updated_at`.
+- **Hosted advisors:** only the known "Leaked Password Protection Disabled" (an Auth setting for
+  email sign-in, P6.10). Nothing was changed.
+- **Now safe to push the code:** the commits up to P5.5 (Home and Mind Clarity read the table).
+- **Commits:** `docs: record the hosted check-ins migration (P5.2)`
 
 ### 2026-11-06 — Session 6 (cont.): P5.5 today's one thing on Home
 

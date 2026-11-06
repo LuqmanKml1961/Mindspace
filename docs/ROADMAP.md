@@ -599,7 +599,8 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     only the new table.
   - **Tests:** `daily_checkins_rls_test.sql` has 28 checks (121 pgTAP in total). 18 deliberate
     breaks were each caught by a named test, and the advisors report no issues.
-  - **Hosted:** not pushed yet. It waits for your approval, with a dry run first.
+  - **Hosted:** pushed on 2026-11-06 with your approval, after a clean dry run. The hosted table
+    matches local.
 - [x] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing
       task or free text), and list past check-ins. **Done 2026-11-06:**
   - **The repository** (`supabase-daily-check-in-repository.ts`). Phase 5 has no separate

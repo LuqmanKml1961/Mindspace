@@ -15,7 +15,7 @@
 | `thoughts`         | 3     | **Migrated** (same migration)                                                  | Brain dumps and parked thoughts (encrypted)   |
 | `tasks`            | 4     | **Migrated** (`20261105080758_create_tasks_and_reminders.sql`; hosted too)     | Tasks with due date and priority (encrypted)  |
 | `reminders`        | 4     | **Migrated** (same migration)                                                  | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | **Migrated locally** (`20261106040822_create_daily_checkins.sql`; not hosted)  | Daily Mind Clarity reflections (encrypted)    |
+| `daily_checkins`   | 5     | **Migrated** (`20261106040822_create_daily_checkins.sql`; hosted too)          | Daily Mind Clarity reflections (encrypted)    |
 | `voice_recordings` | 7+    | Deferred                                                                       | Recording metadata and transcripts (post-MVP) |
 
 "(encrypted)" means the table's free-text columns are encrypted (D-021). Its ids, dates, statuses
