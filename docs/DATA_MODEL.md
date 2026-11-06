@@ -13,9 +13,9 @@
 | `user_keys`        | 3     | **Migrated** (`20261104065744_create_user_keys.sql`)                           | Wrapped encryption keys (D-021)               |
 | `categories`       | 3     | **Migrated** (`20261104083602_create_categories_and_thoughts.sql`; hosted too) | User-owned thought categories (encrypted)     |
 | `thoughts`         | 3     | **Migrated** (same migration)                                                  | Brain dumps and parked thoughts (encrypted)   |
-| `tasks`            | 4     | Draft                                                                          | Tasks with due date and priority (encrypted)  |
-| `reminders`        | 4     | Draft                                                                          | In-app reminders attached to tasks (D-008)    |
-| `daily_checkins`   | 5     | Draft                                                                          | Daily Mind Clarity reflections (encrypted)    |
+| `tasks`            | 4     | **Migrated** (`20261105080758_create_tasks_and_reminders.sql`; hosted too)     | Tasks with due date and priority (encrypted)  |
+| `reminders`        | 4     | **Migrated** (same migration)                                                  | In-app reminders attached to tasks (D-008)    |
+| `daily_checkins`   | 5     | **Migrated locally** (`20261106040822_create_daily_checkins.sql`; not hosted)  | Daily Mind Clarity reflections (encrypted)    |
 | `voice_recordings` | 7+    | Deferred                                                                       | Recording metadata and transcripts (post-MVP) |
 
 "(encrypted)" means the table's free-text columns are encrypted (D-021). Its ids, dates, statuses
@@ -250,6 +250,18 @@ null when skipped.
   `num_nonnulls(priority_task_id, priority_text_ciphertext) <= 1`. A change always sets both
   columns, so the rule never depends on what is saved.
 - **The domain is built (P5.1):** `src/domain/check-ins/`.
+- **Built (P5.2):** `20261106040822_create_daily_checkins.sql`.
+  - Every answer and the written priority use the shared ciphertext check, with the limits
+    above.
+  - The composite FK to `tasks` sets only `priority_task_id` to null when the task is deleted.
+  - The `unique (user_id, checkin_date)` index also serves "today's check-in" and the list by
+    date. A second index covers the FK, for task deletes.
+  - The `updated_at` trigger.
+- **Grants:** `authenticated` has `select, insert, update` and **no delete**. No Phase 5 feature
+  removes a check-in, and deleting the account removes them all. `anon` and `service_role` have
+  nothing. There are three own-row policies.
+- **Tests:** `supabase/tests/daily_checkins_rls_test.sql` has 28 checks. 18 deliberate breaks
+  were each caught by a named test, and the advisors are clean.
 
 | Column                           | Type        | Notes                                                                                           |
 | -------------------------------- | ----------- | ----------------------------------------------------------------------------------------------- |

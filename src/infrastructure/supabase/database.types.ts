@@ -31,6 +31,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      daily_checkins: {
+        Row: {
+          can_control_ciphertext: string | null;
+          can_wait_ciphertext: string | null;
+          checkin_date: string;
+          created_at: string;
+          id: string;
+          occupying_mind_ciphertext: string | null;
+          priority_task_id: string | null;
+          priority_text_ciphertext: string | null;
+          small_helpful_thing_ciphertext: string | null;
+          updated_at: string;
+          user_id: string;
+          worries_ciphertext: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          can_control_ciphertext?: string | null;
+          can_wait_ciphertext?: string | null;
+          checkin_date: string;
+          created_at?: string;
+          id?: string;
+          occupying_mind_ciphertext?: string | null;
+          priority_task_id?: string | null;
+          priority_text_ciphertext?: string | null;
+          small_helpful_thing_ciphertext?: string | null;
+          updated_at?: string;
+          user_id: string;
+          worries_ciphertext?: string | null;
+        };
+        Update: {
+          can_control_ciphertext?: string | null;
+          can_wait_ciphertext?: string | null;
+          checkin_date?: string;
+          created_at?: string;
+          id?: string;
+          occupying_mind_ciphertext?: string | null;
+          priority_task_id?: string | null;
+          priority_text_ciphertext?: string | null;
+          small_helpful_thing_ciphertext?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          worries_ciphertext?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "daily_checkins_priority_task_fk";
+            columns: ["priority_task_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id", "user_id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           created_at: string;

@@ -585,8 +585,21 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     check-ins use one rule.
   - **Tests:** 24 new (17 check-in, 7 calendar). A mutation check broke each rule on purpose,
     and all 7 breaks were caught.
-- [ ] P5.2 Migration: `daily_checkins`, with an ownership FK to tasks and RLS. pgTAP tests.
-      Regenerate the types. Every answer is ciphertext (D-021, DATA_MODEL.md).
+- [x] P5.2 Migration: `daily_checkins`, with an ownership FK to tasks and RLS. pgTAP tests.
+      Regenerate the types. Every answer is ciphertext (D-021, DATA_MODEL.md). **Done
+      2026-11-06:**
+  - **`20261106040822_create_daily_checkins.sql`:**
+    - five answer columns and a written priority, ciphertext only (up to 10,708 and 2,708);
+    - one check-in per user per day;
+    - the priority is a task or text, never both;
+    - a composite FK to the user's own task, and deleting the task clears only the link;
+    - `select, insert, update` for `authenticated`, with no delete;
+    - three own-row policies.
+  - **Applied locally** with `migration up --local`, which kept your data. `pnpm db:types` added
+    only the new table.
+  - **Tests:** `daily_checkins_rls_test.sql` has 28 checks (121 pgTAP in total). 18 deliberate
+    breaks were each caught by a named test, and the advisors report no issues.
+  - **Hosted:** not pushed yet. It waits for your approval, with a dry run first.
 - [ ] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing
       task or free text), and list past check-ins.
 - [ ] P5.4 Check-in flow UI: one prompt per step (spec §4.6). Every step can be skipped and the

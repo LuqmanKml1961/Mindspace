@@ -2,19 +2,20 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                             |
-| ------------------ | ----------------------------------------------------------------- |
-| **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                |
-| **Phase progress** | Phase 5: 1 / 8 done (P5.1); next is P5.2. Phase 4 done 2026-11-06 |
-| **Last updated**   | 2026-11-06 (Session 6)                                            |
-| **Blocked on**     | Nothing                                                           |
+| Item               | Value                                                                  |
+| ------------------ | ---------------------------------------------------------------------- |
+| **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                     |
+| **Phase progress** | Phase 5: 2 / 8 done (P5.1–P5.2); next is P5.3. Phase 4 done 2026-11-06 |
+| **Last updated**   | 2026-11-06 (Session 6)                                                 |
+| **Blocked on**     | Nothing                                                                |
 
 **Next actions (in order)**
 
-1. **Hosted database:** up to date with all four migrations (`profiles`, `user_keys`,
-   `categories` and `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on
-   2026-11-05. RLS, policies, grants, constraints, indexes and the trigger match local. After
-   deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
+1. **Hosted database:** has the first four migrations (`profiles`, `user_keys`, `categories` and
+   `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on 2026-11-05.
+   **`daily_checkins` (P5.2) is local only.** It waits for your approval, with
+   `pnpm supabase db push --dry-run` first; nothing uses it until the check-in screens (P5.4).
+   After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -24,8 +25,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.2 next:** the `daily_checkins` migration, with RLS and pgTAP tests. P5.1
-   (the domain) is done. Phase 4 is done (acceptance met 2026-11-06). Tasks, "Make it a task",
+4. **Now: Phase 5, P5.3 next:** the check-in use cases (start or resume today's, save answers,
+   set the priority, list past check-ins). P5.1 (the domain) and P5.2 (the table) are done.
+   Phase 4 is done (acceptance met 2026-11-06). Tasks, "Make it a task",
    reminders and the Home summary are ready to try, locally and on the live site once you push.
    **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
    and phone, and tell me what helps or gets in
@@ -162,6 +164,50 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.2 the daily_checkins migration
+
+- **Phase:** 5 · **Task:** P5.2 (your "go").
+- **Migration** `20261106040822_create_daily_checkins.sql` (`migration new`; it follows the
+  P4.3 tasks migration). The `supabase-postgres-best-practices` skill was loaded first.
+  - five answer columns and `priority_text_ciphertext`, each null or ciphertext in the shared
+    `v1.` format, up to 10,708 and 2,708 characters;
+  - `unique (user_id, checkin_date)`, and `daily_checkins_one_priority`
+    (`num_nonnulls(…) <= 1`);
+  - the composite FK `(priority_task_id, user_id)` → `tasks`, with
+    `on delete set null (priority_task_id)`, and an index on it;
+  - the `updated_at` trigger;
+  - grants (D-018): `select, insert, update` for `authenticated` only, no delete;
+  - three own-row policies.
+- **Applied** with `migration up --local`, which kept your data. `pnpm db:types` added only
+  `daily_checkins`.
+- **Tests:** `daily_checkins_rls_test.sql` (28):
+  - own rows only; no check-in for B; one per day;
+  - no priority on B's task, by insert or update; never both a task and text;
+  - plaintext rejected in every answer and the priority;
+  - the largest ciphertexts accepted, and one block over rejected, per column;
+  - no hand-over to B; unfiltered update as A leaves B alone; delete denied;
+  - deleting the task clears only the link; signed-out visitors denied; `updated_at`; the account
+    cascade.
+- **Verified:**
+  - **18 deliberate breaks**, each run in a rolled-back transaction (the local database was
+    unchanged afterwards), and each caught by a named test. They covered:
+    - each policy;
+    - the unique key;
+    - the FK made single-column, and made to cascade;
+    - the never-both rule;
+    - each ciphertext check, and one limit raised;
+    - a delete grant, an anon grant, and the trigger.
+  - **A problem in my script, not the tests:** the first run reported the raised limit as missed.
+    The sabotage SQL contains `$'`, which `String.replace` treats as a special pattern (your saved
+    memory warns about this). With a function replacement it was caught.
+  - **Advisors:** no issues. Only `authenticated` has `select, insert, update`.
+  - **Checks:** 121 pgTAP tests, typecheck, lint and format pass.
+- **Docs:** DATA_MODEL (built, grants, tests; the stale "Draft" status of `tasks` and
+  `reminders` was corrected), ROADMAP.
+- **Hosted:** not pushed. It waits for your approval, with a dry run first.
+- **Commits:** `feat(db): add daily check-ins with RLS (P5.2)`
+- **Next:** P5.3, the check-in use cases.
 
 ### 2026-11-06 — Session 6 (cont.): P5.1 the daily check-in domain
 
