@@ -2,19 +2,19 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                            |
-| ------------------ | -------------------------------------------------------------------------------- |
-| **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                               |
-| **Phase progress** | Phase 5: 7 / 8 done (P5.1–P5.7); next is P5.8 (stretch). Phase 4 done 2026-11-06 |
-| **Last updated**   | 2026-11-06 (Session 6)                                                           |
-| **Blocked on**     | Nothing                                                                          |
+| Item               | Value                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| **Current phase**  | Phase 5 done; Phase 6 (PWA, privacy and beta readiness) is next; Checkpoint A use continues |
+| **Phase progress** | Phase 5: 7 / 8 done, P5.8 deferred, acceptance met 2026-11-06; next is P6.2                 |
+| **Last updated**   | 2026-11-06 (Session 6)                                                                      |
+| **Blocked on**     | Nothing                                                                                     |
 
 **Next actions (in order)**
 
 1. **Hosted database:** up to date with all five migrations (`profiles`, `user_keys`,
    `categories` and `thoughts`, `tasks` and `reminders`, `daily_checkins`). P5.2 was pushed
-   with your approval on 2026-11-06, so the commits up to P5.5 are safe to push. After
-   deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
+   with your approval on 2026-11-06, so every commit so far is safe to push. After deploying,
+   set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
    only. The Vercel env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are
@@ -24,8 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.8 next:** Slow Down Mode, a stretch task. You can do it, or skip it and
-   run the Phase 5 acceptance check. P5.1–P5.7 are done: the daily check-in and past
+4. **Now: Phase 6, P6.2 next:** the service worker, with the update handling you asked for (a
+   new deploy reaches the installed app without reinstalling). Phase 5 is done (acceptance met
+   2026-11-06; P5.8 Slow Down Mode deferred to the backlog): the daily check-in and past
    reflections on Mind Clarity, today's one thing on Home, and the thought review
    (`/thoughts/review`). Please look at their layouts, because screenshots timed out. Phase 4 is
    done (acceptance met 2026-11-06).
@@ -103,7 +104,7 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 | 3     | Brain Dump                      | Done        | 2026-11-04 | 2026-11-05 |
 | —     | Checkpoint A: personal use      | In progress | 2026-11-05 | —          |
 | 4     | External Memory                 | Done        | 2026-11-05 | 2026-11-06 |
-| 5     | Mind Clarity                    | Not started | —          | —          |
+| 5     | Mind Clarity                    | Done        | 2026-11-06 | 2026-11-06 |
 | 6     | PWA, privacy and beta readiness | Not started | —          | —          |
 | —     | Validation stages 1–3           | Not started | —          | —          |
 
@@ -170,6 +171,36 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): the Phase 5 acceptance, and P5.8 deferred
+
+- **Phase:** 5 · **From you:** "which one is better?", then "okie go" for my recommendation.
+- **P5.8 deferred:**
+  - **Why:** Slow Down Mode is outside the spec's MVP core (§5), the acceptance doesn't need
+    it, and your own use should show whether it's wanted.
+  - **Where it went:** it stays unticked in Phase 5, marked deferred, and is listed in the
+    post-MVP backlog.
+- **Acceptance (all met):**
+  - **Database:** pgTAP 121 (28 for `daily_checkins`), and both stored check-ins are
+    ciphertext only (SQL).
+  - **Wording:** a scan of `src/components` and `src/app` for streak, missed, overdue, behind and
+    score wording found none. The only hits were "dismissed" and class names.
+  - **In Chrome** (the probe confirmed MYS231):
+    - **Timing:** a full pass took about 0.4–0.6 s per save on the dev server, after 1.8–2.3 s
+      for the first two while it compiled. The times come from the browser's resource timing,
+      because the tab's own timers were throttled.
+    - **Skipping:** skipping all six steps reaches the recap and saves nothing.
+    - **Answers:** a slow pass that types each question's own name lands every answer under the
+      right question.
+    - **Home:** today's one thing first, and Today still says "6 tasks for today".
+- **A test mix-up, not a bug:** my first timing script ran in a throttled tab and set text
+  directly while a save was running, so two answers landed under the wrong question. A person
+  can't do that, because the text box is read-only while saving. The slow pass confirmed the
+  mapping.
+- **Docs:** ROADMAP (P5.8 deferred, the backlog, the Phase 5 acceptance); DEVLOG (Phase 5
+  done; next is P6.2).
+- **Commits:** `docs: record the Phase 5 acceptance and defer P5.8`
+- **Next:** Phase 6, P6.2: the service worker and update handling.
 
 ### 2026-11-06 — Session 6 (cont.): P5.7 past reflections
 

@@ -711,9 +711,27 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     - no console errors.
 - [ ] P5.8 (Stretch) Slow Down Mode: a short breathing exercise and the prompt "What is actually
       bothering you right now?", with an optional save as a thought. Respects
-      `prefers-reduced-motion`. No medical claims.
+      `prefers-reduced-motion`. No medical claims. **Deferred 2026-11-06 (your choice):**
+      outside the spec's MVP core (§5) and not needed for the acceptance. Moved to the post-MVP
+      backlog, to build if your own use shows the need.
 
-**Acceptance**
+**Acceptance** (checked 2026-11-06):
+
+- **Met: a check-in takes a couple of minutes, and every step can be skipped.**
+  - It's six short steps, each with one field.
+  - A save took about 0.4–0.6 s on the dev server, after 1.8–2.3 s for the first two while it
+    compiled.
+  - Skipping all six steps reaches the recap and saves nothing.
+  - Each answer lands under its own question.
+- **Met: nothing guilt-trips about missed days.**
+  - A scan of the app's wording found no streak, missed, overdue or score wording.
+  - Past reflections leaves out days without a check-in, with no counts or gaps.
+- **Met:** Home shows today's one thing first, and the Today card still lists every task ("6
+  tasks for today").
+- **Met:** pgTAP passes (121, including 28 for `daily_checkins`), and so do the 223 domain and
+  application tests.
+- **Met:** check-in answers are stored only as ciphertext (SQL), and the table is on the
+  hosted database.
 
 - A check-in takes a couple of minutes. Every step can be skipped, and nothing guilt-trips the
   user about missed days.
@@ -810,6 +828,9 @@ and then the private beta.
 - AI categorisation: opt-in, server-side, disclosed (spec §4.1, §14).
 - Push notifications and a morning review (spec §4.5).
 - Reflection pattern review, in non-medical language (spec §4.6).
+- Slow Down Mode (spec §4.3; deferred P5.8): a short breathing exercise and "What is actually
+  bothering you right now?", with an optional save as a thought. Respect
+  `prefers-reduced-motion`, and make no medical claims.
 - Sign in with Apple (D-019): needs an Apple Developer account and a secret rotated every 6
   months.
 - Guest or local-only mode (D-003).
