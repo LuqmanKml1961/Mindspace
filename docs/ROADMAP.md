@@ -691,7 +691,24 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
       Archive; the end message;
     - the database matched each choice;
     - "Make it a task" on the thought page still opens Tasks.
-- [ ] P5.7 Past reflections: a simple list by date. No scores, streaks or "insights".
+- [x] P5.7 Past reflections: a simple list by date. No scores, streaks or "insights". **Done
+      2026-11-06:**
+  - **`/clarity/past`**, from a "Past reflections" link on Mind Clarity:
+    - each earlier day as a card with the date and the recap's grouping (shared as
+      `CheckInSummary`);
+    - newest first;
+    - check-ins with nothing written, and missing days, are simply left out.
+  - **`listPastCheckInRecords`** (server) replaces the unused `listCheckInRecords`. It returns
+    the check-ins before the user's today, with something written, and the tasks chosen as
+    their one thing (one read per distinct task, as for reminders).
+  - **Tests:** 2 new unit tests (past only, newest first, blanks left out; each task read once,
+    missing ones dropped).
+  - **Checked in Chrome:**
+    - the empty state;
+    - a check-in written as Nov 5 (profile briefly on Pacific/Pago_Pago, then back to
+      Asia/Kuala_Lumpur) appears as "Thu, Nov 5" with its groups and one thing, and today's
+      doesn't;
+    - no console errors.
 - [ ] P5.8 (Stretch) Slow Down Mode: a short breathing exercise and the prompt "What is actually
       bothering you right now?", with an optional save as a thought. Respects
       `prefers-reduced-motion`. No medical claims.

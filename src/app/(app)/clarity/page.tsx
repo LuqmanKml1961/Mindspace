@@ -44,6 +44,14 @@ export default async function ClarityPage() {
         taskRecords={chosen ? [...todayTasks, chosen] : todayTasks}
         today={today}
       />
+      <div>
+        <Link
+          href="/clarity/past"
+          className={buttonVariants({ variant: "link", className: "px-0" })}
+        >
+          Past reflections
+        </Link>
+      </div>
       {inbox.total > 0 && (
         <Card>
           <CardHeader>

@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                  |
-| ------------------ | ---------------------------------------------------------------------- |
-| **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                     |
-| **Phase progress** | Phase 5: 6 / 8 done (P5.1–P5.6); next is P5.7. Phase 4 done 2026-11-06 |
-| **Last updated**   | 2026-11-06 (Session 6)                                                 |
-| **Blocked on**     | Nothing                                                                |
+| Item               | Value                                                                            |
+| ------------------ | -------------------------------------------------------------------------------- |
+| **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                               |
+| **Phase progress** | Phase 5: 7 / 8 done (P5.1–P5.7); next is P5.8 (stretch). Phase 4 done 2026-11-06 |
+| **Last updated**   | 2026-11-06 (Session 6)                                                           |
+| **Blocked on**     | Nothing                                                                          |
 
 **Next actions (in order)**
 
@@ -24,8 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.7 next:** past reflections, a simple list by date. P5.1–P5.6 are done:
-   the daily check-in on Mind Clarity, today's one thing on Home, and the thought review
+4. **Now: Phase 5, P5.8 next:** Slow Down Mode, a stretch task. You can do it, or skip it and
+   run the Phase 5 acceptance check. P5.1–P5.7 are done: the daily check-in and past
+   reflections on Mind Clarity, today's one thing on Home, and the thought review
    (`/thoughts/review`). Please look at their layouts, because screenshots timed out. Phase 4 is
    done (acceptance met 2026-11-06).
    Tasks, "Make it a task",
@@ -63,6 +64,10 @@
 
 **Running the app:** use **pnpm** (`pnpm dev`), not yarn. The `packageManager` field enforces
 pnpm. If the dev server shows old colours, restart it and hard-refresh.
+
+- **If pages reload in a loop, or a change never shows** (for example "X is not a function" for
+  code that exists), stop the server, delete `.next`, and run `pnpm dev` again. This happened
+  on 2026-11-06 after dev servers had been killed mid-run.
 
 **Known issues**
 
@@ -165,6 +170,38 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.7 past reflections
+
+- **Phase:** 5 · **Task:** P5.7 (your "go").
+- **Done:**
+  - **`makeListPastCheckInRecords`** (`records.ts`) replaces the unused `listCheckInRecords`:
+    - the check-ins before the user's today, with something written, newest first;
+    - the tasks chosen as their one thing, one read per distinct task, with missing ones
+      dropped.
+  - **`check-in-summary.tsx`:** `summarise` and `CheckInSummary`, now shared by today's recap
+    and the past list.
+  - **`past-reflections.tsx` and `/clarity/past`:** one card per day, decrypted on the device;
+    an Empty when there are none. Mind Clarity links to it.
+- **Tests:** 2 new unit tests (223 in total).
+- **In Chrome** (the probe confirmed MYS231):
+  - the empty state;
+  - with the profile on Pacific/Pago_Pago (Nov 5 there), a test check-in with three answers
+    and a written one thing; then back to Asia/Kuala_Lumpur (checked in the database);
+  - Past reflections showed "Thu, Nov 5" with its groups and "The one thing", and today's
+    wasn't listed;
+  - today's recap was unchanged after the shared component;
+  - no console errors.
+- **Dev server trouble** (not the code):
+  - **First:** the running server kept an old `container.ts` in memory ("listPastCheckInRecords
+    is not a function", although the compiled chunk had it).
+  - **After your restart:** every page reloaded about twice a second ("✓ Compiled in 1ms" after
+    each load).
+  - **Fix:** deleting `.next` and restarting fixed both. A tip is under Resume here.
+- **Local test data:** a "Claude test: past" check-in on 2026-11-05.
+- **Checks:** format, lint, typecheck and 223 unit tests pass.
+- **Commits:** `feat(clarity): add past reflections (P5.7)`
+- **Next:** P5.8 (stretch) or the Phase 5 acceptance check.
 
 ### 2026-11-06 — Session 6 (cont.): P5.6 the thought review
 

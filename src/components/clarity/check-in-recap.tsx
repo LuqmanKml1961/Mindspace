@@ -1,7 +1,10 @@
 "use client";
 
-import { recapGroups } from "@/components/clarity/check-in-prompts";
 import { STEP_HEADING_ID } from "@/components/clarity/check-in-step";
+import {
+  CheckInSummary,
+  summarise,
+} from "@/components/clarity/check-in-summary";
 import { formatDay } from "@/components/tasks/task-views";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,8 +18,7 @@ import {
 import type { DailyCheckIn } from "@/domain/check-ins/daily-check-in";
 import type { Task } from "@/domain/tasks/task";
 
-// The end of the check-in (P5.4): the answers grouped, so what can be acted on now stands apart
-// from what can wait, and today's one thing. Skipped questions don't appear.
+// The end of the check-in (P5.4): today's answers grouped, and today's one thing.
 export function CheckInRecap({
   checkIn,
   tasks,
@@ -30,19 +32,8 @@ export function CheckInRecap({
   pending: boolean;
   onEdit: () => void;
 }) {
-  const groups = recapGroups
-    .map((group) => ({
-      ...group,
-      answers: group.prompts
-        .map((prompt) => checkIn[prompt])
-        .filter((answer) => answer !== null),
-    }))
-    .filter((group) => group.answers.length > 0);
-  const priority =
-    checkIn.priorityText ??
-    tasks.find((task) => task.id === checkIn.priorityTaskId)?.title ??
-    null;
-  const nothingYet = groups.length === 0 && priority === null;
+  const summary = summarise(checkIn, tasks);
+  const nothingYet = summary.groups.length === 0 && summary.priority === null;
 
   return (
     <Card>
@@ -60,33 +51,7 @@ export function CheckInRecap({
             Nothing written yet. Every question is optional.
           </p>
         ) : (
-          <>
-            {groups.map((group) => (
-              <section key={group.title} className="flex flex-col gap-2">
-                <div className="flex flex-col gap-0.5">
-                  <h3 className="font-medium">{group.title}</h3>
-                  {group.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {group.description}
-                    </p>
-                  )}
-                </div>
-                <ul className="flex flex-col gap-2">
-                  {group.answers.map((answer, index) => (
-                    <li key={index} className="break-words whitespace-pre-wrap">
-                      {answer}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-            {priority !== null && (
-              <section className="flex flex-col gap-2">
-                <h3 className="font-medium">Today’s one thing</h3>
-                <p className="break-words whitespace-pre-wrap">{priority}</p>
-              </section>
-            )}
-          </>
+          <CheckInSummary summary={summary} priorityTitle="Today’s one thing" />
         )}
       </CardContent>
       <CardFooter>

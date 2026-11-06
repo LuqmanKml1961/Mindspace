@@ -2,9 +2,14 @@ import type { Today } from "@/application/check-ins/ports";
 import { createDailyCheckIn } from "@/domain/check-ins/daily-check-in";
 import type {
   DailyCheckInRepository,
+  EncryptedDailyCheckIn,
   EncryptedDailyCheckInChanges,
 } from "@/domain/check-ins/daily-check-in-repository";
 import { ConflictError } from "@/domain/shared/errors";
+import type {
+  EncryptedTask,
+  TaskRepository,
+} from "@/domain/tasks/task-repository";
 
 // Server side (D-021): stores and returns ciphertext only; the answers were checked and
 // encrypted on the device. The date is always the user's own today, worked out here, never sent
@@ -59,9 +64,47 @@ export function makeUpdateCheckInRecord(deps: {
     deps.checkIns.update(userId, id, edits);
 }
 
-// Newest date first: past reflections (P5.7).
-export function makeListCheckInRecords(deps: {
+// Nothing was written: no answer and no priority.
+function isBlank(checkIn: EncryptedDailyCheckIn): boolean {
+  return [
+    checkIn.occupyingMindCiphertext,
+    checkIn.worriesCiphertext,
+    checkIn.canControlCiphertext,
+    checkIn.canWaitCiphertext,
+    checkIn.smallHelpfulThingCiphertext,
+    checkIn.priorityTaskId,
+    checkIn.priorityTextCiphertext,
+  ].every((value) => value === null);
+}
+
+// Past reflections (P5.7): the check-ins before today with something written, newest first, and
+// the tasks chosen as their one thing, as ciphertext. One read per distinct task, which suits a
+// person's list (as for reminders).
+export function makeListPastCheckInRecords(deps: {
   checkIns: DailyCheckInRepository;
+  tasks: TaskRepository;
+  today: Today;
 }) {
-  return (userId: string) => deps.checkIns.list(userId);
+  return async (
+    userId: string,
+  ): Promise<{ checkIns: EncryptedDailyCheckIn[]; tasks: EncryptedTask[] }> => {
+    const [today, all] = await Promise.all([
+      deps.today(userId),
+      deps.checkIns.list(userId),
+    ]);
+    const checkIns = all.filter(
+      (checkIn) => checkIn.date < today && !isBlank(checkIn),
+    );
+    const taskIds = [
+      ...new Set(
+        checkIns
+          .map((checkIn) => checkIn.priorityTaskId)
+          .filter((id) => id !== null),
+      ),
+    ];
+    const found = await Promise.all(
+      taskIds.map((id) => deps.tasks.findById(userId, id)),
+    );
+    return { checkIns, tasks: found.filter((task) => task !== null) };
+  };
 }

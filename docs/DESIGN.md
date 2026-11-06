@@ -365,6 +365,17 @@ darken `input`.
   - **Limits:** inline, as in Tasks: "Answers can be up to 2,000 characters." and "Your
     priority can be up to 500 characters.".
 
+- **Past reflections (P5.7):** `/clarity/past`, from a "Past reflections" link under today's
+  check-in.
+  - **The page:** a Breadcrumb (Mind Clarity › Past reflections), "Your earlier check-ins,
+    newest first."
+  - **Each day:** one Card with the date as its heading (`formatDay`) and the same grouping as
+    the recap (`CheckInSummary`), with "The one thing".
+  - **What's left out:** today's check-in (it's on Mind Clarity), check-ins with nothing written,
+    and days without a check-in, so there are no gaps, counts, streaks or "insights".
+  - **When there are none:** an Empty, "No past check-ins yet." "Earlier check-ins appear here,
+    newest first."
+
 ## 6a. App shell and navigation (P1.7)
 
 - `src/components/layout/app-nav.tsx`: a sidebar on desktop (`md` and up, 256px, sticky) and a

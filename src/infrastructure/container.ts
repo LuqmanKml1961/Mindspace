@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import type { AuthService } from "@/application/auth/auth-service";
 import {
   makeGetTodayCheckInRecord,
-  makeListCheckInRecords,
+  makeListPastCheckInRecords,
   makeStartCheckInRecord,
   makeUpdateCheckInRecord,
 } from "@/application/check-ins/records";
@@ -108,7 +108,11 @@ export async function getAppContext() {
       }),
       startCheckInRecord: makeStartCheckInRecord({ checkIns, today: getToday }),
       updateCheckInRecord: makeUpdateCheckInRecord({ checkIns }),
-      listCheckInRecords: makeListCheckInRecords({ checkIns }),
+      listPastCheckInRecords: makeListPastCheckInRecords({
+        checkIns,
+        tasks,
+        today: getToday,
+      }),
     },
   };
 }

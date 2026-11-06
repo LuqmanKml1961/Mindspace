@@ -82,7 +82,7 @@ mindspace/
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # thoughts.ts, categories.ts (browser: rules, encrypt, decrypt); records.ts (server: ciphertext only); ports, schemas, *.test.ts
     │   ├── tasks/              # tasks.ts (browser: rules, encrypt, decrypt); records.ts (server: views by the user's today, complete/reopen) and reminders.ts (server); ports (TaskServer, Clock), schemas, *.test.ts
-    │   └── check-ins/          # check-ins.ts (browser: rules, encrypt, decrypt, start); records.ts (server: today's check-in, start or resume, update, list); ports (CheckInServer, Today), schemas, *.test.ts (P5.3)
+    │   └── check-ins/          # check-ins.ts (browser: rules, encrypt, decrypt, start); records.ts (server: today's check-in, start or resume, update, past check-ins with their tasks); ports (CheckInServer, Today), schemas, *.test.ts (P5.3)
     ├── infrastructure/
     │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
     │   ├── crypto/             # web-crypto.ts, device-key-store.ts: browser-side E2E (D-021)
@@ -104,7 +104,7 @@ mindspace/
     │   ├── encryption/         # lock screen: set up, recovery code, unlock, recover; the KeyServer adapter
     │   ├── thoughts/           # capture-box, thought-list, thought-item, thought-editor, make-task-sheet (P4.7), thought-review (P5.6), category-picker, category-manager, status-nav, save-shortcut, inbox-preview (Home); brain-dump.ts (Server Actions as ports)
     │   ├── tasks/              # quick-add, task-list, task-item, task-sheet, task-fields (shared with make-task-sheet), task-reminders (in the sheet), reminder-list (Home and Tasks), today-preview (Home), task-view-nav, task-views.ts (labels, hrefs, due and reminder wording); task-use-cases.ts (Server Actions as ports)
-    │   ├── clarity/            # check-in (flow and stages), check-in-step, check-in-priority, check-in-recap, check-in-prompts.ts (spec wording), one-thing (Home); check-in-use-cases.ts (Server Actions as ports)
+    │   ├── clarity/            # check-in (flow and stages), check-in-step, check-in-priority, check-in-recap, check-in-summary (shared grouping), check-in-prompts.ts (spec wording), past-reflections (P5.7), one-thing (Home); check-in-use-cases.ts (Server Actions as ports)
     │   └── auth | settings/    # feature UI components
     └── lib/
         ├── utils.ts            # presentation helpers only (e.g. shadcn's cn())

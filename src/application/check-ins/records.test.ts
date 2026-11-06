@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   makeGetTodayCheckInRecord,
-  makeListCheckInRecords,
+  makeListPastCheckInRecords,
   makeStartCheckInRecord,
   makeUpdateCheckInRecord,
 } from "@/application/check-ins/records";
@@ -11,6 +11,10 @@ import type {
   NewEncryptedDailyCheckIn,
 } from "@/domain/check-ins/daily-check-in-repository";
 import { ConflictError } from "@/domain/shared/errors";
+import type {
+  EncryptedTask,
+  TaskRepository,
+} from "@/domain/tasks/task-repository";
 
 const today = async () => "2026-11-06";
 
@@ -126,15 +130,60 @@ describe("startCheckInRecord", () => {
   });
 });
 
-describe("updateCheckInRecord and listCheckInRecords", () => {
-  it("act for the session's user", async () => {
+describe("updateCheckInRecord", () => {
+  it("acts for the session's user", async () => {
     const { checkIns, calls } = repository();
     const edits = { worriesCiphertext: "v1.cipher" };
     await makeUpdateCheckInRecord({ checkIns })("user-a", "check-in-1", edits);
-    await makeListCheckInRecords({ checkIns })("user-a");
-    expect(calls).toEqual([
-      ["update", "user-a", "check-in-1", edits],
-      ["list", "user-a"],
+    expect(calls).toEqual([["update", "user-a", "check-in-1", edits]]);
+  });
+});
+
+describe("listPastCheckInRecords", () => {
+  // Tasks that exist, and the ids they were asked for.
+  function tasks(existing: string[]) {
+    const asked: string[] = [];
+    const repository = {
+      findById: async (_userId: string, id: string) => {
+        asked.push(id);
+        return existing.includes(id) ? ({ id } as EncryptedTask) : null;
+      },
+    } as unknown as TaskRepository;
+    return { repository, asked };
+  }
+
+  it("lists the days before today with something written, newest first", async () => {
+    const { checkIns } = repository([
+      { ...stored("2026-11-06"), worriesCiphertext: "v1.today" },
+      { ...stored("2026-11-05"), canWaitCiphertext: "v1.a" },
+      stored("2026-11-04"),
+      { ...stored("2026-11-02"), priorityTextCiphertext: "v1.b" },
     ]);
+    const past = await makeListPastCheckInRecords({
+      checkIns,
+      tasks: tasks([]).repository,
+      today,
+    })("user-a");
+    expect(past.checkIns.map((c) => c.date)).toEqual([
+      "2026-11-05",
+      "2026-11-02",
+    ]);
+  });
+
+  it("reads each chosen task once, and leaves out any that no longer exist", async () => {
+    const { checkIns } = repository([
+      { ...stored("2026-11-05"), priorityTaskId: "task-1" },
+      { ...stored("2026-11-04"), priorityTaskId: "task-1" },
+      { ...stored("2026-11-03"), priorityTaskId: "task-gone" },
+    ]);
+    const found = tasks(["task-1"]);
+    const past = await makeListPastCheckInRecords({
+      checkIns,
+      tasks: found.repository,
+      today,
+    })("user-a");
+    expect(found.asked).toEqual(["task-1", "task-gone"]);
+    expect(past.tasks.map((t) => t.id)).toEqual(["task-1"]);
+    expect(past.checkIns).toHaveLength(3);
   });
 });
