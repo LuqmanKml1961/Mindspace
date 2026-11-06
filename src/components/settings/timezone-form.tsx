@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  startTransition,
   useActionState,
   useEffect,
   useState,
@@ -56,7 +57,17 @@ export function TimezoneForm({
   const zones = [...missing, ...options];
 
   return (
-    <form action={formAction}>
+    <form
+      action={formAction}
+      // Submitting here skips React's form reset after the action, which would move the controlled
+      // select to its first option ("UTC") although the saved zone is right. `action` stays for
+      // submits before hydration.
+      onSubmit={(event) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        startTransition(() => formAction(formData));
+      }}
+    >
       <FieldGroup>
         <Field>
           <NativeSelect

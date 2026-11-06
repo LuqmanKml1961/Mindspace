@@ -26,8 +26,8 @@
    next Claude session.
 4. **Now: Phase 4 is done** (acceptance met 2026-11-06). Tasks, "Make it a task", reminders and
    the Home summary are ready to try, locally and on the live site once you push. **Next:**
-   Phase 5, P5.1 (the `DailyCheckIn` domain), at your "go". Also open: the Settings time-zone
-   display bug under Known issues. **Checkpoint A use continues alongside:** keep
+   Phase 5, P5.1 (the `DailyCheckIn` domain), at your "go". **Checkpoint A use continues
+   alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
    - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
@@ -62,11 +62,9 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 
 **Known issues**
 
-- **Settings, time zone (found 2026-11-06, not yet fixed):** after a successful save, the select
-  shows the first option ("UTC") instead of the zone you saved. The save itself is correct: the
-  database has the new zone, "Saved: …" names it, and a reload shows it. Cause: after a
-  `<form action>` succeeds, React resets the form, and the controlled `<select>` falls back to
-  its first option.
+- None open.
+- (Resolved 2026-11-06: after a save, the Settings time-zone select showed "UTC". See that
+  day's session entry.)
 - (Resolved 2026-11-04: the Next.js November security release. The upgrade to 16.4.5 is done
   locally and must be pushed to reach the live site.)
 
@@ -163,6 +161,35 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): the Settings time-zone select after a save
+
+- **Phase:** 4 (follow-up) · **From you:** "fix the settings bug first".
+- **Bug:** after a successful save, the select showed "UTC", though the database, "Saved: …" and
+  a reload all had the right zone.
+- **Cause** (read in react-dom 19.3.0):
+  - A function `action` on a `<form>` makes React call `requestFormReset`, and the
+    `form.reset()` runs at the end of the commit.
+  - A controlled `<select>` gets `selected` but not `defaultSelected` (`updateOptions(…,
+false)`), so the reset falls back to the first option.
+- **Fix:** `TimezoneForm` submits in `onSubmit` with `preventDefault()` and
+  `startTransition(() => formAction(formData))`.
+  - React then skips the action dispatch and its reset (the action becomes `null`, so there is
+    no `requestFormReset`).
+  - `action` stays on the form for submits before hydration.
+- **Checked:** no other action form has a controlled select. The auth forms restore their
+  fields with `defaultValue={state…}`.
+- **In Chrome** (probe: MYS231):
+  - saving Pacific/Pago_Pago keeps it shown, with the spinner while saving, "Time zone saved.",
+    and Save disabled;
+  - the database matched;
+  - switching back to Asia/Kuala_Lumpur behaved the same, with no console errors.
+- **Dev server:** the server Claude Code stopped earlier (low memory) had left its Next.js
+  process (PID 30288) serving on port 3000. Your new `pnpm dev` saw it and exited, so I tested
+  on port 3000.
+- lint and typecheck pass.
+- **Commits:** `fix(settings): keep the saved time zone shown after saving`
+- **Next:** Phase 5, P5.1.
 
 ### 2026-11-06 — Session 6 (cont.): P4.10 validation, and the Phase 4 acceptance
 
