@@ -242,8 +242,14 @@ Partial index: `(user_id, remind_at) where dismissed_at is null`.
 ### daily_checkins (Phase 5)
 
 Every prompt is optional (spec §4.6). Every answer is free text, so each is encrypted (D-021) and
-null when skipped. Each answer's limit is Q-7, proposed 2,000 characters, which gives at most
-10,708 characters of ciphertext.
+null when skipped.
+
+- **Limits (Q-7, settled):** each answer is up to 2,000 characters, so at most 10,708 characters
+  of ciphertext. A written priority is up to 500, like a task title, so at most 2,708.
+- **The priority is a task or written text, never both.** P5.2 checks this with
+  `num_nonnulls(priority_task_id, priority_text_ciphertext) <= 1`. A change always sets both
+  columns, so the rule never depends on what is saved.
+- **The domain is built (P5.1):** `src/domain/check-ins/`.
 
 | Column                           | Type        | Notes                                                                                           |
 | -------------------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
@@ -369,4 +375,4 @@ For every table, with two test users A and B:
 | Q-4 | Can a reminder exist without a task?                              | **Settled 2026-11-05: no** (D-008). A standalone reminder is a task with a reminder                                                                                                  | P4.1      |
 | Q-5 | Should `profiles.timezone` be set automatically at first sign-in? | **Settled 2026-11-05: yes** (your choice). Save the device zone once while the profile is still on `UTC`; Settings still changes it. Built in P4.2                                   | P4.1      |
 | Q-6 | Maximum length for task notes?                                    | **Settled 2026-11-05: 10,000 characters** (your choice), the same as a thought, so a converted thought's text fits                                                                   | P4.1      |
-| Q-7 | Maximum length for each check-in answer?                          | 2,000 characters                                                                                                                                                                     | P5.1      |
+| Q-7 | Maximum length for each check-in answer?                          | **Settled 2026-11-06: 2,000 characters** (your choice). A written priority is up to 500, the same as a task title (your choice)                                                      | P5.1      |

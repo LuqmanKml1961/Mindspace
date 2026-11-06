@@ -1,5 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { addDays, dateInTimeZone } from "@/domain/shared/calendar";
+import {
+  addDays,
+  dateInTimeZone,
+  isCalendarDate,
+} from "@/domain/shared/calendar";
+
+describe("isCalendarDate", () => {
+  it("accepts real dates, leap days included", () => {
+    expect(isCalendarDate("2026-11-06")).toBe(true);
+    expect(isCalendarDate("2028-02-29")).toBe(true);
+  });
+
+  it.each(["2026-02-29", "2026-02-30", "2026-13-01", "2026-11-6", "", "today"])(
+    "refuses %j",
+    (value) => {
+      expect(isCalendarDate(value)).toBe(false);
+    },
+  );
+});
 
 describe("addDays", () => {
   it("moves across months, years and leap days", () => {

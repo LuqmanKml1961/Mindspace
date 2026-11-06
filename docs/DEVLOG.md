@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                    |
-| ------------------ | ------------------------------------------------------------------------ |
-| **Current phase**  | Phase 4 done; Phase 5 — Mind Clarity is next; Checkpoint A use continues |
-| **Phase progress** | Phase 4: 10 / 10 done, acceptance met 2026-11-06; Phase 5: 0 / 8         |
-| **Last updated**   | 2026-11-06 (Session 6)                                                   |
-| **Blocked on**     | Nothing                                                                  |
+| Item               | Value                                                             |
+| ------------------ | ----------------------------------------------------------------- |
+| **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                |
+| **Phase progress** | Phase 5: 1 / 8 done (P5.1); next is P5.2. Phase 4 done 2026-11-06 |
+| **Last updated**   | 2026-11-06 (Session 6)                                            |
+| **Blocked on**     | Nothing                                                           |
 
 **Next actions (in order)**
 
@@ -24,11 +24,11 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4 is done** (acceptance met 2026-11-06). Tasks, "Make it a task", reminders and
-   the Home summary are ready to try, locally and on the live site once you push. **Next:**
-   Phase 5, P5.1 (the `DailyCheckIn` domain), at your "go". **Checkpoint A use continues
-   alongside:** keep
-   using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
+4. **Now: Phase 5, P5.2 next:** the `daily_checkins` migration, with RLS and pgTAP tests. P5.1
+   (the domain) is done. Phase 4 is done (acceptance met 2026-11-06). Tasks, "Make it a task",
+   reminders and the Home summary are ready to try, locally and on the live site once you push.
+   **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
+   and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
    - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
      toast" (inbox, test). The categories are Home admin, Personal, test and Zambaroni.
@@ -162,6 +162,31 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.1 the daily check-in domain
+
+- **Phase:** 5 · **Task:** P5.1 (your "go").
+- **Decisions:**
+  - **Q-7 is settled** (your choice): each answer is up to 2,000 characters.
+  - **A written priority** is up to 500 characters, like a task title (your choice).
+- **Done:**
+  - **`src/domain/check-ins/daily-check-in.ts`:**
+    - the five prompts of spec §4.6, every one optional (blank means skipped);
+    - the local date must be real;
+    - the priority is a task or written words, never both;
+    - `toCheckInChanges` validates only what changes and always sets both priority parts.
+  - **`daily-check-in-repository.ts`:** the ciphertext record and the port: create (a conflict
+    when that date already has a check-in), findByDate, list (newest first) and update. There is
+    no delete, because no Phase 5 task needs one.
+  - **`isCalendarDate`** moved from `task.ts` to `shared/calendar.ts`. The task tests still
+    pass unchanged.
+- **Checks:**
+  - format, lint, typecheck, and 198 unit tests (24 new);
+  - a mutation check broke 7 rules on purpose, and every break was caught.
+- **Docs:** DATA_MODEL (Q-7, limits, the never-both rule for P5.2), ARCHITECTURE (the folders;
+  removed a duplicate `tasks/` line), ROADMAP.
+- **Commits:** `feat(check-ins): add the daily check-in domain (P5.1)`
+- **Next:** P5.2, the `daily_checkins` migration with RLS and pgTAP.
 
 ### 2026-11-06 — Session 6 (cont.): the Settings time-zone select after a save
 

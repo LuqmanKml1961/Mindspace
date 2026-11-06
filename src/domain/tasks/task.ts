@@ -1,3 +1,4 @@
+import { isCalendarDate } from "@/domain/shared/calendar";
 import { ValidationError } from "@/domain/shared/errors";
 import { characterCount } from "@/domain/shared/text";
 
@@ -45,7 +46,6 @@ export type TaskChanges = Partial<
   >
 >;
 
-const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 export function isTaskPriority(value: unknown): value is TaskPriority {
@@ -76,19 +76,6 @@ export function toTaskNotes(input: string | null | undefined): string | null {
   return notes;
 }
 
-function isRealDate(value: string): boolean {
-  const match = DATE.exec(value);
-  if (!match) return false;
-  const [year, month, day] = match.slice(1).map(Number);
-  // Date.UTC rolls an impossible day such as 2026-02-30 into the next month.
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return (
-    date.getUTCFullYear() === year &&
-    date.getUTCMonth() === month - 1 &&
-    date.getUTCDate() === day
-  );
-}
-
 // Blank means no date or no time. A time on its own is refused.
 export function toTaskDue(input: {
   date?: string | null;
@@ -96,7 +83,7 @@ export function toTaskDue(input: {
 }): TaskDue {
   const date = input.date?.trim() || null;
   const time = input.time?.trim() || null;
-  if (date !== null && !isRealDate(date)) {
+  if (date !== null && !isCalendarDate(date)) {
     throw new ValidationError("Choose a real date.");
   }
   if (time !== null && !TIME.test(time)) {

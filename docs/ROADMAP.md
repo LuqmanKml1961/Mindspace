@@ -568,8 +568,23 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
 
 **Goal (spec deliverable):** users can reflect and choose a manageable priority.
 
-- [ ] P5.1 Domain: `DailyCheckIn` (one per user per local date; every prompt optional), its
-      repository interface, and tests.
+- [x] P5.1 Domain: `DailyCheckIn` (one per user per local date; every prompt optional), its
+      repository interface, and tests. **Done 2026-11-06:**
+  - **`DailyCheckIn`** (`src/domain/check-ins/`):
+    - the five prompts of spec §4.6 in order (`CHECK_IN_PROMPTS`);
+    - every answer is optional, and blank means skipped;
+    - the user's local date must be a real calendar date.
+  - **Limits (Q-7, your choice):** answers up to 2,000 characters; a written priority up to 500,
+    like a task title.
+  - **Priority:** an existing task or written words, never both. A change always sets both, so
+    switching clears the other.
+  - **The repository port:** `create` (ConflictError if that date already has a check-in),
+    `findByDate`, `list` (newest first) and `update`. There is no delete, because nothing in
+    Phase 5 needs one.
+  - **Shared:** `isCalendarDate` moved from `task.ts` to `shared/calendar.ts`, so tasks and
+    check-ins use one rule.
+  - **Tests:** 24 new (17 check-in, 7 calendar). A mutation check broke each rule on purpose,
+    and all 7 breaks were caught.
 - [ ] P5.2 Migration: `daily_checkins`, with an ownership FK to tasks and RLS. pgTAP tests.
       Regenerate the types. Every answer is ciphertext (D-021, DATA_MODEL.md).
 - [ ] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing

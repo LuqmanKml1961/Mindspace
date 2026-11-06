@@ -1,3 +1,19 @@
+const DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+// A real calendar date written as YYYY-MM-DD, so 2026-02-30 and 2026-11-6 are refused.
+export function isCalendarDate(value: string): boolean {
+  const match = DATE.exec(value);
+  if (!match) return false;
+  const [year, month, day] = match.slice(1).map(Number);
+  // Date.UTC rolls an impossible day such as 2026-02-30 into the next month.
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
 // The calendar date (YYYY-MM-DD) of an instant in an IANA time zone: what "today" is for someone
 // there. Intl applies the zone's offset and daylight-saving rules, so no date library is needed.
 // Throws a RangeError for a zone Intl doesn't know; profiles only hold checked zones (toTimezone).

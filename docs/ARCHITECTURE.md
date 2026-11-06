@@ -70,19 +70,18 @@ mindspace/
 │   └── tests/                  # pgTAP RLS tests
 └── src/
     ├── domain/
-    │   ├── shared/             # errors.ts (Validation, NotFound, Conflict), text.ts (characterCount), calendar.ts (dateInTimeZone)
+    │   ├── shared/             # errors.ts (Validation, NotFound, Conflict), text.ts (characterCount), calendar.ts (dateInTimeZone, addDays, isCalendarDate)
     │   ├── encryption/         # passphrase.ts, user-keys.ts, user-keys-repository.ts (D-021)
     │   ├── profiles/           # profile.ts (Profile, toTimezone), profile-repository.ts
     │   ├── thoughts/           # thought.ts, category.ts, *-repository.ts (ports), *.test.ts (P3.2)
     │   ├── tasks/              # task.ts, reminder.ts, *-repository.ts (ports), *.test.ts (P4.1)
-    │   └── check-ins/
+    │   └── check-ins/          # daily-check-in.ts, daily-check-in-repository.ts (port), *.test.ts (P5.1)
     ├── application/
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
     │   ├── encryption/         # ports, errors, schemas, lock-data-key; set-up, unlock, recover, device-key (browser); user-keys (server)
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # thoughts.ts, categories.ts (browser: rules, encrypt, decrypt); records.ts (server: ciphertext only); ports, schemas, *.test.ts
     │   ├── tasks/              # tasks.ts (browser: rules, encrypt, decrypt); records.ts (server: views by the user's today, complete/reopen) and reminders.ts (server); ports (TaskServer, Clock), schemas, *.test.ts
-    │   ├── tasks/
     │   └── check-ins/
     ├── infrastructure/
     │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
