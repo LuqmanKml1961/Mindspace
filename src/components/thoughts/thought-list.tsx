@@ -207,6 +207,15 @@ export function ThoughtList({
       ) : (
         <div className="flex flex-wrap items-center gap-2">
           <StatusNav current={status} category={category} />
+          {status === "inbox" &&
+            records.some((record) => record.status === "inbox") && (
+              <Link
+                href="/thoughts/review"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                Review one by one
+              </Link>
+            )}
           {opened && (categories.length > 0 || category !== undefined) && (
             <NativeSelect
               aria-label="Filter by category"

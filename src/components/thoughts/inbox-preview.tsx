@@ -6,6 +6,7 @@ import { FormMessages } from "@/components/forms/form-parts";
 import { brainDump } from "@/components/thoughts/brain-dump";
 import { errorMessage } from "@/lib/action-errors";
 import { ThoughtItem } from "@/components/thoughts/thought-item";
+import { waitingLabel } from "@/components/thoughts/thought-status";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -24,11 +25,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Thought } from "@/domain/thoughts/thought";
 import type { EncryptedThought } from "@/domain/thoughts/thought-repository";
-
-const waiting = (total: number) =>
-  total === 1
-    ? "1 thought waiting · no rush"
-    : `${total} thoughts waiting · no rush`;
 
 // Home's "Your mind, right now" (spec §7): the newest few inbox thoughts and how many wait,
 // decrypted on this device. Calm on purpose: no counts in red, nothing marked urgent.
@@ -101,7 +97,7 @@ export function InboxPreview({
           <h2>Your mind, right now</h2>
         </CardTitle>
         <CardDescription>
-          {total === 0 ? "Nothing is waiting." : waiting(total)}
+          {total === 0 ? "Nothing is waiting." : waitingLabel(total)}
         </CardDescription>
       </CardHeader>
       <CardContent>{content}</CardContent>

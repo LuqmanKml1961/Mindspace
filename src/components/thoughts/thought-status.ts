@@ -21,6 +21,12 @@ export function thoughtsHref(
   return search ? `/thoughts?${search}` : "/thoughts";
 }
 
+// How many inbox thoughts wait, calmly (Home and Mind Clarity).
+export const waitingLabel = (total: number) =>
+  total === 1
+    ? "1 thought waiting · no rush"
+    : `${total} thoughts waiting · no rush`;
+
 const captured = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
   timeStyle: "short",

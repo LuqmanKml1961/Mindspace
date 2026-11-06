@@ -671,8 +671,26 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     - written words;
     - nothing chosen;
     - no console errors.
-- [ ] P5.6 Thought review flow: go through inbox thoughts one at a time and choose park, convert to
-      task, archive or delete.
+- [x] P5.6 Thought review flow: go through inbox thoughts one at a time and choose park, convert to
+      task, archive or delete. **Done 2026-11-06** (your choices: start from Brain Dump and Mind
+      Clarity; oldest first):
+  - **`/thoughts/review`:** one inbox thought at a time, with Park, Make it a task, Archive,
+    Delete (confirmed), Skip for now and Stop for now. Park and Archive offer Undo. The end says
+    how many skipped thoughts still wait.
+  - **Ways in:** "Review one by one" on the Brain Dump inbox, and a "Your inbox" card on Mind
+    Clarity (hidden when the inbox is empty).
+  - **No new data code:** it reuses the thought status change, delete and "Make it a task".
+    - **The sheet:** `MakeTaskSheet` takes `onCreated`, so it can stay in the review.
+    - **Tracking:** Brain Dump's update and delete don't refresh the page, so the review keeps
+      its own track of what was handled.
+    - **Shared:** `waitingLabel` moved to `thought-status.ts`, for Home and Mind Clarity.
+  - **Checked in Chrome** (the probe confirmed MYS231):
+    - both ways in; oldest first;
+    - your two thoughts skipped, so unchanged;
+    - Park, then Undo, then Park; Make it a task stayed in the review; Delete with the dialog;
+      Archive; the end message;
+    - the database matched each choice;
+    - "Make it a task" on the thought page still opens Tasks.
 - [ ] P5.7 Past reflections: a simple list by date. No scores, streaks or "insights".
 - [ ] P5.8 (Stretch) Slow Down Mode: a short breathing exercise and the prompt "What is actually
       bothering you right now?", with an optional save as a thought. Respects

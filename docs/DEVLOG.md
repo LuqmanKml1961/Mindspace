@@ -5,7 +5,7 @@
 | Item               | Value                                                                  |
 | ------------------ | ---------------------------------------------------------------------- |
 | **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                     |
-| **Phase progress** | Phase 5: 5 / 8 done (P5.1–P5.5); next is P5.6. Phase 4 done 2026-11-06 |
+| **Phase progress** | Phase 5: 6 / 8 done (P5.1–P5.6); next is P5.7. Phase 4 done 2026-11-06 |
 | **Last updated**   | 2026-11-06 (Session 6)                                                 |
 | **Blocked on**     | Nothing                                                                |
 
@@ -24,10 +24,10 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.6 next:** the thought review flow (inbox thoughts one at a time: park,
-   make a task, archive or delete). P5.1–P5.5 are done: the daily check-in on Mind Clarity, and
-   today's one thing on Home. Please look at both layouts, because screenshots timed out. Phase
-   4 is done (acceptance met 2026-11-06).
+4. **Now: Phase 5, P5.7 next:** past reflections, a simple list by date. P5.1–P5.6 are done:
+   the daily check-in on Mind Clarity, today's one thing on Home, and the thought review
+   (`/thoughts/review`). Please look at their layouts, because screenshots timed out. Phase 4 is
+   done (acceptance met 2026-11-06).
    Tasks, "Make it a task",
    reminders and the Home summary are ready to try, locally and on the live site once you push.
    **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
@@ -165,6 +165,41 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.6 the thought review
+
+- **Phase:** 5 · **Task:** P5.6 (your "go").
+- **Your choices:** start it from Brain Dump and Mind Clarity; oldest first.
+- **Done:**
+  - **`thought-review.tsx` and `/thoughts/review`:** one inbox thought per card.
+    - Park and Archive offer Undo; Make it a task uses the P4.7 sheet; Delete is confirmed.
+    - Skip and Stop for now; focus moves to each new heading; the end says how many skipped
+      thoughts still wait.
+  - **Ways in:** "Review one by one" beside the views on the Brain Dump inbox, and a "Your
+    inbox" card on Mind Clarity. It uses `getInboxPreview(…, 1)` for the count in one request.
+  - **`MakeTaskSheet`:** gains `onCreated`. Without it, it still opens Tasks.
+  - **`waitingLabel`:** moved to `thought-status.ts`.
+- **Found while testing:**
+  - **Brain Dump's saves don't refresh the page.** `updateThoughtAction` and
+    `deleteThoughtAction` don't call `refresh()` (only capture does), so the review first kept
+    showing a parked thought. The review now tracks what was handled on its own. The shared
+    actions were left alone, so the thought editor isn't affected.
+  - **The dev server's helper processes had crashed.** "Create task" on the thought page
+    returned 500: "Jest worker encountered 2 child process exceptions" (failed to generate
+    static paths for `/thoughts/[id]`). The server had run since 9:37, through the low-memory
+    shutdown. After you restarted it, the same check passed (it opens `/tasks?view=no-date`).
+- **In Chrome** (the probe confirmed MYS231):
+  - both ways in; oldest first;
+  - your two thoughts skipped, so unchanged;
+  - Park, then Undo, then Park; Make it a task stayed in the review; Delete with the dialog;
+    Archive; the end message;
+  - the database matched: test 1 parked, test 2 archived with its task, test 3 deleted, test 4
+    archived;
+  - no console errors on the fresh server.
+- **Local test data:** four "Claude test: review" thoughts (one deleted) and two linked tasks.
+- **Checks:** format, lint, typecheck and 221 unit tests pass.
+- **Commits:** `feat(thoughts): add the inbox review (P5.6)`
+- **Next:** P5.7, past reflections.
 
 ### 2026-11-06 — Session 6 (cont.): P5.2 pushed to the hosted database
 

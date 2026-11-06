@@ -27,10 +27,12 @@ function MakeTaskForm({
   userId,
   thought,
   today,
+  onCreated,
 }: {
   userId: string;
   thought: Thought;
   today: string;
+  onCreated?: () => void;
 }) {
   const router = useRouter();
   const [draft, setDraft] = useState<TaskDraft>(() => {
@@ -68,7 +70,8 @@ function MakeTaskForm({
             ? "Task created. The thought is archived."
             : "Task created. The thought couldn’t be archived, so it’s still where it was.",
         );
-        router.push(tasksHref(viewForDue(task.dueDate, today)));
+        if (onCreated) onCreated();
+        else router.push(tasksHref(viewForDue(task.dueDate, today)));
       } catch (cause) {
         // Nothing was created; the draft stays as typed.
         notify.error(errorMessage(cause));
@@ -107,24 +110,33 @@ function MakeTaskForm({
   );
 }
 
-// P4.7: the title and notes are pre-filled from the thought (taskDraftFromThought).
+// P4.7: the title and notes are pre-filled from the thought (taskDraftFromThought). It then
+// opens the view where the task landed, unless `onCreated` keeps you where you are (the review,
+// P5.6).
 export function MakeTaskSheet({
   userId,
   thought,
   today,
   open,
   onOpenChange,
+  onCreated,
 }: {
   userId: string;
   thought: Thought;
   today: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onCreated?: () => void;
 }) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="data-[side=right]:w-full data-[side=right]:sm:max-w-md">
-        <MakeTaskForm userId={userId} thought={thought} today={today} />
+        <MakeTaskForm
+          userId={userId}
+          thought={thought}
+          today={today}
+          onCreated={onCreated}
+        />
       </SheetContent>
     </Sheet>
   );

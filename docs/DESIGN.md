@@ -209,6 +209,24 @@ darken `input`.
 - **Brain Dump views (P3.9):** Inbox, Parked and Archived are links. The current one uses the
   `default` (primary) button style with `aria-current="page"`, the others `ghost`. Primary
   matches the pressed toggles.
+- **Thought review (P5.6):** `/thoughts/review`, with a Breadcrumb (Brain Dump › Review), "Review
+  your inbox", and "One thought at a time, oldest first. Skip anything you're not ready to
+  decide."
+  - **Ways in:** an outline "Review one by one" button beside the views on the Inbox, and a "Your
+    inbox" Card on Mind Clarity ("N thoughts waiting · no rush"), hidden when the inbox is empty.
+  - **The thought:** one Card per thought. It reads "N waiting", then the heading "What would you
+    like to do with this thought?" (focused after each choice). The thought sits in a bordered
+    box on the page colour: title, text (scrolls past 40svh), when it was captured, and its
+    category Badge.
+  - **The choices:**
+    - **Park**, **Make it a task** (the P4.7 sheet, which stays in the review) and **Archive**
+      are all outline, so none is nudged;
+    - **Delete** is destructive, with the usual confirmation;
+    - **Skip for now** and **Stop for now** are ghost.
+  - **Toasts:** "Parked for later." and "Archived." offer **Undo**, which puts the thought back
+    in the inbox, and it comes up again.
+  - **The end:** an Empty, "That's everything in your inbox for now." with how many skipped
+    thoughts still wait (or "Your inbox is clear."), and **Back to Brain Dump**.
 - **Lists of linked items:** a `<ul>` of `<li>`, each holding an `Item` with
   `render={<Link />}`. `ItemGroup` sets `role="list"`, but its children would be links, not list
   items, which isn't valid ARIA.
