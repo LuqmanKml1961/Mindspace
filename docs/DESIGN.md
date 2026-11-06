@@ -272,8 +272,15 @@ darken `input`.
     native date and time pair (the time is disabled until there is a date; "Clear date" clears
     both), and **ToggleGroup** priority. Save, and Delete with the same confirmation as thoughts.
   - **Home summary (P4.9):**
-    - Home reads, top to bottom: **Today**, **Upcoming reminders**, then "Your mind, right
-      now".
+    - Home reads, top to bottom: **Today's one thing** (P5.5), **Today**, **Upcoming
+      reminders**, then "Your mind, right now".
+    - **Today's one thing:** the priority chosen at the end of today's check-in.
+      - A task shows as the usual task row, linking to Tasks, and shows "Completed …" once it is
+        done.
+      - Written words show in larger text (`text-xl`).
+      - With nothing chosen, it reads "Nothing chosen yet." The footer link reads "Choose it in
+        Mind Clarity" or, once chosen, "Change it in Mind Clarity".
+      - The Today card stays right below it, so every other task is one tap away (spec §4.7).
     - The Today card lists up to 5 open tasks due today or earlier, with "N tasks for today" and
       "See all N in Tasks" when there are more.
     - Earlier tasks read "Waiting since Wed, Nov 4" in the same muted text as "Today": no red,

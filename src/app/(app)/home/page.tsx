@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OneThing } from "@/components/clarity/one-thing";
 import { ReminderList } from "@/components/tasks/reminder-list";
 import { TodayPreview } from "@/components/tasks/today-preview";
 import { InboxPreview } from "@/components/thoughts/inbox-preview";
@@ -14,12 +15,19 @@ const REMINDERS_SHOWN = 5;
 
 export default async function HomePage() {
   const { user, useCases } = await getAppContext();
-  const [inbox, reminders, todayTasks, today] = await Promise.all([
+  const [inbox, reminders, todayTasks, today, checkIn] = await Promise.all([
     useCases.getInboxPreview(user.id, PREVIEW_SIZE),
     useCases.listReminderRecords(user.id),
     useCases.listTaskRecords(user.id, "today"),
     useCases.getToday(user.id),
+    useCases.getTodayCheckInRecord(user.id),
   ]);
+  // The one thing's task is usually among today's; if it was done or moved, it is read on its own.
+  const priorityId = checkIn?.priorityTaskId;
+  const priorityTask = priorityId
+    ? (todayTasks.find((task) => task.id === priorityId) ??
+      (await useCases.getTaskRecord(user.id, priorityId)))
+    : null;
 
   return (
     <>
@@ -36,6 +44,12 @@ export default async function HomePage() {
           Brain Dump
         </Link>
       </div>
+      <OneThing
+        userId={user.id}
+        record={checkIn}
+        task={priorityTask}
+        today={today}
+      />
       <TodayPreview
         userId={user.id}
         records={todayTasks.slice(0, TODAY_SHOWN)}

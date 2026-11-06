@@ -5,7 +5,7 @@
 | Item               | Value                                                                  |
 | ------------------ | ---------------------------------------------------------------------- |
 | **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                     |
-| **Phase progress** | Phase 5: 4 / 8 done (P5.1–P5.4); next is P5.5. Phase 4 done 2026-11-06 |
+| **Phase progress** | Phase 5: 5 / 8 done (P5.1–P5.5); next is P5.6. Phase 4 done 2026-11-06 |
 | **Last updated**   | 2026-11-06 (Session 6)                                                 |
 | **Blocked on**     | Nothing                                                                |
 
@@ -14,9 +14,9 @@
 1. **Hosted database:** has the first four migrations (`profiles`, `user_keys`, `categories` and
    `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on 2026-11-05.
    **`daily_checkins` (P5.2) is local only.** It waits for your approval, with
-   `pnpm supabase db push --dry-run` first. **Push it before you push the P5.4 commit:** the
-   Mind Clarity page reads it, and without the table that page shows the error page on the live
-   site.
+   `pnpm supabase db push --dry-run` first. **Push it before you push the P5.4 and P5.5
+   commits:** Mind Clarity and Home both read it. Without the table, both show the error page
+   on the live site.
    After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
@@ -27,9 +27,10 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.5 next:** One Thing at a Time, with today's priority prominent on Home.
-   P5.1–P5.4 are done: the daily check-in works locally on the Mind Clarity page. Please look
-   at its layout, because screenshots timed out. Phase 4 is done (acceptance met 2026-11-06).
+4. **Now: Phase 5, P5.6 next:** the thought review flow (inbox thoughts one at a time: park,
+   make a task, archive or delete). P5.1–P5.5 are done: the daily check-in on Mind Clarity, and
+   today's one thing on Home. Please look at both layouts, because screenshots timed out. Phase
+   4 is done (acceptance met 2026-11-06).
    Tasks, "Make it a task",
    reminders and the Home summary are ready to try, locally and on the live site once you push.
    **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
@@ -167,6 +168,30 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.5 today's one thing on Home
+
+- **Phase:** 5 · **Task:** P5.5 (your "go").
+- **Done:**
+  - **`one-thing.tsx`:** the "Today's one thing" card, first on Home, under the Brain Dump button.
+    - a task as its task row (linking to Tasks);
+    - written words in larger text;
+    - with nothing chosen, "Nothing chosen yet." The link reads "Choose it" or "Change it in
+      Mind Clarity".
+  - **`home/page.tsx`:** reads today's check-in. The priority task comes from today's list,
+    otherwise `getTaskRecord`, so a done or moved task still shows.
+- **In Chrome:**
+  - the card order: one thing, Today, Upcoming reminders, Your mind;
+  - the task, then completed ("Completed …"), then reopened;
+  - written words, and nothing chosen;
+  - no console errors.
+  - Afterwards, the test check-in's one thing is "dentist appointment" again.
+- **Checks:** format, lint and typecheck pass. There is no new domain or application logic, so
+  no new unit tests.
+- **Hosted:** as for P5.4, `daily_checkins` must reach the hosted database before these commits
+  go live, because Home now reads it too.
+- **Commits:** `feat(home): show today's one thing (P5.5)`
+- **Next:** P5.6, the thought review flow.
 
 ### 2026-11-06 — Session 6 (cont.): P5.4 the check-in flow
 

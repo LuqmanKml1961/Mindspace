@@ -653,8 +653,23 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     - Tasks still shows its validation.
   - **Visual check:** Chrome's screenshots timed out (rendering paused), so the layout still
     needs your look.
-- [ ] P5.5 One Thing at a Time: today's priority is prominent on Home, and every other task is
-      still one tap away (spec §4.7).
+- [x] P5.5 One Thing at a Time: today's priority is prominent on Home, and every other task is
+      still one tap away (spec §4.7). **Done 2026-11-06:**
+  - **"Today's one thing"** is the first card on Home, under the Brain Dump button
+    (`one-thing.tsx`).
+    - a task shows as its task row, linking to Tasks, and shows "Completed …" once done;
+    - written words show in larger text;
+    - with nothing chosen, it says "Nothing chosen yet." and links to Mind Clarity, with no
+      nagging.
+  - **The Today card stays right below**, so every other task is one tap away.
+  - **Data:** Home reads today's check-in. The priority task comes from today's list, or on
+    its own when it was done or moved to another day. Decrypted on the device.
+  - **Checked in Chrome:**
+    - the card order;
+    - a task (linking to `/tasks`), the same task completed, and then reopened;
+    - written words;
+    - nothing chosen;
+    - no console errors.
 - [ ] P5.6 Thought review flow: go through inbox thoughts one at a time and choose park, convert to
       task, archive or delete.
 - [ ] P5.7 Past reflections: a simple list by date. No scores, streaks or "insights".
