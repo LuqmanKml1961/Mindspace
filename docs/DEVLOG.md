@@ -49,6 +49,7 @@
 | 2026-11-05 | "You didn't use shadcn components to the fullest … audit everything."                            | Full audit: Card, Empty, Kbd, InputGroup, Breadcrumb and button icons (DESIGN.md).   |
 | 2026-11-05 | "Why does the box colour now match the background … we already fixed this before."               | The thought box in Home's card takes the page colour; Kbd uses the skeleton tint.    |
 | 2026-11-05 | "We need to use perfect shades of colour … so I can fix it."                                     | A local colour page lists every colour; your proposal from it is applied (D-022).    |
+| 2026-11-06 | "We need caching … and logic for updates, so users don't need to reinstall."                     | Caching was already P6.2. Update handling added to P6.2, a speed check as P6.11.     |
 
 **Open questions (yours to decide)**
 

@@ -607,6 +607,14 @@ and then the private beta.
       a connection-status indicator. Choose between a hand-written worker (Next.js PWA guide) and a
       library such as Serwist after checking compatibility with the installed Next.js version.
       Do not cache user data yet.
+  - **Updates (added 2026-11-06, your request):** a new deploy must reach the installed app
+    without reinstalling.
+    - The worker must never pin an old version.
+    - Each deploy makes a new worker version, checked when the app returns to the foreground.
+      A calm "A new version is ready" prompt offers Refresh and never reloads while you type.
+    - An app left open reloads on its next navigation after a deploy, instead of failing a save.
+      This is Next.js version-skew handling, `deploymentId`. Check first whether Vercel sets it
+      already.
 - [ ] P6.3 Test installation and browser behaviour on Chrome and Edge desktop, Android Chrome, and
       iOS Safari (Add to Home Screen). Record the results in the DEVLOG.
 - [ ] P6.4 Accessibility review: keyboard navigation, visible focus, WCAG AA contrast, labels,
@@ -631,11 +639,23 @@ and then the private beta.
       `email-code-form.tsx` (deferred from the 2026-11-05 shadcn audit). Also review the hosted
       security advisor "Leaked password protection
       disabled" (an Auth setting; it only matters once passwords are used).
+- [ ] P6.11 Speed check (added 2026-11-06, your request).
+  - **Measure first:** time Home, Tasks and Brain Dump on the live site, not the dev server,
+    which builds each page on first visit.
+  - **Then fix what is actually slow.** One candidate is instant switching between pages from
+    the client cache (`staleTimes`, an experimental setting). Confirm that your own saves still
+    show at once.
+  - **Measure again**, and record both sets of times in the DEVLOG.
+  - **Not in scope:**
+    - server-side caching of user data;
+    - keeping data on the device for offline reading (spec offline strategy steps 3–5, which
+      need sync design under D-021).
 
 **Acceptance**
 
 - The app installs on supported browsers, and offline shows the app's fallback page rather than
   a browser error.
+- A new deploy reaches the installed app without reinstalling it.
 - Export returns all of the user's data, and account deletion leaves no rows for that user
   (checked).
 - The security and accessibility checklists are done, with findings fixed or logged.
