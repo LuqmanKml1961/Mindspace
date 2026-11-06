@@ -1,4 +1,10 @@
 import {
+  makeOpenCheckIns,
+  makeStartCheckIn,
+  makeUpdateCheckIn,
+} from "@/application/check-ins/check-ins";
+import type { CheckInServer } from "@/application/check-ins/ports";
+import {
   makeForgetDevice,
   makeGetDeviceKey,
 } from "@/application/encryption/device-key";
@@ -90,5 +96,14 @@ export function createTaskUseCases(servers: {
     updateTask: makeUpdateTask(deps),
     deleteTask: makeDeleteTask(deps),
     convertThought: makeConvertThoughtToTask(deps),
+  };
+}
+
+export function createCheckInUseCases(checkIns: CheckInServer) {
+  const deps = { crypto: webFieldCrypto, device: indexedDbKeyStore, checkIns };
+  return {
+    openCheckIns: makeOpenCheckIns(deps),
+    startCheckIn: makeStartCheckIn(deps),
+    updateCheckIn: makeUpdateCheckIn(deps),
   };
 }

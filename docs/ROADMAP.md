@@ -600,8 +600,33 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
   - **Tests:** `daily_checkins_rls_test.sql` has 28 checks (121 pgTAP in total). 18 deliberate
     breaks were each caught by a named test, and the advisors report no issues.
   - **Hosted:** not pushed yet. It waits for your approval, with a dry run first.
-- [ ] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing
-      task or free text), and list past check-ins.
+- [x] P5.3 Use cases: start or resume today's check-in, save answers, set the priority (an existing
+      task or free text), and list past check-ins. **Done 2026-11-06:**
+  - **The repository** (`supabase-daily-check-in-repository.ts`). Phase 5 has no separate
+    repository task, so it comes here, where P4.4 did it for tasks.
+    - a second check-in for a day becomes `ConflictError`;
+    - someone else's or a deleted task becomes "That task no longer exists.";
+    - the list is newest first and pages past 1,000 rows.
+  - **Browser** (`application/check-ins/check-ins.ts`, D-021):
+    - `openCheckIns`;
+    - `startCheckIn`, which needs an unlocked device, so a locked one starts nothing;
+    - `updateCheckIn`, which saves answers and sets the priority. Each answer and the written
+      priority are encrypted for their own column.
+  - **Server** (`records.ts`):
+    - today's check-in uses the user's own date from the profile's time zone, and the browser
+      never sends a date;
+    - start or resume: when two devices start at once, the database refuses the second and
+      that check-in is resumed;
+    - update and list.
+  - **`checkInEditsSchema`:** ciphertext within the database's sizes, and the priority's task
+    and text sent together, never both. Unknown keys are dropped.
+  - **Wired** into `container.ts` and `browser.ts`. The Server Actions come with the screens
+    (P5.4), as in Phase 4.
+  - **Checks:**
+    - 23 unit tests, and 10 deliberate breaks, all caught;
+    - a one-off end-to-end run on the local stack (8/8): two throwaway users, RLS on, real Web
+      Crypto, through the Server Action's schema. 7 deliberate repository breaks were all
+      caught, including the two-device race. The users and rows are gone afterwards.
 - [ ] P5.4 Check-in flow UI: one prompt per step (spec §4.6). Every step can be skipped and the
       flow can end early. Separates "act on now" from "can wait".
 - [ ] P5.5 One Thing at a Time: today's priority is prominent on Home, and every other task is

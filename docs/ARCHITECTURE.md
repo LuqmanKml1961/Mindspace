@@ -82,15 +82,15 @@ mindspace/
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
     │   ├── thoughts/           # thoughts.ts, categories.ts (browser: rules, encrypt, decrypt); records.ts (server: ciphertext only); ports, schemas, *.test.ts
     │   ├── tasks/              # tasks.ts (browser: rules, encrypt, decrypt); records.ts (server: views by the user's today, complete/reopen) and reminders.ts (server); ports (TaskServer, Clock), schemas, *.test.ts
-    │   └── check-ins/
+    │   └── check-ins/          # check-ins.ts (browser: rules, encrypt, decrypt, start); records.ts (server: today's check-in, start or resume, update, list); ports (CheckInServer, Today), schemas, *.test.ts (P5.3)
     ├── infrastructure/
     │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
     │   ├── crypto/             # web-crypto.ts, device-key-store.ts: browser-side E2E (D-021)
     │   ├── config/             # env.ts (validated environment variables)
     │   ├── supabase/           # server/browser clients, session refresh, database.types.ts, fetch-all-rows.ts (paging past max_rows)
-    │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles, user keys, encrypted thoughts and categories, encrypted tasks, reminders)
+    │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles, user keys, encrypted thoughts and categories, encrypted tasks, reminders, encrypted check-ins)
     │   ├── container.ts        # server composition root: builds use cases for the current request
-    │   └── browser.ts          # browser composition root: encryption use cases (P3.4)
+    │   └── browser.ts          # browser composition root: encryption, Brain Dump, task and check-in use cases
     ├── app/                    # Next.js App Router (presentation)
     │   ├── (auth)/sign-in | sign-up | forgot-password | reset-password/, actions.ts
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects

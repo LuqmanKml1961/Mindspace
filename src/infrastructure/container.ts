@@ -2,6 +2,12 @@ import "server-only";
 import { redirect } from "next/navigation";
 import type { AuthService } from "@/application/auth/auth-service";
 import {
+  makeGetTodayCheckInRecord,
+  makeListCheckInRecords,
+  makeStartCheckInRecord,
+  makeUpdateCheckInRecord,
+} from "@/application/check-ins/records";
+import {
   makeCreateUserKeys,
   makeGetUserKeys,
   makeReplaceUserKeys,
@@ -38,6 +44,7 @@ import {
 } from "@/application/thoughts/records";
 import { createSupabaseAuthService } from "@/infrastructure/auth/supabase-auth-service";
 import { createSupabaseCategoryRepository } from "@/infrastructure/repositories/supabase-category-repository";
+import { createSupabaseDailyCheckInRepository } from "@/infrastructure/repositories/supabase-daily-check-in-repository";
 import { createSupabaseProfileRepository } from "@/infrastructure/repositories/supabase-profile-repository";
 import { createSupabaseReminderRepository } from "@/infrastructure/repositories/supabase-reminder-repository";
 import { createSupabaseTaskRepository } from "@/infrastructure/repositories/supabase-task-repository";
@@ -62,7 +69,9 @@ export async function getAppContext() {
   const categories = createSupabaseCategoryRepository(supabase);
   const tasks = createSupabaseTaskRepository(supabase);
   const reminders = createSupabaseReminderRepository(supabase);
+  const checkIns = createSupabaseDailyCheckInRepository(supabase);
   const clock = () => new Date();
+  const getToday = makeGetToday({ profiles, clock });
   return {
     user: { id: data.claims.sub, email: data.claims.email ?? null },
     useCases: {
@@ -82,7 +91,7 @@ export async function getAppContext() {
       createCategoryRecord: makeCreateCategoryRecord({ categories }),
       renameCategoryRecord: makeRenameCategoryRecord({ categories }),
       deleteCategoryRecord: makeDeleteCategoryRecord({ categories }),
-      getToday: makeGetToday({ profiles, clock }),
+      getToday,
       listTaskRecords: makeListTaskRecords({ tasks, profiles, clock }),
       getTaskRecord: makeGetTaskRecord({ tasks }),
       createTaskRecord: makeCreateTaskRecord({ tasks }),
@@ -93,6 +102,13 @@ export async function getAppContext() {
       addReminder: makeAddReminder({ reminders }),
       listReminderRecords: makeListReminderRecords({ reminders, tasks }),
       dismissReminder: makeDismissReminder({ reminders, clock }),
+      getTodayCheckInRecord: makeGetTodayCheckInRecord({
+        checkIns,
+        today: getToday,
+      }),
+      startCheckInRecord: makeStartCheckInRecord({ checkIns, today: getToday }),
+      updateCheckInRecord: makeUpdateCheckInRecord({ checkIns }),
+      listCheckInRecords: makeListCheckInRecords({ checkIns }),
     },
   };
 }

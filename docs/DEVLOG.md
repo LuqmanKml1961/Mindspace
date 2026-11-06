@@ -5,7 +5,7 @@
 | Item               | Value                                                                  |
 | ------------------ | ---------------------------------------------------------------------- |
 | **Current phase**  | Phase 5 — Mind Clarity; Checkpoint A use continues                     |
-| **Phase progress** | Phase 5: 2 / 8 done (P5.1–P5.2); next is P5.3. Phase 4 done 2026-11-06 |
+| **Phase progress** | Phase 5: 3 / 8 done (P5.1–P5.3); next is P5.4. Phase 4 done 2026-11-06 |
 | **Last updated**   | 2026-11-06 (Session 6)                                                 |
 | **Blocked on**     | Nothing                                                                |
 
@@ -14,7 +14,8 @@
 1. **Hosted database:** has the first four migrations (`profiles`, `user_keys`, `categories` and
    `thoughts`, `tasks` and `reminders`). P4.3 was pushed with your approval on 2026-11-05.
    **`daily_checkins` (P5.2) is local only.** It waits for your approval, with
-   `pnpm supabase db push --dry-run` first; nothing uses it until the check-in screens (P5.4).
+   `pnpm supabase db push --dry-run` first. No page reads it yet, so pushing the code is safe.
+   It must reach the hosted database before the check-in screens (P5.4) go live.
    After deploying, set up the passphrase on the live site and time PBKDF2 on a phone.
 
 2. **Push** the latest commits (`git push`; Claude never pushes). The live site signs in with Google
@@ -25,9 +26,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 5, P5.3 next:** the check-in use cases (start or resume today's, save answers,
-   set the priority, list past check-ins). P5.1 (the domain) and P5.2 (the table) are done.
-   Phase 4 is done (acceptance met 2026-11-06). Tasks, "Make it a task",
+4. **Now: Phase 5, P5.4 next:** the check-in flow UI, one prompt per step, every step skippable.
+   P5.1–P5.3 (the domain, the table and the use cases) are done. Phase 4 is done (acceptance met
+   2026-11-06). Tasks, "Make it a task",
    reminders and the Home summary are ready to try, locally and on the live site once you push.
    **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
    and phone, and tell me what helps or gets in
@@ -164,6 +165,51 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P5.3 the check-in use cases
+
+- **Phase:** 5 · **Task:** P5.3 (your "go").
+- **Scope:** Phase 5 has no separate repository task, so the check-in repository comes with the
+  use cases. In Phase 4 they were split between P4.4 and P4.5. The Server Actions come with the
+  screens (P5.4), as in P4.6.
+- **Done:**
+  - **`supabase-daily-check-in-repository.ts`:**
+    - `23505` becomes `ConflictError`, and `23503` becomes "That task no longer exists.";
+    - a missing check-in gives `NotFoundError`, and an empty change returns the current one;
+    - the list is newest first, paged with `fetchAllRows`.
+  - **`application/check-ins/`:**
+    - **Browser:** `openCheckIns`, `startCheckIn` (unlocked device first), and `updateCheckIn`
+      (answers and priority). The AAD columns are `occupying_mind`, `worries`, `can_control`,
+      `can_wait`, `small_helpful_thing` and `priority_text`.
+    - **Server:** `getTodayCheckInRecord`, `startCheckInRecord` (resumes, or starts empty;
+      recovers from a two-device race), `updateCheckInRecord` and `listCheckInRecords`. "Today"
+      is injected as `getToday`.
+    - **`checkInEditsSchema`:** the ciphertext sizes; the priority's task and text together,
+      never both.
+  - **Wiring:** `container.ts` now builds `getToday` once and shares it. `browser.ts` has
+    `createCheckInUseCases`.
+- **Checks:**
+  - **Unit tests:** 23 new (221 in total). 10 deliberate breaks to the use cases and the schema
+    were all caught.
+  - **End-to-end run** (`supabase/.temp/p53`, git-ignored, deleted after), 8/8 pass:
+    - **Setup:** two throwaway users signed in with the publishable key (RLS on), real Web
+      Crypto keys, and edits passed through `checkInEditsSchema`. The keys came by environment
+      and were never printed.
+    - **Covered:** one start even from two devices at once; answers stored only as ciphertext
+      and opening again; a task then words as the priority; B's task refused; deleting the
+      priority task clears only the link; B can't see or change A's check-in, even with A's id;
+      an empty change; listing past 1,000 newest first, with today's still found.
+    - **Breaks:** 7 deliberate breaks to the repository were all caught, after one gap was
+      closed. "findByDate ignores the date" was first missed, because each person had only one
+      check-in at the time, so the run now also checks today's check-in among 1,005.
+    - **My test's mistake:** the first run used the service-role key to read rows. That key
+      has no grants on `daily_checkins` (D-018), so I read with A's own session instead.
+    - **Afterwards:** the local database is back to 1 user, 8 tasks and 0 check-ins.
+  - format, lint and typecheck pass.
+  - **The build was not run:** only 1.6 GB of memory was free. Run `pnpm build` before
+    pushing, or let Vercel's build check it.
+- **Commits:** `feat(check-ins): add the check-in repository and use cases (P5.3)`
+- **Next:** P5.4, the check-in flow UI.
 
 ### 2026-11-06 — Session 6 (cont.): P5.2 the daily_checkins migration
 
