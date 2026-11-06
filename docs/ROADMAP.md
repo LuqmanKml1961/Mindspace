@@ -523,8 +523,15 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
   - **Completed tasks:** their reminders are hidden, and reopening brings them back
     (`listReminderRecords`).
   - **Domain:** `isReminderDue`.
-- [ ] P4.9 Home: a summary of today's tasks and upcoming reminders. Overdue items look neutral, with
-      no red alarms.
+- [x] P4.9 Home: a summary of today's tasks and upcoming reminders. Overdue items look neutral, with
+      no red alarms. **Done 2026-11-06:**
+  - **Home order:** a **Today** card, then **Upcoming reminders** (P4.8), then "Your mind,
+    right now".
+  - **The Today card:** up to 5 open tasks due today or earlier, with "N tasks for today",
+    "See all N in Tasks" when there are more, and a calm empty state ("Nothing for today. Enjoy
+    the space…").
+  - **Neutral:** earlier tasks read "Waiting since …" in the same muted text as the rest.
+  - **Rows** link to Tasks; `TaskItem` now takes `href` or `onOpen`.
 - [ ] P4.10 Validation, empty and error states.
 
 **Acceptance**

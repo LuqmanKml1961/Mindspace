@@ -271,6 +271,15 @@ darken `input`.
   - **Edit sheet:** **Sheet** on the right, full width on phones. It has the title, notes, a
     native date and time pair (the time is disabled until there is a date; "Clear date" clears
     both), and **ToggleGroup** priority. Save, and Delete with the same confirmation as thoughts.
+  - **Home summary (P4.9):**
+    - Home reads, top to bottom: **Today**, **Upcoming reminders**, then "Your mind, right
+      now".
+    - The Today card lists up to 5 open tasks due today or earlier, with "N tasks for today" and
+      "See all N in Tasks" when there are more.
+    - Earlier tasks read "Waiting since Wed, Nov 4" in the same muted text as "Today": no red,
+      no "overdue".
+    - Rows are outline Items on the page colour that link to Tasks. When there's nothing:
+      "Nothing for today. Enjoy the space. Tasks are there when you need them."
   - **Reminders (P4.8, D-008, in-app only):**
     - **In the edit sheet:** a "Reminders" field lists the task's reminders, each with Dismiss,
       and a "Remind me at" `datetime-local` picker with Add inside it. The hint reads "Shows on

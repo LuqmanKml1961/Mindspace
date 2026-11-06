@@ -5,8 +5,8 @@
 | Item               | Value                                                                       |
 | ------------------ | --------------------------------------------------------------------------- |
 | **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 8 / 10 tasks done (P4.1–P4.8; P4.3 also hosted); next is P4.9      |
-| **Last updated**   | 2026-11-05 (Session 5)                                                      |
+| **Phase progress** | Phase 4: 9 / 10 tasks done (P4.1–P4.9; P4.3 also hosted); next is P4.10     |
+| **Last updated**   | 2026-11-06 (Session 6)                                                      |
 | **Blocked on**     | Nothing                                                                     |
 
 **Next actions (in order)**
@@ -24,9 +24,9 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.9 next:** Home shows a summary of today's tasks and upcoming reminders,
-   with overdue items neutral. Tasks (P4.6), "Make it a task" (P4.7) and reminders (P4.8) are
-   ready to try locally.
+4. **Now: Phase 4, P4.10 next:** validation, empty and error states across the task screens,
+   then the Phase 4 acceptance check. Tasks, "Make it a task", reminders and the Home summary
+   (P4.6–P4.9) are ready to try locally.
    Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
@@ -158,6 +158,44 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6: P4.9 the Home summary
+
+- **Phase:** 4 · **Task:** P4.9 (your "continue").
+- **Done:**
+  - **`TodayPreview`**, built like `InboxPreview`:
+    - the first 5 of `listTaskRecords("today")`, decrypted on the device;
+    - "N tasks for today", "See all N in Tasks" when there are more, and a calm Empty state;
+    - rows link to `/tasks`.
+  - **`TaskItem`** takes `href` (a link) or `onOpen` (the sheet), and takes the page colour
+    inside a card.
+  - **Home order:** Today, then Upcoming reminders, then "Your mind, right now".
+- **Before testing:** the machine had restarted. Docker Desktop was off (you started it), so I
+  ran `pnpm db:start` and `pnpm dev`.
+  - Note: `db:start` printed the local stack's keys. These are the standard local defaults, not
+    the hosted project's.
+- **Browser:**
+  - **Picking it:** two browsers were connected, so I asked. You declined the connect prompt and
+    reopened Chrome, after which one was connected.
+  - **The probe:** it failed at first, because the services were down and the tab was on
+    Chrome's error page. After a reload it reached the local Kong, which confirms MYS231.
+  - **Unlocking:** the tab was on the lock screen, and you unlocked it (I don't hold your
+    passphrase).
+- **In Chrome:**
+  - **Today card:** "2 tasks for today" with the two test tasks (their due date is now today),
+    linking to `/tasks`.
+  - **Upcoming reminders:** both due ones are marked Now, and yesterday's reads "Thu, Nov 5, 6:14
+    PM".
+  - **More than 5:** with "sort the photos" dated Nov 4 and three extra quick adds, the card
+    showed "6 tasks for today", five rows, "Waiting since Wed, Nov 4" first in the same muted
+    colour, and "See all 6 in Tasks". A screenshot was saved.
+  - **No console errors.**
+- **Problem:** the extension disconnected once mid-batch. Retried, the batch had already
+  finished.
+- format, lint, typecheck, 174 unit tests and the build pass. There is no new domain or
+  application logic, so there are no new unit tests.
+- **Commits:** `feat(home): add the Today summary (P4.9)`
+- **Next:** P4.10 (validation, empty and error states), then the Phase 4 acceptance check.
 
 ### 2026-11-05 — Session 5 (cont.): P4.8 in-app reminders
 
