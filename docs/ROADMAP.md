@@ -532,9 +532,31 @@ in the DEVLOG, then adjust Phases 4–5 if needed.
     the space…").
   - **Neutral:** earlier tasks read "Waiting since …" in the same muted text as the rest.
   - **Rows** link to Tasks; `TaskItem` now takes `href` or `onOpen`.
-- [ ] P4.10 Validation, empty and error states.
+- [x] P4.10 Validation, empty and error states. **Done 2026-11-06:**
+  - **Validation as you type:** quick add, the edit sheet and "Make it a task" show the domain's
+    own messages under the field: a missing title, a title over 500 characters, notes over
+    10,000. Save, Add or Create task stays disabled until it's fixed (`taskDraftErrors`, which
+    calls `toTaskTitle` and `toTaskNotes`). A blank quick add only keeps Add disabled.
+  - **Reminders:** a time that has already passed is allowed, and the hint says it will show
+    straight away.
+  - **Already in place (reviewed):**
+    - loading skeletons, an empty state per view, and the Today card's empty state;
+    - decryption errors shown in place, and failed actions as toasts that keep what you typed;
+    - server errors on the root error page (P3.12).
+  - **Checked in Chrome:** each message and disabled button at 500/501 characters and
+    10,000/10,001, and the past-time hint.
 
-**Acceptance**
+**Acceptance** (checked 2026-11-06):
+
+- **Met:** with the profile switched to Pacific/Pago_Pago (still Nov 5 there), the five tasks
+  due Nov 6 moved from Today to Upcoming as "Tomorrow", and Home showed "1 task for today".
+  Switching back to Asia/Kuala_Lumpur restored them. Tasks without a date stay in No date
+  (unit and integration tests, P4.2–P4.5).
+- **Met:** "Make it a task" creates a task linked through `source_thought_id` and archives the
+  thought (P4.7, checked in Chrome).
+- **Met:** pgTAP passes (93, including 22 for `tasks` and 12 for `reminders`), and so do the 174
+  domain and application tests.
+- **Met:** task titles and notes are only ciphertext in the database (checked with SQL).
 
 - Tasks, with or without due dates, land in the right view for the user's timezone.
 - Converting a thought creates a linked task.

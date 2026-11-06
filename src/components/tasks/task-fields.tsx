@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldTitle,
@@ -13,9 +14,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ValidationError } from "@/domain/shared/errors";
 import {
   isTaskPriority,
   TASK_PRIORITIES,
+  toTaskNotes,
+  toTaskTitle,
   type TaskPriority,
 } from "@/domain/tasks/task";
 
@@ -28,6 +32,24 @@ export type TaskDraft = {
   priority: TaskPriority;
 };
 
+// The domain's own message when a rule is broken, or undefined.
+export function validationMessage(check: () => unknown): string | undefined {
+  try {
+    check();
+    return undefined;
+  } catch (error) {
+    return error instanceof ValidationError ? error.message : undefined;
+  }
+}
+
+// Shown as the person types, so a title or notes over the limit never reach Save.
+export function taskDraftErrors(draft: TaskDraft) {
+  return {
+    title: validationMessage(() => toTaskTitle(draft.title)),
+    notes: validationMessage(() => toTaskNotes(draft.notes)),
+  };
+}
+
 // The fields shared by the edit sheet and "Make it a task". The time needs a date, so it is
 // disabled without one, and clearing the date clears it too.
 export function TaskFields({
@@ -39,26 +61,33 @@ export function TaskFields({
   pending: boolean;
   onChange: (next: Partial<TaskDraft>) => void;
 }) {
+  const errors = taskDraftErrors(draft);
   return (
     <FieldGroup>
       <FormField
         id="task-title"
         label="Title"
         autoComplete="off"
+        error={errors.title}
         value={draft.title}
         readOnly={pending}
         onChange={(event) => onChange({ title: event.target.value })}
       />
-      <Field>
+      <Field data-invalid={errors.notes ? true : undefined}>
         <FieldLabel htmlFor="task-notes">Notes</FieldLabel>
         <Textarea
           id="task-notes"
+          aria-invalid={errors.notes ? true : undefined}
           value={draft.notes}
           readOnly={pending}
           className="max-h-[40svh] min-h-24"
           onChange={(event) => onChange({ notes: event.target.value })}
         />
-        <FieldDescription>Optional.</FieldDescription>
+        {errors.notes ? (
+          <FieldError>{errors.notes}</FieldError>
+        ) : (
+          <FieldDescription>Optional.</FieldDescription>
+        )}
       </Field>
       <div className="grid grid-cols-2 gap-3">
         <Field>

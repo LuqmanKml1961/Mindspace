@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                       |
-| ------------------ | --------------------------------------------------------------------------- |
-| **Current phase**  | Phase 4 — External Memory (tasks and reminders); Checkpoint A use continues |
-| **Phase progress** | Phase 4: 9 / 10 tasks done (P4.1–P4.9; P4.3 also hosted); next is P4.10     |
-| **Last updated**   | 2026-11-06 (Session 6)                                                      |
-| **Blocked on**     | Nothing                                                                     |
+| Item               | Value                                                                    |
+| ------------------ | ------------------------------------------------------------------------ |
+| **Current phase**  | Phase 4 done; Phase 5 — Mind Clarity is next; Checkpoint A use continues |
+| **Phase progress** | Phase 4: 10 / 10 done, acceptance met 2026-11-06; Phase 5: 0 / 8         |
+| **Last updated**   | 2026-11-06 (Session 6)                                                   |
+| **Blocked on**     | Nothing                                                                  |
 
 **Next actions (in order)**
 
@@ -24,10 +24,10 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 4, P4.10 next:** validation, empty and error states across the task screens,
-   then the Phase 4 acceptance check. Tasks, "Make it a task", reminders and the Home summary
-   (P4.6–P4.9) are ready to try locally.
-   Phase 4 started on 2026-11-05 at your "go". **Checkpoint A use continues alongside:** keep
+4. **Now: Phase 4 is done** (acceptance met 2026-11-06). Tasks, "Make it a task", reminders and
+   the Home summary are ready to try, locally and on the live site once you push. **Next:**
+   Phase 5, P5.1 (the `DailyCheckIn` domain), at your "go". Also open: the Settings time-zone
+   display bug under Known issues. **Checkpoint A use continues alongside:** keep
    using Brain Dump on the live site, on desktop and phone, and tell me what helps or gets in
    the way (see "Checkpoint A notes" below).
    - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
@@ -62,8 +62,13 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 
 **Known issues**
 
-- None open. (Resolved 2026-11-04: the Next.js November security release. The upgrade to 16.4.5
-  is done locally and must be pushed to reach the live site.)
+- **Settings, time zone (found 2026-11-06, not yet fixed):** after a successful save, the select
+  shows the first option ("UTC") instead of the zone you saved. The save itself is correct: the
+  database has the new zone, "Saved: …" names it, and a reload shows it. Cause: after a
+  `<form action>` succeeds, React resets the form, and the controlled `<select>` falls back to
+  its first option.
+- (Resolved 2026-11-04: the Next.js November security release. The upgrade to 16.4.5 is done
+  locally and must be pushed to reach the live site.)
 
 ## How to resume (for you or Claude)
 
@@ -88,9 +93,9 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 | 0     | Planning and decisions          | Done        | 2026-11-03 | 2026-11-03 |
 | 1     | Foundation                      | Done        | 2026-11-03 | 2026-11-04 |
 | 2     | Supabase and authentication     | Done        | 2026-11-04 | 2026-11-04 |
-| 3     | Brain Dump                      | Not started | —          | —          |
-| —     | Checkpoint A: personal use      | Not started | —          | —          |
-| 4     | External Memory                 | Not started | —          | —          |
+| 3     | Brain Dump                      | Done        | 2026-11-04 | 2026-11-05 |
+| —     | Checkpoint A: personal use      | In progress | 2026-11-05 | —          |
+| 4     | External Memory                 | Done        | 2026-11-05 | 2026-11-06 |
 | 5     | Mind Clarity                    | Not started | —          | —          |
 | 6     | PWA, privacy and beta readiness | Not started | —          | —          |
 | —     | Validation stages 1–3           | Not started | —          | —          |
@@ -158,6 +163,37 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-06 — Session 6 (cont.): P4.10 validation, and the Phase 4 acceptance
+
+- **Phase:** 4 · **Task:** P4.10 (your "go").
+- **Done:**
+  - **`taskDraftErrors`** in `task-fields.tsx`: the domain's own messages (`toTaskTitle`,
+    `toTaskNotes`) shown under the title and notes as you type. The edit sheet and "Make it a
+    task" disable Save and Create task while either field is invalid.
+  - **Quick add:** a title over 500 characters shows the message and disables Add. A blank
+    title only keeps Add disabled.
+  - **Reminders:** a time that has already passed reads "That time has passed, so it will show
+    straight away."
+  - **Reviewed, already in place:** loading skeletons, the empty states, decryption errors shown
+    in place, toasts that keep what you typed, and the root error page.
+- **In Chrome** (the probe confirmed MYS231 first):
+  - each message, invalid outline and disabled button, at 500/501 characters and
+    10,000/10,001, in all three places;
+  - the past-time hint, then closed without saving;
+  - no console errors.
+- **Phase 4 acceptance:**
+  - Switched the profile to Pacific/Pago_Pago (Nov 5 there): the five tasks due Nov 6 moved to
+    Upcoming as "Tomorrow", and Home said "1 task for today".
+  - Restored Asia/Kuala_Lumpur, checked in the database.
+  - pgTAP 93/93, and every task title and note is ciphertext (SQL).
+- **Found:** the Settings time-zone select shows "UTC" after a successful save (Known issues).
+  It is not fixed here, because it is outside P4.10.
+- **Docs:** the phase tracker was out of date. Phase 3 and Checkpoint A are now filled in from
+  the git history.
+- format, lint, typecheck, 174 unit tests and the build pass.
+- **Commits:** `feat(tasks): show task validation inline (P4.10)`
+- **Next:** Phase 5, P5.1, or the Settings time-zone fix first.
 
 ### 2026-11-06 — Session 6: P4.9 the Home summary
 

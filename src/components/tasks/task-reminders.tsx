@@ -32,6 +32,8 @@ export function TaskReminders({
   const [when, setWhen] = useState("");
   const [pending, startTransition] = useTransition();
   const now = useNow();
+  // A time already gone is allowed: the reminder simply shows straight away.
+  const passed = Boolean(now && when && new Date(when) <= now);
 
   function add() {
     if (pending || !when) return;
@@ -113,7 +115,9 @@ export function TaskReminders({
         </InputGroupAddon>
       </InputGroup>
       <FieldDescription>
-        Shows on Home and Tasks when it’s time. No notifications are sent.
+        {passed
+          ? "That time has passed, so it will show straight away."
+          : "Shows on Home and Tasks when it’s time. No notifications are sent."}
       </FieldDescription>
     </Field>
   );

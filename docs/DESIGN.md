@@ -283,7 +283,9 @@ darken `input`.
   - **Reminders (P4.8, D-008, in-app only):**
     - **In the edit sheet:** a "Reminders" field lists the task's reminders, each with Dismiss,
       and a "Remind me at" `datetime-local` picker with Add inside it. The hint reads "Shows on
-      Home and Tasks when it's time. No notifications are sent."
+      Home and Tasks when it's time. No notifications are sent." A time that has already
+      passed is allowed, and the hint then reads "That time has passed, so it will show straight
+      away." (P4.10).
     - **On Home:** an "Upcoming reminders" Card lists active reminders, soonest first; due ones
       carry a secondary **Now** badge. On Tasks, a "Reminders" Card shows only the due ones.
       Each row is an outline Item on the page colour (the boxes-in-cards rule, §3), with a ghost
@@ -298,6 +300,12 @@ darken `input`.
     - the sheet's description says what will happen ("…the thought moves to Archived");
     - **Create task** then shows "Task created. The thought is archived." and opens the view
       where the task landed.
+  - **Validation (P4.10):** checked as you type, with the domain's own messages under the field
+    (`FieldError`, the field marked invalid). Save, Add or Create task stays disabled until it's
+    fixed, so nothing typed is lost.
+    - **Title:** "Give the task a title." (edit sheet and "Make it a task"; a blank quick add
+      only keeps Add disabled) and "Task titles can be up to 500 characters."
+    - **Notes:** "Notes can be up to 10,000 characters." replaces "Optional." while it applies.
 
 ## 6a. App shell and navigation (P1.7)
 

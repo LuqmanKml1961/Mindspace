@@ -4,7 +4,11 @@ import { Delete02Icon } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { useState, useTransition } from "react";
 import { SubmitButton } from "@/components/forms/form-parts";
-import { TaskFields, type TaskDraft } from "@/components/tasks/task-fields";
+import {
+  TaskFields,
+  taskDraftErrors,
+  type TaskDraft,
+} from "@/components/tasks/task-fields";
 import { TaskReminders } from "@/components/tasks/task-reminders";
 import { taskUseCases } from "@/components/tasks/task-use-cases";
 import {
@@ -77,9 +81,11 @@ function TaskForm({
   const [pending, startTransition] = useTransition();
   const changes = changesBetween(task, draft);
   const unchanged = Object.keys(changes).length === 0;
+  const errors = taskDraftErrors(draft);
+  const invalid = Boolean(errors.title || errors.notes);
 
   function save() {
-    if (pending || unchanged) return;
+    if (pending || unchanged || invalid) return;
     startTransition(async () => {
       try {
         await taskUseCases.updateTask({ userId, id: task.id, changes });
@@ -132,7 +138,7 @@ function TaskForm({
       <SheetFooter className="flex-row flex-wrap items-center justify-between">
         <SubmitButton
           pending={pending && !confirming}
-          disabled={unchanged || pending || !draft.title.trim()}
+          disabled={unchanged || pending || invalid}
         >
           Save changes
         </SubmitButton>

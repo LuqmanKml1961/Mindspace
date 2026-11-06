@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { SubmitButton } from "@/components/forms/form-parts";
-import { TaskFields, type TaskDraft } from "@/components/tasks/task-fields";
+import {
+  TaskFields,
+  taskDraftErrors,
+  type TaskDraft,
+} from "@/components/tasks/task-fields";
 import { taskUseCases } from "@/components/tasks/task-use-cases";
 import { tasksHref, viewForDue } from "@/components/tasks/task-views";
 import {
@@ -40,9 +44,11 @@ function MakeTaskForm({
     };
   });
   const [pending, startTransition] = useTransition();
+  const errors = taskDraftErrors(draft);
+  const invalid = Boolean(errors.title || errors.notes);
 
   function create() {
-    if (pending || !draft.title.trim()) return;
+    if (pending || invalid) return;
     const dueDate = draft.date || null;
     startTransition(async () => {
       try {
@@ -93,7 +99,7 @@ function MakeTaskForm({
         />
       </div>
       <SheetFooter className="flex-row">
-        <SubmitButton pending={pending} disabled={!draft.title.trim()}>
+        <SubmitButton pending={pending} disabled={invalid}>
           Create task
         </SubmitButton>
       </SheetFooter>

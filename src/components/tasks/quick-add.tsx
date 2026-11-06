@@ -2,9 +2,10 @@
 
 import { useState, useTransition } from "react";
 import type { TaskViewName } from "@/application/tasks/records";
+import { validationMessage } from "@/components/tasks/task-fields";
 import { taskUseCases } from "@/components/tasks/task-use-cases";
 import { quickAddDate } from "@/components/tasks/task-views";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
@@ -12,6 +13,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
+import { toTaskTitle } from "@/domain/tasks/task";
 import { errorMessage } from "@/lib/action-errors";
 import { notify } from "@/lib/notify";
 
@@ -41,9 +43,14 @@ export function QuickAdd({
   const [pending, startTransition] = useTransition();
   const dueDate = quickAddDate(view, today);
   if (dueDate === undefined) return null;
+  // A blank title just keeps Add disabled; only a broken rule shows a message.
+  const error = title.trim()
+    ? validationMessage(() => toTaskTitle(title))
+    : undefined;
+  const ready = Boolean(title.trim()) && !error;
 
   function add() {
-    if (pending || !title.trim()) return;
+    if (pending || !ready) return;
     startTransition(async () => {
       try {
         await taskUseCases.createTask({ userId, title, dueDate });
@@ -63,7 +70,7 @@ export function QuickAdd({
         add();
       }}
     >
-      <Field>
+      <Field data-invalid={error ? true : undefined}>
         <FieldLabel htmlFor="quick-add" className="sr-only">
           New task
         </FieldLabel>
@@ -74,6 +81,7 @@ export function QuickAdd({
             placeholder={placeholders[view]}
             value={title}
             readOnly={pending}
+            aria-invalid={error ? true : undefined}
             onChange={(event) => setTitle(event.target.value)}
           />
           <InputGroupAddon align="inline-end">
@@ -81,13 +89,14 @@ export function QuickAdd({
               type="submit"
               variant="default"
               size="sm"
-              disabled={pending || !title.trim()}
+              disabled={pending || !ready}
             >
               {pending && <Spinner data-icon="inline-start" />}
               Add
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
+        <FieldError>{error}</FieldError>
       </Field>
     </form>
   );
