@@ -886,9 +886,20 @@ and then the private beta.
     under the shadcn CLI).
   - **Rate limiting (your choice):** rely on Supabase Auth's per-IP limits and Vercel's DDoS
     protection. Before the public launch, revisit Vercel's one free WAF rate-limit rule.
-- [ ] P6.7 Reliability: check Supabase backup options on the chosen tier, decide on error
+- [x] P6.7 Reliability: check Supabase backup options on the chosen tier, decide on error
       monitoring (optional), and sort out auth email delivery (custom SMTP if needed; check the
-      current Supabase limits).
+      current Supabase limits). **Done 2026-11-10 (D-027), decisions only:**
+  - **Backups (your call: none for now):**
+    - The Free plan has no downloadable backups. Supabase advises `supabase db dump` copies kept
+      elsewhere.
+    - Settings → Export my data gives you a readable copy of your own data at any time.
+  - **Pausing:** a Free project may be paused after 7 days of low activity, and you restore it
+    from the Supabase dashboard. Your regular use keeps it active.
+  - **Error monitoring (your choice):** Vercel's runtime logs only. Errors are logged with a
+    reference code and never your text. Hobby keeps them for 1 hour, so report a failure soon.
+    Revisit before the public launch.
+  - **Auth email:** none is sent today, because sign-in is Google-only (D-020). The built-in
+    provider allows 2 emails an hour, so email sign-in waits for custom SMTP in P6.10.
 - [ ] P6.8 Privacy policy, terms of use, and a contact / report-a-problem link. A PDPA (Malaysia)
       review is your task (legal); Claude can draft.
 - [ ] P6.9 Production deployment on the chosen host. Review the hosting terms (D-009) before the

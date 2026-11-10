@@ -5,7 +5,7 @@
 | Item               | Value                                                                 |
 | ------------------ | --------------------------------------------------------------------- |
 | **Current phase**  | Phase 6 (PWA, privacy and beta readiness); Checkpoint A use continues |
-| **Phase progress** | Phase 6: 5 / 11 done (P6.1, P6.2, P6.4–P6.6); P6.3 waits on you       |
+| **Phase progress** | Phase 6: 6 / 11 done (P6.1, P6.2, P6.4–P6.7); P6.3 waits on you       |
 | **Last updated**   | 2026-11-10 (Session 7)                                                |
 | **Blocked on**     | Nothing                                                               |
 
@@ -50,7 +50,10 @@
        clean for the app.
        - **After you push:** sign in with Google on the live site once, and check that Home
          loads with your theme. Tell me if anything looks blocked.
-   - **Next for Claude:** P6.7 (reliability: backups, error monitoring, auth email).
+     - **P6.7 (D-027):** decisions only. No database backups for now (your call), Vercel's logs
+       for errors (so tell me soon when something fails), and auth email waiting for P6.10.
+   - **Next for Claude:** P6.8 (draft the privacy policy, terms and a contact link; the PDPA
+     review is yours).
    - **Earlier phases:**
      - Phase 5 is done (acceptance met 2026-11-06; P5.8 Slow Down Mode deferred to the
        backlog): the daily check-in and past reflections on Mind Clarity, today's one thing on
@@ -197,6 +200,23 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-10 — Session 7 (cont.): P6.7 reliability decisions
+
+- **Phase:** 6 · **Tasks:** P6.7 · **From you:** "go" (also taken as yes to the P6.6 commit,
+  as before), then "let it be, we dont care" for backups, and Vercel logs only for errors.
+- **Research (sources checked):**
+  - **Supabase:** the backups page, the production checklist and the billing page. The Free
+    plan has no downloadable backups (use `db dump` and keep copies elsewhere), and a project
+    may pause after 7 days of low activity.
+  - **Vercel:** the runtime-logs, limits, drains and Observability Plus pages. Hobby keeps
+    runtime logs for 1 hour, with no drains and no Observability Plus.
+  - **`supabase db dump --dry-run`:** a data dump would include `public` and `auth`. Not run;
+    no backup was made.
+- **Done:** D-027 and the ROADMAP note. No code changes.
+- **Decisions:** D-027.
+- **Commits:** `docs: record the reliability decisions (P6.7)`
+- **Next:** P6.8, drafting the privacy policy, terms and a contact link.
 
 ### 2026-11-10 — Session 7 (cont.): P6.6 the security review
 

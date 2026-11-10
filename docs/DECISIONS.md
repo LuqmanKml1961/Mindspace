@@ -39,6 +39,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-024 | Accessibility fixes                | Accepted            | P6.4                                             |
 | D-025 | Data export and account deletion   | Accepted            | P6.5                                             |
 | D-026 | Security headers, CSP, rate limits | Accepted            | P6.6                                             |
+| D-027 | Reliability (backups, monitoring)  | Accepted            | P6.7                                             |
 
 ---
 
@@ -599,6 +600,26 @@ database, debugging, development`, following Supabase's MCP security guidance. S
     - `minimatch` <11.0.1 (moderate), under ESLint's TypeScript parser;
     - `deepmerge` ≤4.3.1 (low), under the shadcn CLI.
     - Forcing `minimatch` 11 onto the parser's `^9` range risks breaking lint.
+- **Date:** 2026-11-10
+
+## D-027 — Reliability: backups, monitoring, auth email
+
+- **Context:** P6.7. The hosted Supabase project is on the Free plan (D-005), and Vercel on
+  Hobby (D-009). Sources: Supabase's backups and production-checklist pages, and Vercel's
+  runtime-logs and limits pages.
+  - **Supabase Free plan:**
+    - no downloadable backups ("Database backups are not available for download for Free Plan
+      projects");
+    - it may pause a project after 7 days of low activity, restored from the dashboard.
+  - **Vercel Hobby:** runtime logs are kept for 1 hour, with no log drains.
+- **Decision:** Accepted, your choices on 2026-11-10.
+  - **Backups: none for now** ("let it be"). Export my data (P6.5) gives you a readable copy
+    whenever you want one. Reconsider before the private beta, when other people's data is
+    involved: a `supabase db dump` script, or the Pro plan.
+  - **Error monitoring: Vercel's runtime logs only.** They hold the reference code (digest)
+    and never user text. Revisit before the public launch.
+  - **Auth email:** Google sign-in sends no email. The built-in provider's 2 emails an hour
+    can't serve real users, so email sign-in stays hidden until custom SMTP (P6.10, D-020).
 - **Date:** 2026-11-10
 
 ---
