@@ -815,8 +815,37 @@ and then the private beta.
     - the Delete dialog focuses "Keep it", Escape closes it, and focus returns to Delete.
   - **Not covered:** a screen-reader pass (VoiceOver or TalkBack, on your devices with P6.3),
     and the sign-in pages, which redirect when signed in and share the same components.
-- [ ] P6.5 Data controls (spec §14): export my data (a JSON download of all the user's rows), and
+- [x] P6.5 Data controls (spec §14): export my data (a JSON download of all the user's rows), and
       delete my account (server-side only; removes the auth user and cascades their data).
+      **Done 2026-11-10 (D-025):**
+  - **Export my data** (Settings → Your data):
+    - the server sends every row the user owns, still ciphertext;
+    - the browser decrypts it and downloads `mindspace-export-<date>.json`.
+    - It includes archived thoughts, every task (done or not) and dismissed reminders, through
+      the new `TaskRepository.listAll` and `ReminderRepository.listAll`.
+    - `user_keys` is left out: it is wrapped key material, not something you wrote.
+    - The file isn't encrypted, and the card says so.
+  - **Delete my account:**
+    - a dialog where you type "delete" (your choice), checked in the dialog and again on the
+      server;
+    - the server deletes the user with Supabase's admin API (your choice), using
+      `SUPABASE_SECRET_KEY`, read only at that moment;
+    - then the server signs out, and the browser forgets its device key and goes to sign-in.
+  - **Tests:**
+    - 7 new unit tests;
+    - a pgTAP test (7 checks, 128 in total) that every user table cascades;
+    - a one-off integration test on the local stack: the export had every row, deleting through
+      the app's adapter left 0 rows in all 7 tables, and the old access token could no longer
+      write.
+  - **Checked in Chrome** (the download was caught in the page, so nothing was saved):
+    - the export had 4 categories, 7 thoughts, 10 tasks, 3 reminders and 2 check-ins, matching
+      the database, with no ciphertext left;
+    - the dialog keeps its button disabled until "delete" is typed, and resets when closed.
+    - Your local account was not deleted.
+  - **Your step:** add the hosted secret key to Vercel (see the DEVLOG). Until then, deleting
+    on the live site fails with a calm error and changes nothing.
+  - **Known limit:** categories are read in one request (up to 1,000), the same as the
+    Categories page.
 - [ ] P6.6 Security review: re-run every RLS test, confirm no secret keys are in the client bundle,
       add security headers, audit dependencies, and consider rate limiting on auth.
 - [ ] P6.7 Reliability: check Supabase backup options on the chosen tier, decide on error

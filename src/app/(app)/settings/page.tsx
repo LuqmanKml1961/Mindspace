@@ -5,6 +5,7 @@ import {
   timezoneOptions,
 } from "@/domain/profiles/profile";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { DataControls } from "@/components/settings/data-controls";
 import { TimezoneForm } from "@/components/settings/timezone-form";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import {
@@ -65,6 +66,20 @@ export default async function SettingsPage() {
       <Card>
         <CardHeader>
           <CardTitle>
+            <h2>Your data</h2>
+          </CardTitle>
+          <CardDescription>
+            Take a copy of everything you’ve saved, or delete your account and
+            all of it.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DataControls userId={user.id} />
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>
             <h2>Account</h2>
           </CardTitle>
           {user.email && (
@@ -79,7 +94,7 @@ export default async function SettingsPage() {
         </CardFooter>
       </Card>
       <p className="text-sm text-muted-foreground">
-        More account, privacy and data settings are coming soon.
+        The privacy policy and a way to contact us are coming soon.
       </p>
     </>
   );

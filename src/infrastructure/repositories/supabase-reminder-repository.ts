@@ -71,6 +71,20 @@ export function createSupabaseReminderRepository(
       );
       return rows.map(toReminder);
     },
+    async listAll(userId) {
+      const rows = await fetchAllRows(
+        (from, to) =>
+          supabase
+            .from("reminders")
+            .select(COLUMNS, { count: "exact" })
+            .eq("user_id", userId)
+            .order("created_at")
+            .order("id")
+            .range(from, to),
+        (error) => failure("Listing reminders", error),
+      );
+      return rows.map(toReminder);
+    },
     async dismiss(userId, id, at) {
       const { data, error } = await supabase
         .from("reminders")

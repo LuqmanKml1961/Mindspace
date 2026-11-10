@@ -5,7 +5,7 @@
 | Item               | Value                                                                 |
 | ------------------ | --------------------------------------------------------------------- |
 | **Current phase**  | Phase 6 (PWA, privacy and beta readiness); Checkpoint A use continues |
-| **Phase progress** | Phase 6: 3 / 11 done (P6.1, P6.2, P6.4); P6.3 waits on your devices   |
+| **Phase progress** | Phase 6: 4 / 11 done (P6.1, P6.2, P6.4, P6.5); P6.3 waits on you      |
 | **Last updated**   | 2026-11-10 (Session 7)                                                |
 | **Blocked on**     | Nothing                                                               |
 
@@ -29,12 +29,23 @@
      Chrome, iPhone Safari), and send one line per device. It includes airplane mode for the
      offline notice and page, and the "new version" prompt after a push. If you can, also try
      VoiceOver or TalkBack for a minute (P6.4 left the screen reader to you).
+   - **Before "Delete my account" works on the live site (P6.5, D-025):**
+     1. In Supabase, open Project Settings → API Keys and copy a **secret key** (`sb_secret_…`).
+        Create one if there is none.
+     2. In Vercel, add `SUPABASE_SECRET_KEY` with that value, type **Secret**, never
+        `NEXT_PUBLIC_`.
+     3. Redeploy. Until then, deleting on the live site shows a calm error and changes
+        nothing. Export works without it.
+     - Locally, `.env.development.local` already has the local stack's key (added 2026-11-10).
+       Restart `pnpm dev` if deleting says something went wrong.
    - **Done:**
      - **P6.2 (D-023):** the offline page and notice, and Refresh after a deploy. The live
        `/sw.js` names a `dpl_…` version (checked 2026-11-10).
      - **P6.4 (D-024):** clearer field outlines, a solid focus ring, an AA dark Delete button,
        reduced motion, and the theme buttons wrapping at 400% zoom.
-   - **Next for Claude:** P6.5 (export my data, delete my account).
+     - **P6.5 (D-025):** Settings → Your data: Export my data (decrypted on the device), and
+       Delete my account (type "delete").
+   - **Next for Claude:** P6.6 (the security review).
    - **Earlier phases:**
      - Phase 5 is done (acceptance met 2026-11-06; P5.8 Slow Down Mode deferred to the
        backlog): the daily check-in and past reflections on Mind Clarity, today's one thing on
@@ -181,6 +192,57 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-10 — Session 7 (cont.): P6.5 data export and account deletion
+
+- **Phase:** 6 · **Tasks:** P6.5 · **From you:** "go", then your choices: Supabase's admin
+  API, and typing "delete" to confirm.
+- **Research (sources checked):**
+  - **Supabase docs:** `auth.admin.deleteUser` needs a secret key on a server. The default hard
+    delete cascades to sessions, and the access token stays valid until it expires. Secret keys
+    are refused from browsers.
+  - **The supabase-js 2.118 source:** `signOut` ignores "user not found" and still clears the
+    session.
+  - **The repositories:** tasks only came as views and reminders only active, hence `listAll`.
+- **Done:**
+  - **Domain:** `TaskRepository.listAll` and `ReminderRepository.listAll` (oldest first,
+    paged).
+  - **Application (`account/`):**
+    - `makeGetAccountRecords` (server, ciphertext);
+    - `makeDeleteAccount` (admin delete, then sign out; a failed delete stays signed in);
+    - `makeExportAccount` (browser: the device key is checked first, then everything is
+      decrypted);
+    - `deleteAccountConfirmationSchema`.
+  - **Infrastructure:**
+    - `secret-env.ts` reads `SUPABASE_SECRET_KEY` on use only;
+    - `supabase/admin.ts` (no session);
+    - `supabase-account-admin.ts` (errors carry only the status).
+    - Both composition roots are wired.
+  - **Settings → Your data:** Export my data and Delete my account (`data-controls.tsx`). The
+    closing line now says only the privacy policy and contact link are still to come.
+  - **Env:**
+    - `.env.example` and the README explain the key;
+    - the local key was added to `.env.development.local` without being shown.
+- **Checks:**
+  - lint, typecheck and 230 unit tests (7 new);
+  - pgTAP 128 (the new `account_deletion_test.sql`, 7 checks, with its cascade guard proved by
+    a rolled-back break);
+  - a one-off integration test on the local stack, removed afterwards: the export had every
+    row, deletion through the app left 0 rows in all 7 tables plus `auth.users`, and the old
+    token could no longer write.
+- **Checked in Chrome** (Browser 1, verified earlier this session; my own tab):
+  - **Export:** the download was caught in the page, so no file was saved. It held 4
+    categories, 7 thoughts, 10 tasks, 3 reminders and 2 check-ins, the same as the database,
+    with no ciphertext left.
+  - **Delete dialog:** focus starts in the field, the button is disabled for "Delet" and
+    enabled for "DeletE ", and Keep my account closes it and clears the field. **Your local
+    account was not deleted.**
+- **Not checked:** clicking the final Delete in the browser (it would delete your account; the
+  integration test covers that path).
+- **Decisions:** D-025.
+- **Commits:** `feat(settings): export my data and delete my account (P6.5)`
+- **Next:** P6.6 the security review. Your steps: the Vercel secret key, and the P6.3 device
+  results.
 
 ### 2026-11-10 — Session 7 (cont.): P6.4 the accessibility review
 

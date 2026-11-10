@@ -1,3 +1,5 @@
+import { makeExportAccount } from "@/application/account/export";
+import type { AccountServer } from "@/application/account/ports";
 import {
   makeOpenCheckIns,
   makeStartCheckIn,
@@ -96,6 +98,16 @@ export function createTaskUseCases(servers: {
     updateTask: makeUpdateTask(deps),
     deleteTask: makeDeleteTask(deps),
     convertThought: makeConvertThoughtToTask(deps),
+  };
+}
+
+export function createAccountUseCases(server: AccountServer) {
+  return {
+    exportAccount: makeExportAccount({
+      crypto: webFieldCrypto,
+      device: indexedDbKeyStore,
+      server,
+    }),
   };
 }
 

@@ -39,6 +39,9 @@ Open http://localhost:3000. It redirects to `/home`.
 git-ignored and read only by `pnpm dev`. Create it once: run `pnpm supabase status`, then set
 `NEXT_PUBLIC_SUPABASE_URL` to its `API_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to its
 `PUBLISHABLE_KEY`. Sign-up confirmation codes arrive in Mailpit at http://127.0.0.1:54324.
+For "Delete my account" (Settings), also set `SUPABASE_SECRET_KEY` to its `SECRET_KEY`. That one
+is server-only: never prefix it `NEXT_PUBLIC_`. The live site needs the hosted project's secret
+key in Vercel as type Secret (see `.env.example`).
 
 Google sign-in also needs `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID` and
 `SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_SECRET` in a git-ignored root `.env` (see `.env.example`).

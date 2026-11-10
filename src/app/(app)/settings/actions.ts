@@ -1,9 +1,15 @@
 "use server";
 
 import { refresh, revalidatePath } from "next/cache";
+import type { AccountRecords } from "@/application/account/ports";
+import {
+  DELETE_ACCOUNT_WORD,
+  deleteAccountConfirmationSchema,
+} from "@/application/account/schemas";
 import { timezoneFormSchema } from "@/application/profiles/schemas";
 import { ValidationError } from "@/domain/shared/errors";
 import { getAppContext } from "@/infrastructure/container";
+import { attempt, type ActionResult } from "@/lib/action-result";
 
 export type TimezoneFormState = { error?: string; notice?: string };
 
@@ -63,4 +69,27 @@ export async function saveDetectedTimezoneAction(
     }
     return null;
   }
+}
+
+// Every row the user owns, still encrypted; the browser decrypts it for the export (D-021).
+export async function accountRecordsAction(): Promise<
+  ActionResult<AccountRecords>
+> {
+  const { user, useCases } = await getAppContext();
+  return attempt(() => useCases.getAccountRecords(user.id));
+}
+
+// The account comes from the session, never from the browser. The typed word is checked here
+// too, so only a confirmed request deletes anything.
+export async function deleteAccountAction(
+  confirmation: unknown,
+): Promise<ActionResult<null>> {
+  const { user, useCases } = await getAppContext();
+  if (!deleteAccountConfirmationSchema.safeParse(confirmation).success) {
+    return { ok: false, error: `Type “${DELETE_ACCOUNT_WORD}” to confirm.` };
+  }
+  return attempt(async () => {
+    await useCases.deleteAccount(user.id);
+    return null;
+  });
 }

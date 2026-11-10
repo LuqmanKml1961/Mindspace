@@ -377,6 +377,21 @@ For every table, with two test users A and B:
   of your local account. Limit it to the test users (`where user_id in (A, B)`), or it fails as
   soon as the local database has data.
 
+**Account deletion (P6.5): `supabase/tests/account_deletion_test.sql`.**
+
+- **Setup:** A and B each own a linked row in every user table (category → thought → task →
+  reminder and check-in, plus `user_keys` and the profile).
+- **Delete A:** deleting A's `auth.users` row removes every row A owns in all 7 tables, while
+  B's rows and links stay. `auth.admin.deleteUser` deletes that same row.
+- **Two guards for future tables:**
+  - every foreign key from `public` to `auth.users` must be `on delete cascade`;
+  - the list of tables linked to `auth.users` must equal the 7 in the test, so add a new table
+    there.
+- **Proven:** making `user_keys`' link non-cascading, in a transaction that was rolled back,
+  gave 1, so the guard would fail.
+- **Cascade path:** the cascade runs inside Postgres, so it works although `service_role` has
+  no grants on these tables (D-018).
+
 ## 5. Open questions
 
 | ID  | Question                                                          | Proposed answer                                                                                                                                                                      | Settle by |

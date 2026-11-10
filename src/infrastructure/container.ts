@@ -1,5 +1,9 @@
 import "server-only";
 import { redirect } from "next/navigation";
+import {
+  makeDeleteAccount,
+  makeGetAccountRecords,
+} from "@/application/account/records";
 import type { AuthService } from "@/application/auth/auth-service";
 import {
   makeGetTodayCheckInRecord,
@@ -42,6 +46,7 @@ import {
   makeRenameCategoryRecord,
   makeUpdateThoughtRecord,
 } from "@/application/thoughts/records";
+import { createSupabaseAccountAdmin } from "@/infrastructure/auth/supabase-account-admin";
 import { createSupabaseAuthService } from "@/infrastructure/auth/supabase-auth-service";
 import { createSupabaseCategoryRepository } from "@/infrastructure/repositories/supabase-category-repository";
 import { createSupabaseDailyCheckInRepository } from "@/infrastructure/repositories/supabase-daily-check-in-repository";
@@ -112,6 +117,18 @@ export async function getAppContext() {
         checkIns,
         tasks,
         today: getToday,
+      }),
+      getAccountRecords: makeGetAccountRecords({
+        profiles,
+        categories,
+        thoughts,
+        tasks,
+        reminders,
+        checkIns,
+      }),
+      deleteAccount: makeDeleteAccount({
+        accounts: createSupabaseAccountAdmin(),
+        auth: createSupabaseAuthService(supabase),
       }),
     },
   };

@@ -155,6 +155,20 @@ export function createSupabaseTaskRepository(
       );
       return rows.map(toEncryptedTask);
     },
+    async listAll(userId) {
+      const rows = await fetchAllRows(
+        (from, to) =>
+          supabase
+            .from("tasks")
+            .select(COLUMNS, { count: "exact" })
+            .eq("user_id", userId)
+            .order("created_at")
+            .order("id")
+            .range(from, to),
+        (error) => failure("Listing tasks", error),
+      );
+      return rows.map(toEncryptedTask);
+    },
     async update(userId, id, changes) {
       const row = toRowChanges(changes);
       if (Object.keys(row).length === 0) {

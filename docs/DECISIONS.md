@@ -37,6 +37,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-022 | Palette retune                    | Accepted            | —                                                |
 | D-023 | Service worker and updates        | Accepted            | P6.2                                             |
 | D-024 | Accessibility fixes               | Accepted            | P6.4                                             |
+| D-025 | Data export and account deletion  | Accepted            | P6.5                                             |
 
 ---
 
@@ -524,6 +525,37 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - the Delete hover tint (4.0–4.4:1, mouse only);
   - decorative card and separator lines below 3:1.
   - Avoid dark `primary` text on dialogs and sheets (4.26:1).
+- **Date:** 2026-11-10
+
+## D-025 — Data export and account deletion
+
+- **Context:** P6.5, spec §14: "Clear account deletion and data export procedures" and "No
+  service-role keys in frontend code".
+- **Options for deleting:**
+  - **Supabase's admin API** (`auth.admin.deleteUser`), which "Requires a `service_role`
+    key" and "should only be called on a server";
+  - a `security definer` database function, which Supabase doesn't document for deleting
+    users.
+- **Decision:** Accepted, your choices on 2026-11-10.
+  - **Delete with the admin API.**
+    - A new server-only `SUPABASE_SECRET_KEY` (`sb_secret_…`) is read only when an account is
+      deleted (`src/infrastructure/config/secret-env.ts`). The app runs without it.
+    - It is used only by `createSupabaseAdminClient` (`persistSession: false`) through the
+      `AccountAdmin` port.
+    - Supabase's default hard delete removes the `auth.users` row and its sessions. Every
+      user table follows through `on delete cascade` (pgTAP-guarded).
+    - The deleted user's access token stays valid until it expires (Supabase docs). So the
+      server signs out right after: supabase-js ignores the "user not found" reply and still
+      clears the cookies. The browser then forgets its device key.
+  - **Confirm by typing "delete"** (any case), checked in the dialog and again in the Server
+    Action.
+  - **Export decrypted on the device:** the server returns ciphertext only, and the browser
+    decrypts it and downloads readable JSON.
+    - It has the profile, categories, thoughts, tasks, reminders and check-ins, without
+      `user_keys`.
+    - The file is not encrypted, and Settings says so.
+- **Needs on Vercel:** `SUPABASE_SECRET_KEY`, type Secret, from Supabase → Project Settings →
+  API Keys.
 - **Date:** 2026-11-10
 
 ---

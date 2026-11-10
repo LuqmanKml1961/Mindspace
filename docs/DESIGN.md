@@ -276,6 +276,21 @@ The thought box is an outline `Item` with no fill. Inside Home's card it took th
   - **A save from a page older than the live deploy** fails with "Mindspace has just been
     updated. Copy your text, refresh the page, then save it again." The text stays in place
     (D-023).
+- **Your data (Settings, P6.5, D-025):** the card reads "Take a copy of everything you've saved,
+  or delete your account and all of it."
+  - **Export my data** (outline, download icon):
+    - it shows a spinner while it decrypts;
+    - then the file downloads and "Your data is downloading." appears;
+    - the note says the file is readable and "isn't encrypted, so keep it somewhere safe".
+  - **Delete my account** (destructive, below a separator) opens an `AlertDialog`:
+    - "Delete your account?" with what goes (thoughts, categories, tasks, reminders and
+      check-ins, on every device), "It can't be undone", and "Export your data first if you
+      want a copy";
+    - then the field "Type "delete" to confirm". Focus starts there, because typing is the
+      next step. Other delete dialogs focus the safe choice instead.
+    - **Delete my account** stays disabled until the word matches (any case). **Keep my
+      account** closes the dialog and clears the field.
+    - Afterwards: "Your account and everything in it have been deleted." and the sign-in page.
 - **Offline page (P6.2):** `/offline` uses the sign-in pages' brand frame and one card:
   "You're offline", "Mindspace needs a connection to open this page. Everything you've saved is
   safe.", and **Try again** (reloads). The service worker shows it at the address you tried, and
@@ -288,7 +303,7 @@ The thought box is an outline `Item` with no fill. Inside Home's card it took th
 
   | Where                       | Component                                                                                                                         |
   | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-  | Settings                    | **Card** per section (Appearance, Time zone, Account; Sign out in the footer)                                                     |
+  | Settings                    | **Card** per section (Appearance, Time zone, Your data, Account; Sign out in the footer)                                          |
   | Home "Your mind, right now" | **Card** (count as the description, "See all" in the footer), **Empty** when the inbox is clear                                   |
   | Tasks, Mind Clarity         | **Empty** ("Coming soon")                                                                                                         |
   | Save shortcut hint          | **Kbd** / **KbdGroup**, in a shared `save-shortcut.tsx` (capture box and editor)                                                  |

@@ -59,6 +59,8 @@ export interface TaskRepository {
   // Today and Upcoming: by due date, then time (untimed last), then oldest first. No date:
   // newest first. Completed: most recently completed first.
   list(userId: string, view: TaskView): Promise<EncryptedTask[]>;
+  // Every task, done or not, oldest first (the data export).
+  listAll(userId: string): Promise<EncryptedTask[]>;
   // Throws NotFoundError if there is no such task for this user.
   update(
     userId: string,

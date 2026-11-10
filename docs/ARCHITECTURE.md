@@ -77,6 +77,7 @@ mindspace/
     │   ├── tasks/              # task.ts, reminder.ts, *-repository.ts (ports), *.test.ts (P4.1)
     │   └── check-ins/          # daily-check-in.ts, daily-check-in-repository.ts (port), *.test.ts (P5.1)
     ├── application/
+    │   ├── account/            # export.ts (browser: decrypt everything for the export); records.ts (server: every row, delete then sign out); ports (AccountServer, AccountAdmin), schemas, *.test.ts (P6.5)
     │   ├── auth/               # auth-service.ts (port: sign-up and sign-in, codes, password reset), schemas.ts
     │   ├── encryption/         # ports, errors, schemas, lock-data-key; set-up, unlock, recover, device-key (browser); user-keys (server)
     │   ├── profiles/           # get-profile.ts, update-timezone.ts, schemas.ts
@@ -84,10 +85,10 @@ mindspace/
     │   ├── tasks/              # tasks.ts (browser: rules, encrypt, decrypt); records.ts (server: views by the user's today, complete/reopen) and reminders.ts (server); ports (TaskServer, Clock), schemas, *.test.ts
     │   └── check-ins/          # check-ins.ts (browser: rules, encrypt, decrypt, start); records.ts (server: today's check-in, start or resume, update, past check-ins with their tasks); ports (CheckInServer, Today), schemas, *.test.ts (P5.3)
     ├── infrastructure/
-    │   ├── auth/               # supabase-auth-service.ts (implements the auth port)
+    │   ├── auth/               # supabase-auth-service.ts (implements the auth port), supabase-account-admin.ts (AccountAdmin, P6.5)
     │   ├── crypto/             # web-crypto.ts, device-key-store.ts: browser-side E2E (D-021)
-    │   ├── config/             # env.ts (validated environment variables)
-    │   ├── supabase/           # server/browser clients, session refresh, database.types.ts, fetch-all-rows.ts (paging past max_rows)
+    │   ├── config/             # env.ts (validated public variables), secret-env.ts (SUPABASE_SECRET_KEY, read on use)
+    │   ├── supabase/           # server/browser clients, admin.ts (secret key, Auth admin only), session refresh, database.types.ts, fetch-all-rows.ts (paging past max_rows)
     │   ├── repositories/       # supabase-*-repository.ts and row ↔ domain mappers (profiles, user keys, encrypted thoughts and categories, encrypted tasks, reminders, encrypted check-ins)
     │   ├── container.ts        # server composition root: builds use cases for the current request
     │   └── browser.ts          # browser composition root: encryption, Brain Dump, task and check-in use cases
@@ -108,7 +109,8 @@ mindspace/
     │   ├── tasks/              # quick-add, task-list, task-item, task-sheet, task-fields (shared with make-task-sheet), task-reminders (in the sheet), reminder-list (Home and Tasks), today-preview (Home), task-view-nav, task-views.ts (labels, hrefs, due and reminder wording); task-use-cases.ts (Server Actions as ports)
     │   ├── clarity/            # check-in (flow and stages), check-in-step, check-in-priority, check-in-recap, check-in-summary (shared grouping), check-in-prompts.ts (spec wording), past-reflections (P5.7), one-thing (Home); check-in-use-cases.ts (Server Actions as ports)
     │   ├── pwa/                # app-updates (worker registration, Refresh offer), connection-status, reload-button (P6.2)
-    │   └── auth | settings/    # feature UI components
+    │   ├── settings/           # timezone-form, timezone-detector, data-controls (export, delete account, P6.5); account-use-cases.ts (Server Actions as ports)
+    │   └── auth/               # feature UI components
     └── lib/
         ├── utils.ts            # presentation helpers only (e.g. shadcn's cn())
         ├── action-result.ts    # ActionResult, attempt and failure, shared by every Server Action
@@ -271,7 +273,11 @@ The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.
   docs say, **every Server Action and data read verifies the user itself** through
   `getAppContext()` and RLS, never by relying on the proxy alone.
 - Collect only the data the app needs (spec §14). Do not log user content.
-- Account deletion and data export arrive in Phase 6, before anyone else uses the app.
+- **Account deletion and data export (P6.5, D-025):**
+  - The only secret key is `SUPABASE_SECRET_KEY`. It is read only when an account is deleted,
+    and only by `src/infrastructure/supabase/admin.ts` (Auth's admin API, behind the
+    `AccountAdmin` port).
+  - The export reaches the browser as ciphertext and is decrypted there.
 
 ## 8. Testing strategy
 
