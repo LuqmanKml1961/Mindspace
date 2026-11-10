@@ -846,8 +846,46 @@ and then the private beta.
     on the live site fails with a calm error and changes nothing.
   - **Known limit:** categories are read in one request (up to 1,000), the same as the
     Categories page.
-- [ ] P6.6 Security review: re-run every RLS test, confirm no secret keys are in the client bundle,
+- [x] P6.6 Security review: re-run every RLS test, confirm no secret keys are in the client bundle,
       add security headers, audit dependencies, and consider rate limiting on auth.
+      **Done 2026-11-10 (D-026):**
+  - **RLS:**
+    - all 8 local pgTAP files pass (128 checks);
+    - the hosted migrations match local (5 of 5);
+    - a read-only hosted query showed RLS on all 7 tables, the expected policies and grants,
+      nothing for `anon` or `service_role`, every table cascading with its user, and no
+      `security definer` functions in `public`;
+    - the hosted advisors show only the known "Leaked Password Protection Disabled" (P6.10).
+  - **No secrets in the browser:** a production build with a canary `SUPABASE_SECRET_KEY` had
+    none of the following in any of the 48 client files:
+    - the canary, the variable's name or any `sb_secret_`;
+    - `service_role`, a JWT or the Google client secret.
+    - The key isn't in the server build either, because it is read at run time. Git history
+      (87 commits) has no keys and no env files.
+  - **Headers:**
+    - **A strict Content Security Policy (your choice):** a nonce per request, set in
+      `src/proxy.ts` and built by `src/lib/content-security-policy.ts`.
+      - Scripts need the nonce, with `'strict-dynamic'`. Styles may be inline.
+      - Images, fonts, workers and connections are same-origin only, with no framing.
+      - `form-action` also allows Supabase and Google for sign-in.
+      - The root layout passes the nonce to next-themes. Pages are now all rendered per
+        request; `/sw.js`, the manifest and the icons stay static.
+    - **`next.config.ts`:** `X-Content-Type-Options`, `X-Frame-Options: DENY`,
+      `Referrer-Policy` and a `Permissions-Policy` (no camera, microphone, location or
+      Topics). Vercel already sends HSTS.
+  - **Checked:**
+    - **Dev:** every script tag carries the nonce, and it differs per request. A script parsed
+      without the nonce and an inline handler were both blocked. Moving through Home, Brain
+      Dump, Tasks, Mind Clarity and Settings, the theme switch and the delete dialog raised no
+      violations.
+    - **Production build:** the same holds. The service worker and the offline page work under
+      the policy, including the cached copy, and `upgrade-insecure-requests` didn't break
+      `http://localhost`.
+  - **Dependencies:** `pnpm audit --prod` found nothing. Two dev-only tool advisories are
+    accepted and logged in D-026: `minimatch` (moderate, under ESLint) and `deepmerge` (low,
+    under the shadcn CLI).
+  - **Rate limiting (your choice):** rely on Supabase Auth's per-IP limits and Vercel's DDoS
+    protection. Before the public launch, revisit Vercel's one free WAF rate-limit rule.
 - [ ] P6.7 Reliability: check Supabase backup options on the chosen tier, decide on error
       monitoring (optional), and sort out auth email delivery (custom SMTP if needed; check the
       current Supabase limits).

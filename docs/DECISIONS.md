@@ -11,33 +11,34 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 
 ## Summary
 
-| ID    | Topic                             | Status              | Needed before                                    |
-| ----- | --------------------------------- | ------------------- | ------------------------------------------------ |
-| D-001 | Product name                      | Accepted            | P6.1 (manifest). Working name is fine until then |
-| D-002 | Visual direction                  | Accepted            | P1.6 (design tokens)                             |
-| D-003 | Accounts                          | Accepted            | Phase 2                                          |
-| D-004 | Scope and build order             | Accepted            | Phase 1                                          |
-| D-005 | Technology stack                  | Accepted            | P1.1 (scaffold)                                  |
-| D-006 | Onion Architecture                | Accepted            | —                                                |
-| D-007 | Sign-in method                    | Superseded by D-019 | P2.6                                             |
-| D-008 | Reminders in the MVP              | Accepted            | Phase 4                                          |
-| D-009 | Hosting                           | Accepted            | P1.10 (deployment previews)                      |
-| D-010 | Package manager                   | Accepted            | P1.1                                             |
-| D-011 | Local database and tests          | Accepted            | Phase 2                                          |
-| D-012 | shadcn/ui library and preset      | Accepted            | Before more components are added                 |
-| D-013 | Colour palette and control height | Accepted            | P1.6                                             |
-| D-014 | Installable app and screen edges  | Accepted            | —                                                |
-| D-015 | Appearance setting (theme toggle) | Accepted            | —                                                |
-| D-016 | System bars always dark           | Accepted            | —                                                |
-| D-017 | Supabase access path and tooling  | Accepted            | Phase 2                                          |
-| D-018 | Database privileges convention    | Accepted            | Every migration                                  |
-| D-019 | Sign-in methods                   | Accepted            | P2.6                                             |
-| D-020 | Email on the live site            | Accepted            | P6.10 (before the private beta)                  |
-| D-021 | End-to-end encryption             | Accepted            | P3.3 (before any thought is stored)              |
-| D-022 | Palette retune                    | Accepted            | —                                                |
-| D-023 | Service worker and updates        | Accepted            | P6.2                                             |
-| D-024 | Accessibility fixes               | Accepted            | P6.4                                             |
-| D-025 | Data export and account deletion  | Accepted            | P6.5                                             |
+| ID    | Topic                              | Status              | Needed before                                    |
+| ----- | ---------------------------------- | ------------------- | ------------------------------------------------ |
+| D-001 | Product name                       | Accepted            | P6.1 (manifest). Working name is fine until then |
+| D-002 | Visual direction                   | Accepted            | P1.6 (design tokens)                             |
+| D-003 | Accounts                           | Accepted            | Phase 2                                          |
+| D-004 | Scope and build order              | Accepted            | Phase 1                                          |
+| D-005 | Technology stack                   | Accepted            | P1.1 (scaffold)                                  |
+| D-006 | Onion Architecture                 | Accepted            | —                                                |
+| D-007 | Sign-in method                     | Superseded by D-019 | P2.6                                             |
+| D-008 | Reminders in the MVP               | Accepted            | Phase 4                                          |
+| D-009 | Hosting                            | Accepted            | P1.10 (deployment previews)                      |
+| D-010 | Package manager                    | Accepted            | P1.1                                             |
+| D-011 | Local database and tests           | Accepted            | Phase 2                                          |
+| D-012 | shadcn/ui library and preset       | Accepted            | Before more components are added                 |
+| D-013 | Colour palette and control height  | Accepted            | P1.6                                             |
+| D-014 | Installable app and screen edges   | Accepted            | —                                                |
+| D-015 | Appearance setting (theme toggle)  | Accepted            | —                                                |
+| D-016 | System bars always dark            | Accepted            | —                                                |
+| D-017 | Supabase access path and tooling   | Accepted            | Phase 2                                          |
+| D-018 | Database privileges convention     | Accepted            | Every migration                                  |
+| D-019 | Sign-in methods                    | Accepted            | P2.6                                             |
+| D-020 | Email on the live site             | Accepted            | P6.10 (before the private beta)                  |
+| D-021 | End-to-end encryption              | Accepted            | P3.3 (before any thought is stored)              |
+| D-022 | Palette retune                     | Accepted            | —                                                |
+| D-023 | Service worker and updates         | Accepted            | P6.2                                             |
+| D-024 | Accessibility fixes                | Accepted            | P6.4                                             |
+| D-025 | Data export and account deletion   | Accepted            | P6.5                                             |
+| D-026 | Security headers, CSP, rate limits | Accepted            | P6.6                                             |
 
 ---
 
@@ -556,6 +557,48 @@ database, debugging, development`, following Supabase's MCP security guidance. S
     - The file is not encrypted, and Settings says so.
 - **Needs on Vercel:** `SUPABASE_SECRET_KEY`, type Secret, from Supabase → Project Settings →
   API Keys.
+- **Date:** 2026-11-10
+
+## D-026 — Security headers, CSP and rate limits
+
+- **Context:** P6.6. The live site sent only Vercel's HSTS. Mindspace decrypts what you write
+  in the browser (D-021), so an injected script could read it.
+- **Options:** two kinds of Content Security Policy, from the Next.js 16 CSP guide.
+  - **A per-request nonce**, which the guide suggests when "your application handles sensitive
+    data". Every page is then rendered per request.
+  - **A fixed policy that allows inline scripts.** Static pages stay static, but injected
+    inline scripts could run.
+- **Decision:** Accepted, your choices on 2026-11-10.
+  - **The nonce policy:**
+    - `src/proxy.ts` makes a nonce per request and sets the policy on the request (Next.js
+      adds the nonce to its scripts) and on the response.
+    - `x-nonce` goes to the root layout for next-themes' inline script.
+    - `src/lib/content-security-policy.ts` builds the policy:
+      - `script-src 'self' 'nonce-…' 'strict-dynamic'`, plus `'unsafe-eval'` in development
+        only;
+      - `style-src 'self' 'unsafe-inline'`, because React and Base UI set style attributes,
+        which a nonce can't cover;
+      - same-origin `img`, `font`, `connect`, `worker` and `manifest`;
+      - `object-src 'none'`, `base-uri 'self'` and `frame-ancestors 'none'`;
+      - `form-action 'self'`, plus the Supabase origin and `https://accounts.google.com`;
+      - `upgrade-insecure-requests` in production.
+    - The browser never calls Supabase, so `connect-src 'self'` holds.
+  - **Fixed headers** in `next.config.ts`:
+    - `X-Content-Type-Options: nosniff`;
+    - `X-Frame-Options: DENY`;
+    - `Referrer-Policy: strict-origin-when-cross-origin`;
+    - `Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()`.
+    - Voice Capture (post-MVP) will need `microphone=(self)`.
+  - **Rate limits:** no limits of our own for now.
+    - **Supabase Auth limits by IP:** sign-ins and sign-ups at 30 per 5 minutes, tokens at
+      150 per 5 minutes (Authentication → Rate Limits).
+    - **Vercel** mitigates DDoS on every plan.
+    - **Before the public launch,** revisit Vercel's WAF rate limiting. Hobby allows one rule.
+  - **Dependencies:** `pnpm audit --prod` is clean. Two advisories in development tools are
+    accepted, because they never ship and only process our own files:
+    - `minimatch` <11.0.1 (moderate), under ESLint's TypeScript parser;
+    - `deepmerge` ≤4.3.1 (low), under the shadcn CLI.
+    - Forcing `minimatch` 11 onto the parser's `^9` range risks breaking lint.
 - **Date:** 2026-11-10
 
 ---

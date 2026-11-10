@@ -5,7 +5,7 @@
 | Item               | Value                                                                 |
 | ------------------ | --------------------------------------------------------------------- |
 | **Current phase**  | Phase 6 (PWA, privacy and beta readiness); Checkpoint A use continues |
-| **Phase progress** | Phase 6: 4 / 11 done (P6.1, P6.2, P6.4, P6.5); P6.3 waits on you      |
+| **Phase progress** | Phase 6: 5 / 11 done (P6.1, P6.2, P6.4–P6.6); P6.3 waits on you       |
 | **Last updated**   | 2026-11-10 (Session 7)                                                |
 | **Blocked on**     | Nothing                                                               |
 
@@ -45,7 +45,12 @@
        reduced motion, and the theme buttons wrapping at 400% zoom.
      - **P6.5 (D-025):** Settings → Your data: Export my data (decrypted on the device), and
        Delete my account (type "delete").
-   - **Next for Claude:** P6.6 (the security review).
+     - **P6.6 (D-026):** a strict per-request Content Security Policy and security headers. No
+       secrets reach the browser, the hosted RLS matches local, and the dependency audit is
+       clean for the app.
+       - **After you push:** sign in with Google on the live site once, and check that Home
+         loads with your theme. Tell me if anything looks blocked.
+   - **Next for Claude:** P6.7 (reliability: backups, error monitoring, auth email).
    - **Earlier phases:**
      - Phase 5 is done (acceptance met 2026-11-06; P5.8 Slow Down Mode deferred to the
        backlog): the daily check-in and past reflections on Mind Clarity, today's one thing on
@@ -192,6 +197,49 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-10 — Session 7 (cont.): P6.6 the security review
+
+- **Phase:** 6 · **Tasks:** P6.6 · **From you:** "go", then your choices: the strict nonce
+  CSP, and relying on Supabase and Vercel rate limits for now.
+- **Research (sources checked):**
+  - the Next.js 16 CSP guide (nonces need per-request rendering; the no-nonce and experimental
+    SRI options);
+  - the Next.js source (`NextResponse.next` forwards the changed request headers);
+  - next-themes (`nonce` prop);
+  - the Supabase Auth rate-limit docs and the Vercel firewall docs (DDoS on all plans; WAF
+    rate limiting, one rule on Hobby).
+- **Done:**
+  - **`src/lib/content-security-policy.ts`**, set per request in `src/proxy.ts` with a fresh
+    nonce. The root layout passes the nonce to next-themes.
+  - **`next.config.ts` `headers()`:** nosniff, `X-Frame-Options: DENY`, `Referrer-Policy` and
+    `Permissions-Policy`.
+- **Checks:**
+  - lint, typecheck, 230 unit tests, pgTAP 128;
+  - hosted: migrations match, the read-only RLS, grants and cascade query, and the advisors
+    (only the known Auth warning);
+  - the bundle scan with a canary secret;
+  - the git-history scan (87 commits).
+- **Checked in Chrome** (Browser 1, verified earlier this session; my own tab, closed):
+  - **Dev:**
+    - every page's scripts carry the nonce;
+    - a nonce-less parsed script and an inline handler were blocked;
+    - moving through Home, Brain Dump, Tasks, Mind Clarity and Settings, Dark and back to your
+      Light, and the delete dialog gave no violations.
+  - **Production build (port 3100):**
+    - the offline page and the lock screen run under the policy;
+    - the worker installs, and the cached offline page still hydrates;
+    - `upgrade-insecure-requests` left `http://localhost` alone.
+  - The test worker and caches were removed, and the server stopped.
+  - The extension's own injected inline script still ran: extension code isn't subject to page
+    policies, so that test was replaced by the in-page `srcdoc` one.
+- **Not checked:** Google sign-in on the live site under the policy (you sign in, I don't). The
+  sign-in path was reviewed: React submits the form and then navigates, and `form-action` also
+  allows Supabase and Google for a submit before the scripts load.
+- **Decisions:** D-026.
+- **Commits:** `feat(security): add a nonce Content Security Policy and security headers (P6.6)`
+- **Next:** P6.7 reliability. Your steps: the Vercel secret key, the P6.3 devices, and one live
+  Google sign-in after pushing.
 
 ### 2026-11-10 — Session 7 (cont.): P6.5 data export and account deletion
 

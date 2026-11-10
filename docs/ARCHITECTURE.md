@@ -116,13 +116,15 @@ mindspace/
         ├── action-result.ts    # ActionResult, attempt and failure, shared by every Server Action
         ├── action-errors.ts    # browser side: unwrap and errorMessage
         ├── app-version.ts      # the deploy's version (VERCEL_DEPLOYMENT_ID), for the service worker
+        ├── content-security-policy.ts # the per-request CSP the proxy sets (P6.6)
         ├── notify.ts           # toasts (success, error, notice), with an optional action such as Undo
         └── use-now.ts          # the time, refreshed every 30 s (null on the server), for what is due
 ```
 
 Session refresh and route protection live in `src/proxy.ts` (Next.js 16 renamed `middleware` to
 `proxy`; it runs on the Node.js runtime), at the `src/` root where Next.js requires it. It calls
-`updateSession()` from infrastructure and owns the list of public auth pages (P2.7).
+`updateSession()` from infrastructure and owns the list of public auth pages (P2.7). Since P6.6 it
+also makes each page's CSP nonce, before the session refresh, so the forwarded request carries it.
 
 ## 4. Dependency rules
 
@@ -265,6 +267,14 @@ The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.
   (`(x_id, user_id)` → `(id, user_id)`). Otherwise a user could link their row to someone else's.
   Postgres foreign-key checks bypass RLS.
 - Server-only modules import `server-only`. Secret keys never use the `NEXT_PUBLIC_` prefix.
+- **Headers (P6.6, D-026):**
+  - `src/proxy.ts` sets a per-request Content Security Policy with a nonce. Only scripts
+    carrying it run, and the browser may talk only to this app.
+  - `next.config.ts` adds nosniff, `X-Frame-Options`, `Referrer-Policy` and
+    `Permissions-Policy`.
+  - **Keep it that way:** don't add a third-party script, image, font or browser-side API call
+    without extending `src/lib/content-security-policy.ts`. Don't add inline scripts without
+    the nonce from `x-nonce`.
 - Auth sessions use cookie-based SSR auth through `@supabase/ssr`. Session refresh follows the
   current Supabase guide.
 - **Route protection (P2.7)** is in `src/proxy.ts`: signed-out users go to `/sign-in`, and
