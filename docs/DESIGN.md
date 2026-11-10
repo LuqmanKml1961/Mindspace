@@ -40,29 +40,30 @@ teal (205°), and the light greys yellow-green (128–138°). Each theme now kee
 - The five jobs that shared `#354f52` in dark mode now each have their own shade: the card, the
   dialog, the category badge, the phone tab pill, and the current page in the navigation.
 
-| Token                          | Light                                                    | Dark                             |
-| ------------------------------ | -------------------------------------------------------- | -------------------------------- |
-| `background`                   | `#f2f6f3`                                                | `#25353b`                        |
-| `foreground`                   | `#2f3e46` Charcoal Blue                                  | `#e6ece3`                        |
-| `card`                         | `#ffffff`                                                | `#32494e`                        |
-| `popover`                      | `#ffffff`                                                | `#385053`                        |
-| `card-` / `popover-foreground` | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)      |
-| `primary`                      | `#4e756b` Deep Teal, nudged                              | `#98c0a2`                        |
-| `primary-foreground`           | `#ffffff`                                                | `#1c252a`                        |
-| `secondary`                    | `#d3e3d6`                                                | `#456256`                        |
-| `secondary-foreground`         | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)      |
-| `muted`                        | `#e6ede8`                                                | `#3f585a`                        |
-| `muted-foreground`             | `#4d6668`                                                | `#beccc0`                        |
-| `accent`                       | `#d4e9dd`                                                | `#3a5c4f`                        |
-| `accent-foreground`            | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)      |
-| `destructive`                  | `#a8463a` **added** soft terracotta (not in the palette) | `#f2b9b0` **added**, light coral |
-| `border`                       | `#d5ddd7`                                                | `#4e5e61`                        |
-| `input`                        | `#c5cfc7`                                                | `#5b6b6d`                        |
-| `ring` (focus)                 | `#4e756b` (as `primary`)                                 | `#98c0a2` (as `primary`)         |
-| `sidebar`                      | `#eaf0ec`                                                | `#1e2c32`                        |
-| `sidebar-accent`               | `#d4e9dd` (as `accent`)                                  | `#2e4b49`                        |
-| `sidebar-*` (others)           | as the matching main token                               | as the matching main token       |
-| `chart-1…5`                    | the five palette colours (unchanged, not used yet)       | unchanged, not used yet          |
+| Token                          | Light                                                    | Dark                            |
+| ------------------------------ | -------------------------------------------------------- | ------------------------------- |
+| `background`                   | `#f2f6f3`                                                | `#25353b`                       |
+| `foreground`                   | `#2f3e46` Charcoal Blue                                  | `#e6ece3`                       |
+| `card`                         | `#ffffff`                                                | `#32494e`                       |
+| `popover`                      | `#ffffff`                                                | `#385053`                       |
+| `card-` / `popover-foreground` | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)     |
+| `primary`                      | `#4e756b` Deep Teal, nudged                              | `#98c0a2`                       |
+| `primary-foreground`           | `#ffffff`                                                | `#1c252a`                       |
+| `secondary`                    | `#d3e3d6`                                                | `#456256`                       |
+| `secondary-foreground`         | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)     |
+| `muted`                        | `#e6ede8`                                                | `#3f585a`                       |
+| `muted-foreground`             | `#4d6668`                                                | `#beccc0`                       |
+| `accent`                       | `#d4e9dd`                                                | `#3a5c4f`                       |
+| `accent-foreground`            | `#2f3e46` Charcoal Blue                                  | `#e6ece3` (as `foreground`)     |
+| `destructive`                  | `#a8463a` **added** soft terracotta (not in the palette) | `#f6cbc4` (P6.4; was `#f2b9b0`) |
+| `border`                       | `#d5ddd7`                                                | `#4e5e61`                       |
+| `input` (field tint)           | `#c5cfc7`                                                | `#5b6b6d`                       |
+| `input-border` **added P6.4**  | `#838f8e` (field outlines, 3:1)                          | `#909c9a`                       |
+| `ring` (focus)                 | `#4e756b` (as `primary`)                                 | `#98c0a2` (as `primary`)        |
+| `sidebar`                      | `#eaf0ec`                                                | `#1e2c32`                       |
+| `sidebar-accent`               | `#d4e9dd` (as `accent`)                                  | `#2e4b49`                       |
+| `sidebar-*` (others)           | as the matching main token                               | as the matching main token      |
+| `chart-1…5`                    | the five palette colours (unchanged, not used yet)       | unchanged, not used yet         |
 
 - `destructive` is the only colour outside the palette. It is used **only** for deleting, never
   for overdue or "missed" items. Those stay neutral (spec §3: no guilt-based productivity).
@@ -84,8 +85,10 @@ colour page (`docs/colours.html`, not in git).
 | Note box (tinted Alert) text                  | 4.5:1  | 9.23:1         | 6.20:1        |
 | Error box (tinted Alert) text                 | 4.5:1  | 9.58:1         | 6.55:1        |
 | Alert border against the card                 | —      | 1.88:1         | 2.17:1        |
-| Focus ring on background                      | 3:1    | 4.72:1         | 6.30:1        |
-| Border / input on background                  | 3:1    | 1.27 / 1.47:1  | 1.88 / 2.28:1 |
+| Focus ring (solid since P6.4), lowest surface | 3:1    | 4.72:1         | 4.26:1        |
+| Field outline (`input-border`, P6.4)          | 3:1    | 3.06:1         | 3.04:1        |
+| Delete button text (dark fixed in P6.4)       | 4.5:1  | 4.64:1         | 4.77:1        |
+| Card / separator `border` (decorative)        | —      | 1.27:1         | 1.41:1        |
 
 **Alerts (2026-11-04):** an Alert used to share the card's colour (1.00:1), so it was
 invisible. Its variants now tint the box: `bg-primary/14 border-primary/45` for notes, and
@@ -112,13 +115,27 @@ The thought box is an outline `Item` with no fill. Inside Home's card it took th
   - The tint is 1.32:1 (dark) and 1.18:1 (light) against the page.
   - Its text is 5.77:1 and 4.76:1.
 
-**Known gap (dark mode):** the Delete button inside the delete dialog is 3.51:1: red text on its
-own 20% tint over the dialog colour. On the page it passes (4.79:1), and in light mode it is
-5.05:1. Fix in P6.4.
+**Accessibility fixes (P6.4, 2026-11-10, D-024, your choices).** These were rechecked from
+`globals.css` with the same formula.
 
-The border and input lines are decorative and below WCAG 1.4.11's 3:1, like shadcn's defaults.
-**Review in P6.4:** confirm that inputs are still identifiable (Maia inputs also have a fill), or
-darken `input`.
+- **Field outlines:** a new `input-border` token is used by fields, selects, checkboxes, input
+  groups and the outline toggle: `#838f8e` light, `#909c9a` dark.
+  - It reaches 3.06–3.34:1 (light) and 3.04–4.49:1 (dark) against the page, cards and sheets.
+  - The `bg-input/30` tint inside fields is unchanged.
+- **Focus ring:** solid `ring-ring` instead of the 50% halo: 4.72–5.15:1 (light), 4.26–6.30:1
+  (dark).
+  - The Delete button no longer overrides it with a faint red ring.
+  - The base outline is `outline-ring`.
+- **Dark Delete button:** `destructive` is `#f6cbc4` (was `#f2b9b0`), with a 10% tint (was
+  20%) and a 20% hover tint (was 30%).
+  - 4.77:1 in dialogs and sheets, 5.21:1 on cards, 6.78:1 on the page.
+  - Error boxes keep their text at 6.38:1.
+- **Still below 4.5:1, on purpose:**
+  - **Delete while a mouse hovers it** (4.0–4.4:1). It's momentary, and phones have no hover.
+  - **Dark `primary` text on a dialog or sheet** (4.26:1). No such text exists today; use
+    `foreground` there.
+- **Card, separator and plain `border` lines** stay below 3:1. They are decoration, not
+  controls, so WCAG 1.4.11 doesn't apply.
 
 ## 4. Light and dark mode
 
@@ -160,6 +177,11 @@ darken `input`.
     - **No animation (instant switch)** when the browser has no View Transitions, the user has
       `prefers-reduced-motion: reduce`, or the visible theme doesn't change (e.g. Dark → System
       while the system is dark).
+  - **The three buttons wrap** onto a second line when they can't fit (`flex-wrap`, P6.4).
+    At 320px wide, the width of 400% zoom, they used to push Settings into sideways scrolling.
+- **Reduced motion (P6.4):** with `prefers-reduced-motion: reduce`, a rule in `globals.css`
+  cuts every animation and transition to 0.01ms. Dialogs, sheets and toasts appear in place, and
+  skeletons and spinners stop moving.
 
 ## 5. Typography
 
@@ -399,7 +421,7 @@ darken `input`.
   uses an `accent` background; the tab bar uses an `accent` pill behind the icon and `primary`
   text.
 - Every nav target is at least 40px tall (sidebar `h-10`, tab bar `min-h-16`). Focus shows the
-  same ring as Button (`ring-3 ring-ring/50`).
+  same ring as Button (`ring-3 ring-ring`, solid since P6.4).
 - On mobile, `main` has `pb-28` so content clears the fixed tab bar. The tab bar comes after
   `main` in the DOM, so it paints on top without a manual `z-index`.
 - The app name and tagline come from `src/lib/site.ts` (D-001: one place to rename).

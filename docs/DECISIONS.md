@@ -36,6 +36,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-021 | End-to-end encryption             | Accepted            | P3.3 (before any thought is stored)              |
 | D-022 | Palette retune                    | Accepted            | —                                                |
 | D-023 | Service worker and updates        | Accepted            | P6.2                                             |
+| D-024 | Accessibility fixes               | Accepted            | P6.4                                             |
 
 ---
 
@@ -457,6 +458,7 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   reasons are in DESIGN.md §2.
   - Your greens stay; light `primary` is nudged to `#4e756b`.
   - Every text check passes except the Delete button inside the dark dialog (3.51:1, P6.4).
+    Fixed in P6.4 (D-024).
 - **System bars:** they stay always dark (D-016), now in the new dark page colour `#25353b`.
   - **Following the theme:** your notes proposed letting the status bar follow the theme, and
     fixing both bars to `#25353b` if Android's bottom bar won't follow. The 2026-11-03 test on
@@ -500,6 +502,28 @@ database, debugging, development`, following Supabase's MCP security guidance. S
 - **Needs on Vercel:** "Automatically expose System Environment Variables" must stay on. If it
   is off, `VERCEL_DEPLOYMENT_ID` is missing, the version stays `"local"`, and updates are
   never offered. Check: the first line of the live `/sw.js` names a `dpl_…` ID.
+- **Date:** 2026-11-10
+
+## D-024 — Accessibility fixes (contrast, focus, motion)
+
+- **Context:** the P6.4 review (WCAG 2.x AA) recomputed every token pair from `globals.css`.
+  Three things you use failed:
+  - **field outlines** at 1.3–2.3:1, where 1.4.11 needs 3:1 to see where a field is;
+  - **the focus ring's 50% halo** at 2.0–2.8:1. On a green button it is the only focus cue;
+  - **the dark Delete button** at 3.5–3.8:1, where 1.4.3 needs 4.5:1.
+- **Decision:** Accepted, your choices on 2026-11-10 (the recommended option each time):
+  - **Outline only:** a new `input-border` token (`#838f8e` / `#909c9a`). The field tint
+    (`input`) is unchanged.
+  - **A solid focus ring** in the same green, everywhere. That includes the Delete button,
+    which used a faint red ring before.
+  - **A paler dark coral** `#f6cbc4` with a 10% tint, 20% on hover. Light mode is unchanged.
+  - **Also, with no visual choice involved:**
+    - a `prefers-reduced-motion` rule;
+    - the theme buttons wrap at narrow widths.
+- **Known and accepted:**
+  - the Delete hover tint (4.0–4.4:1, mouse only);
+  - decorative card and separator lines below 3:1.
+  - Avoid dark `primary` text on dialogs and sheets (4.26:1).
 - **Date:** 2026-11-10
 
 ---

@@ -25,6 +25,7 @@
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
   --color-input: var(--input);
+  --color-input-border: var(--input-border);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
@@ -67,6 +68,7 @@
   --destructive: #a8463a;
   --border: #d5ddd7;
   --input: #c5cfc7;
+  --input-border: #838f8e;
   --ring: #4e756b;
   --chart-1: #52796f;
   --chart-2: #84a98c;
@@ -99,9 +101,10 @@
   --muted-foreground: #beccc0;
   --accent: #3a5c4f;
   --accent-foreground: #e6ece3;
-  --destructive: #f2b9b0;
+  --destructive: #f6cbc4;
   --border: #4e5e61;
   --input: #5b6b6d;
+  --input-border: #909c9a;
   --ring: #98c0a2;
   --chart-1: #84a98c;
   --chart-2: #cad2c5;
@@ -120,13 +123,25 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground;
   }
   html {
     @apply bg-background font-sans;
+  }
+}
+
+/* With "reduce motion" on, dialogs, sheets, toasts and loaders appear without moving (P6.4). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

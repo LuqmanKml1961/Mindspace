@@ -789,8 +789,32 @@ and then the private beta.
       already.
 - [ ] P6.3 Test installation and browser behaviour on Chrome and Edge desktop, Android Chrome, and
       iOS Safari (Add to Home Screen). Record the results in the DEVLOG.
-- [ ] P6.4 Accessibility review: keyboard navigation, visible focus, WCAG AA contrast, labels,
-      reduced motion, and readable text at 200% zoom.
+- [x] P6.4 Accessibility review: keyboard navigation, visible focus, WCAG AA contrast, labels,
+      reduced motion, and readable text at 200% zoom. **Done 2026-11-10 (D-024):**
+  - **Contrast** (computed from `globals.css`, alpha tints blended; method checked against
+    21:1 and 4.74:1). Fixed, with your choices:
+    - field outlines 1.3–2.3:1 → a new `input-border` token at 3.0:1 or more;
+    - the focus ring's 50% halo 2.0–2.8:1 → solid, 4.3:1 or more;
+    - the dark Delete button 3.5–3.8:1 → 4.77:1 or more.
+    - All other text and control pairs already passed. Details are in DESIGN.md §3.
+  - **Reduced motion:** a `prefers-reduced-motion` rule in `globals.css` stops the slides,
+    fades and pulses. The animation library had none.
+  - **Labels, headings, landmarks** (an automated check on all 9 signed-in pages and
+    `/offline`):
+    - each page has its own title, one `h1`, no skipped heading levels, one `main`, and
+      labelled navs;
+    - every field and button has a name;
+    - no duplicate IDs and no positive `tabindex`.
+    - The only hits were Base UI's hidden checkbox inputs (`aria-hidden`, `tabindex=-1`).
+  - **Zoom and reflow** (each page in a 320px and full-width frame; 320px equals 400% zoom):
+    - Settings scrolled sideways at 320px because of the three theme buttons. They now wrap.
+    - The task sheet fits.
+    - No other page scrolls sideways.
+  - **Keyboard** (real Tab presses on Home):
+    - every stop shows the solid ring, in a logical order (sidebar, then the page);
+    - the Delete dialog focuses "Keep it", Escape closes it, and focus returns to Delete.
+  - **Not covered:** a screen-reader pass (VoiceOver or TalkBack, on your devices with P6.3),
+    and the sign-in pages, which redirect when signed in and share the same components.
 - [ ] P6.5 Data controls (spec §14): export my data (a JSON download of all the user's rows), and
       delete my account (server-side only; removes the auth user and cascades their data).
 - [ ] P6.6 Security review: re-run every RLS test, confirm no secret keys are in the client bundle,

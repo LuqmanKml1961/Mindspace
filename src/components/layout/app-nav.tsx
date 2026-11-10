@@ -48,7 +48,7 @@ export function AppSidebar() {
                   href={item.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+                    "flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors outline-none hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-3 focus-visible:ring-ring",
                     active &&
                       "bg-sidebar-accent text-sidebar-accent-foreground",
                   )}
@@ -86,7 +86,7 @@ export function AppTabBar() {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-center text-xs leading-tight font-medium text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset",
+                  "flex min-h-16 flex-col items-center justify-center gap-1 px-1 py-2 text-center text-xs leading-tight font-medium text-muted-foreground outline-none focus-visible:ring-3 focus-visible:ring-ring focus-visible:ring-inset",
                   active && "text-primary",
                 )}
               >

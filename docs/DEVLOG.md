@@ -5,7 +5,7 @@
 | Item               | Value                                                                 |
 | ------------------ | --------------------------------------------------------------------- |
 | **Current phase**  | Phase 6 (PWA, privacy and beta readiness); Checkpoint A use continues |
-| **Phase progress** | Phase 6: 2 / 11 done (P6.1, P6.2); next is P6.3                       |
+| **Phase progress** | Phase 6: 3 / 11 done (P6.1, P6.2, P6.4); P6.3 waits on your devices   |
 | **Last updated**   | 2026-11-10 (Session 7)                                                |
 | **Blocked on**     | Nothing                                                               |
 
@@ -24,14 +24,17 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 6, P6.3 next** (browser and install testing on your devices). P6.2 is done
-   (D-023): the offline page, the offline notice, and "A new version is ready" with Refresh
-   after a deploy.
-   - **After you push, on Vercel:** keep Settings → Environment Variables → "Automatically
-     expose System Environment Variables" on. Then open `https://m1ndspace.vercel.app/sw.js`:
-     its first line should name a `dpl_…` version, not `"local"`.
-   - **On your phone:** with Home open, turn on airplane mode. The offline notice should
-     appear, and opening another page should show the offline page.
+4. **Now: Phase 6.**
+   - **P6.3, your devices:** run the install checklist (Chrome and Edge on the desktop, Android
+     Chrome, iPhone Safari), and send one line per device. It includes airplane mode for the
+     offline notice and page, and the "new version" prompt after a push. If you can, also try
+     VoiceOver or TalkBack for a minute (P6.4 left the screen reader to you).
+   - **Done:**
+     - **P6.2 (D-023):** the offline page and notice, and Refresh after a deploy. The live
+       `/sw.js` names a `dpl_…` version (checked 2026-11-10).
+     - **P6.4 (D-024):** clearer field outlines, a solid focus ring, an AA dark Delete button,
+       reduced motion, and the theme buttons wrapping at 400% zoom.
+   - **Next for Claude:** P6.5 (export my data, delete my account).
    - **Earlier phases:**
      - Phase 5 is done (acceptance met 2026-11-06; P5.8 Slow Down Mode deferred to the
        backlog): the daily check-in and past reflections on Mind Clarity, today's one thing on
@@ -178,6 +181,50 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-10 — Session 7 (cont.): P6.4 the accessibility review
+
+- **Phase:** 6 · **Tasks:** P6.4 (P6.3 waits on your devices) · **From you:** "go", your
+  three colour choices (all the recommended ones), then "done, go" once the stack was up.
+- **Live check first:** after your push, the live `/sw.js` names `dpl_8KCW…`. The static
+  `/offline` and the dynamic `/sign-in` carry the same version, so there is no false prompt.
+  All 17 offline assets load (200).
+- **Contrast** (a script reading `globals.css`, tints blended over their surface; checked
+  against 21:1 and 4.74:1):
+  - **Failing before:**
+    - field outlines 1.3–2.3:1;
+    - the 50% focus halo 2.0–2.8:1;
+    - the dark Delete button 3.51:1 in dialogs and sheets, and 3.82:1 on cards;
+    - the Delete button's own faint red focus ring.
+  - **Fixed (D-024):** an `input-border` token, `ring-ring` (12 component files and the base
+    outline), and dark `destructive` `#f6cbc4` with a 10% tint. All controls now pass in
+    both themes.
+- **Other fixes:**
+  - a `prefers-reduced-motion` rule (tw-animate-css has none);
+  - `flex-wrap` on the theme buttons, which made Settings scroll sideways at 320px.
+- **Checked in Chrome** (the database-log probe confirmed MYS231; light theme; my own tab;
+  helpers removed afterwards):
+  - **Automated check of 9 signed-in pages and `/offline`:**
+    - titles, one `h1`, heading order, landmarks;
+    - names for every field and button;
+    - no duplicate IDs and no positive `tabindex`.
+    - Its only hits were Base UI's hidden checkbox inputs, which screen readers ignore.
+  - **Reflow:**
+    - each page in a 320px frame (400% zoom): only Settings overflowed, and it is fixed;
+    - the task sheet fits at 320px, and focus moves into it.
+  - **Keyboard:**
+    - Tab through Home shows the solid ring at every stop;
+    - two links looked ringless at first, but that was my check catching their 150ms
+      fade-in;
+    - the Delete dialog focuses "Keep it", Escape closes it, and focus returns to Delete.
+  - **Loaded values:** the outline is `#838f8e` and Delete is `#a8463a` on 10%, and the
+    reduced-motion rule is present.
+- **Checks:** lint, typecheck, 223 unit tests, and the format check pass.
+- **Not covered:** a screen reader on a real device, dark mode in the browser (values come from
+  the script), and the sign-in pages (signed in, they redirect).
+- **Decisions:** D-024.
+- **Commits:** `fix(a11y): meet WCAG AA for field outlines, focus and dark delete (P6.4)`
+- **Next:** P6.5 data controls; P6.3 results when you send them.
 
 ### 2026-11-10 — Session 7: P6.2 the service worker and updates
 

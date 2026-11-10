@@ -63,6 +63,8 @@ export function ThemeToggle({ labelledBy }: { labelledBy: string }) {
     <ToggleGroup
       aria-labelledby={labelledBy}
       variant="outline"
+      // Wraps instead of scrolling sideways on a narrow screen or at high zoom.
+      className="flex-wrap"
       value={[theme ?? "system"]}
       onValueChange={(value, details) => {
         const next = value[0];
