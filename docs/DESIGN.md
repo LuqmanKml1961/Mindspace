@@ -243,6 +243,21 @@ darken `input`.
   - **Failed actions** stay until closed (`timeout: 0`) and are announced urgently
     (`priority: "high"`). The text is kept.
   - **Field errors** stay inline. The static "Saved." lines were removed.
+  - **Notices** (`notify.notice`, the info icon, added in P6.2) stay until they are closed, by
+    you or by the app, and are announced politely:
+    - "You're offline. You can keep typing, and save once you're connected." It shows on
+      signed-in pages, and closes itself when the connection returns, followed by "You're back
+      online." (success).
+    - "A new version is ready. Refresh once you've saved what you're writing." It comes with a
+      **Refresh** action, after a deploy, and only on a page older than the live version.
+      Nothing reloads by itself.
+  - **A save from a page older than the live deploy** fails with "Mindspace has just been
+    updated. Copy your text, refresh the page, then save it again." The text stays in place
+    (D-023).
+- **Offline page (P6.2):** `/offline` uses the sign-in pages' brand frame and one card:
+  "You're offline", "Mindspace needs a connection to open this page. Everything you've saved is
+  safe.", and **Try again** (reloads). The service worker shows it at the address you tried, and
+  it never claims your data is available offline (spec §10).
   - **Placement:** the viewport sits above the phone tab bar, at
     `bottom-[calc(5rem+env(safe-area-inset-bottom,0px))]`, computed as 80px with a 12px gap above
     the 67px bar. From `md` up it is `bottom-4`. Checked in a 420px frame.

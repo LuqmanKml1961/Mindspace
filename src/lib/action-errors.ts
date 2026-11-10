@@ -1,3 +1,4 @@
+import { unstable_isUnrecognizedActionError } from "next/navigation";
 import {
   DecryptFailedError,
   DeviceLockedError,
@@ -28,6 +29,10 @@ export function errorMessage(error: unknown): string {
     error instanceof ServerActionError
   ) {
     return error.message;
+  }
+  // The page is older than the latest deploy, so its Server Actions no longer exist (P6.2).
+  if (unstable_isUnrecognizedActionError(error)) {
+    return "Mindspace has just been updated. Copy your text, refresh the page, then save it again.";
   }
   // A Server Action without a connection fails like this; the text stays where it was.
   if (!navigator.onLine) {

@@ -4,7 +4,7 @@ import { updateSession } from "@/infrastructure/supabase/session";
 // Signed-in users are sent from these pages to /home.
 const authPages = ["/sign-in", "/sign-up", "/forgot-password"];
 // Reachable whether signed in or not. Every other route needs a signed-in user.
-const publicRoutes = ["/auth/callback"];
+const publicRoutes = ["/auth/callback", "/offline"];
 
 export async function proxy(request: NextRequest) {
   const session = await updateSession(request);
@@ -19,6 +19,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|manifest\\.webmanifest|.*\\.(?:png|svg|ico|jpg|jpeg|gif|webp)$).*)",
+    "/((?!_next/static|_next/image|manifest\\.webmanifest|sw\\.js|.*\\.(?:png|svg|ico|jpg|jpeg|gif|webp)$).*)",
   ],
 };

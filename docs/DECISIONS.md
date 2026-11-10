@@ -35,6 +35,7 @@ then add a line to the current session in [`DEVLOG.md`](DEVLOG.md).
 | D-020 | Email on the live site            | Accepted            | P6.10 (before the private beta)                  |
 | D-021 | End-to-end encryption             | Accepted            | P3.3 (before any thought is stored)              |
 | D-022 | Palette retune                    | Accepted            | —                                                |
+| D-023 | Service worker and updates        | Accepted            | P6.2                                             |
 
 ---
 
@@ -464,6 +465,42 @@ database, debugging, development`, following Supabase's MCP security guidance. S
   - **iOS:** the notes also suggested `black-translucent` for iOS. Sources say it makes the
     status-bar text white even over a light page, so it isn't used. iOS is still untested.
 - **Date:** 2026-11-05
+
+## D-023 — Service worker and updates
+
+- **Context:** P6.2 (spec §10): an offline page instead of a browser error, and your request on
+  2026-11-06 that a new deploy reaches the installed app without reinstalling.
+- **Options:**
+  - **A hand-written worker** (Next.js PWA guide).
+  - **Serwist (`@serwist/turbopack` 9.5.13):** it adds esbuild, `@swc/core` and a second zod,
+    and its Next.js 16 example runs `serwist@preview` (10.0.0-preview). Its strength,
+    precaching every built file, isn't needed while pages and data stay online-only.
+- **Decision:** Accepted, the hand-written worker (your choice, 2026-11-10).
+  - **Served at `/sw.js`:** a static Route Handler (`src/app/sw.js/`) prepends the version
+    (`appVersion` in `src/lib/app-version.ts`: `VERCEL_DEPLOYMENT_ID`, or `"local"`). Each
+    deploy is therefore a new worker. It is registered with `updateViaCache: "none"`, in
+    production builds only.
+  - **What it stores:** only `/offline` and the assets that page links to, in a cache named
+    after the version. It never stores pages, page data or Supabase responses (D-021,
+    ARCHITECTURE §9).
+  - **Updates:** a new worker skips waiting, claims open pages, deletes older caches, and
+    sends its version to each page.
+    - A page with an older version offers Refresh. It never reloads itself.
+    - Pages are always fetched from the network, so a page opened after a deploy is already
+      current and gets no prompt.
+  - **Version skew:** Next.js 16.4.5 already reloads on the next navigation when the build
+    differs (`fetch-server-response.js`).
+    - Vercel Skew Protection would also keep an outdated page's saves working. Vercel lists it
+      for Pro and Enterprise only, and the project is on Hobby (D-009). So `deploymentId` is
+      not set.
+    - Such a save fails with Next's `UnrecognizedActionError`, which now gets a calm message
+      (`errorMessage`).
+  - **Connection status:** `navigator.onLine` events, not Next's experimental `useOffline`.
+    That flag would hold every save until the connection returns, a change for every form.
+- **Needs on Vercel:** "Automatically expose System Environment Variables" must stay on. If it
+  is off, `VERCEL_DEPLOYMENT_ID` is missing, the version stays `"local"`, and updates are
+  never offered. Check: the first line of the live `/sw.js` names a `dpl_…` ID.
+- **Date:** 2026-11-10
 
 ---
 

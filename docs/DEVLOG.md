@@ -2,12 +2,12 @@
 
 ## ▶ Resume here
 
-| Item               | Value                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| **Current phase**  | Phase 5 done; Phase 6 (PWA, privacy and beta readiness) is next; Checkpoint A use continues |
-| **Phase progress** | Phase 5: 7 / 8 done, P5.8 deferred, acceptance met 2026-11-06; next is P6.2                 |
-| **Last updated**   | 2026-11-06 (Session 6)                                                                      |
-| **Blocked on**     | Nothing                                                                                     |
+| Item               | Value                                                                 |
+| ------------------ | --------------------------------------------------------------------- |
+| **Current phase**  | Phase 6 (PWA, privacy and beta readiness); Checkpoint A use continues |
+| **Phase progress** | Phase 6: 2 / 11 done (P6.1, P6.2); next is P6.3                       |
+| **Last updated**   | 2026-11-10 (Session 7)                                                |
+| **Blocked on**     | Nothing                                                               |
 
 **Next actions (in order)**
 
@@ -24,17 +24,24 @@
 3. **Authenticate the Supabase MCP server:** in a normal terminal run `claude /mcp`, then
    supabase → Authenticate (choose the org with the Mindspace project). Its tools appear in the
    next Claude session.
-4. **Now: Phase 6, P6.2 next:** the service worker, with the update handling you asked for (a
-   new deploy reaches the installed app without reinstalling). Phase 5 is done (acceptance met
-   2026-11-06; P5.8 Slow Down Mode deferred to the backlog): the daily check-in and past
-   reflections on Mind Clarity, today's one thing on Home, and the thought review
-   (`/thoughts/review`). Please look at their layouts, because screenshots timed out. Phase 4 is
-   done (acceptance met 2026-11-06).
-   Tasks, "Make it a task",
-   reminders and the Home summary are ready to try, locally and on the live site once you push.
-   **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on desktop
-   and phone, and tell me what helps or gets in
-   the way (see "Checkpoint A notes" below).
+4. **Now: Phase 6, P6.3 next** (browser and install testing on your devices). P6.2 is done
+   (D-023): the offline page, the offline notice, and "A new version is ready" with Refresh
+   after a deploy.
+   - **After you push, on Vercel:** keep Settings → Environment Variables → "Automatically
+     expose System Environment Variables" on. Then open `https://m1ndspace.vercel.app/sw.js`:
+     its first line should name a `dpl_…` version, not `"local"`.
+   - **On your phone:** with Home open, turn on airplane mode. The offline notice should
+     appear, and opening another page should show the offline page.
+   - **Earlier phases:**
+     - Phase 5 is done (acceptance met 2026-11-06; P5.8 Slow Down Mode deferred to the
+       backlog): the daily check-in and past reflections on Mind Clarity, today's one thing on
+       Home, and the thought review (`/thoughts/review`). Please look at their layouts, because
+       screenshots timed out.
+     - Phase 4 is done (acceptance met 2026-11-06). Tasks, "Make it a task", reminders and the
+       Home summary are ready to try, locally and on the live site once you push.
+   - **Checkpoint A use continues alongside:** keep using Brain Dump on the live site, on
+     desktop and phone, and tell me what helps or gets in the way (see "Checkpoint A notes"
+     below).
    - Your local account has, among others, the landlord thought (inbox, Home admin) and "test
      toast" (inbox, test). The categories are Home admin, Personal, test and Zambaroni.
    - **Follow-up:** time PBKDF2 on a phone.
@@ -105,7 +112,7 @@ pnpm. If the dev server shows old colours, restart it and hard-refresh.
 | —     | Checkpoint A: personal use      | In progress | 2026-11-05 | —          |
 | 4     | External Memory                 | Done        | 2026-11-05 | 2026-11-06 |
 | 5     | Mind Clarity                    | Done        | 2026-11-06 | 2026-11-06 |
-| 6     | PWA, privacy and beta readiness | Not started | —          | —          |
+| 6     | PWA, privacy and beta readiness | In progress | 2026-11-10 | —          |
 | —     | Validation stages 1–3           | Not started | —          | —          |
 
 ## Environment snapshot
@@ -171,6 +178,55 @@ Template — copy it above the newest entry:
 - **Commits:** <hash + message, or "none">
 - **Next:** <first task for the next session>
 -->
+
+### 2026-11-10 — Session 7: P6.2 the service worker and updates
+
+- **Phase:** 6 · **Tasks:** P6.2 · **From you:** "go", then your choices of a hand-written
+  worker and an offline notice that stays.
+- **Done:**
+  - **Worker:** `/sw.js` comes from a static Route Handler with the deploy's version built in.
+    It stores only the offline page and the assets it links to. Pages and data always go to the
+    network.
+  - **Offline:** an `/offline` page (public, static), and an offline notice on signed-in pages
+    ("You're back online." when it returns).
+  - **Updates:**
+    - every deploy is a new worker, looked for when the app returns to the foreground;
+    - an outdated page offers Refresh and never reloads by itself;
+    - a save from an outdated page gets a calm "just updated" message.
+  - **`notify.notice`** (stays, polite, optional action) and `notify.close`. `notify.success`
+    now shares the action code; its behaviour is unchanged.
+- **Research (sources checked):**
+  - **Next.js 16.4.5:**
+    - the PWA guide;
+    - the `deploymentId` and `useOffline` docs;
+    - the source: navigations reload on a build mismatch, a failed link fetch falls back to a
+      full page load, and outdated Server Actions throw `UnrecognizedActionError`.
+  - **Vercel docs:** Skew Protection is Pro and Enterprise only, and `VERCEL_DEPLOYMENT_ID` is
+    set at build and runtime.
+  - **MDN:** `register`, `update`, `skipWaiting`, `clients.claim`, navigation preload.
+  - **npm:** `@serwist/turbopack` 9.5.13 and its dependencies.
+- **Decisions:** D-023 (service worker and updates).
+- **Checks:**
+  - lint, typecheck, 223 unit tests, and the format check pass;
+  - `pnpm build` passes, with `/offline` and `/sw.js` static.
+- **Checked in Chrome** on local production builds (port 3100, signed out, hosted settings
+  from `.env.local`). Docker was off, so a small local probe server confirmed the browser was
+  on this computer.
+  - **Install:** the worker controls the page, navigation preload is on, and the cache holds
+    the offline page plus 17 assets (fonts, CSS, 12 scripts, two logo sizes), all 200.
+  - **Offline:** with the server stopped, `/home` showed the offline page with its font,
+    colours and logo, hydrated.
+  - **Update:** I rebuilt as `p62-test-2` and ran the foreground check. The new worker took
+    over and deleted the old cache, and the old page offered Refresh without reloading.
+    Refresh reached `/sign-in`, with no prompt on the fresh page.
+  - **Clean-up:** the worker and its cache were removed afterwards, both test servers stopped,
+    and the tab closed. Screenshots still time out, so the checks read the page itself.
+- **Not checked yet:**
+  - the offline notice, which needs a real connection drop on a signed-in page (your phone,
+    P6.3);
+  - the "just updated" save message (the error type is read from the Next.js source).
+- **Commits:** `feat(pwa): add the service worker, offline page and update prompt (P6.2)`
+- **Next:** P6.3, browser and install testing, which needs your devices.
 
 ### 2026-11-06 — Session 6 (cont.): the Phase 5 acceptance, and P5.8 deferred
 

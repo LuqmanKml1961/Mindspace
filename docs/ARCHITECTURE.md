@@ -96,6 +96,8 @@ mindspace/
     │   ├── auth/callback/route.ts   # OAuth return: exchanges the code, then redirects
     │   ├── (app)/home | thoughts (+ [id], categories, review) | tasks | clarity | settings/ (each with its actions.ts), encryption/actions.ts
     │   ├── (app)/layout.tsx    # the lock screen (EncryptionGate) around the whole signed-in app
+    │   ├── offline/            # the page the service worker shows offline (public, static)
+    │   ├── sw.js/              # route.ts serves service-worker.js at /sw.js, versioned per deploy (P6.2)
     │   └── layout.tsx
     ├── components/             # presentation
     │   ├── ui/                 # shadcn/ui generated components
@@ -105,12 +107,14 @@ mindspace/
     │   ├── thoughts/           # capture-box, thought-list, thought-item, thought-editor, make-task-sheet (P4.7), thought-review (P5.6), category-picker, category-manager, status-nav, save-shortcut, inbox-preview (Home); brain-dump.ts (Server Actions as ports)
     │   ├── tasks/              # quick-add, task-list, task-item, task-sheet, task-fields (shared with make-task-sheet), task-reminders (in the sheet), reminder-list (Home and Tasks), today-preview (Home), task-view-nav, task-views.ts (labels, hrefs, due and reminder wording); task-use-cases.ts (Server Actions as ports)
     │   ├── clarity/            # check-in (flow and stages), check-in-step, check-in-priority, check-in-recap, check-in-summary (shared grouping), check-in-prompts.ts (spec wording), past-reflections (P5.7), one-thing (Home); check-in-use-cases.ts (Server Actions as ports)
+    │   ├── pwa/                # app-updates (worker registration, Refresh offer), connection-status, reload-button (P6.2)
     │   └── auth | settings/    # feature UI components
     └── lib/
         ├── utils.ts            # presentation helpers only (e.g. shadcn's cn())
         ├── action-result.ts    # ActionResult, attempt and failure, shared by every Server Action
         ├── action-errors.ts    # browser side: unwrap and errorMessage
-        ├── notify.ts           # toasts, with an optional action such as Undo
+        ├── app-version.ts      # the deploy's version (VERCEL_DEPLOYMENT_ID), for the service worker
+        ├── notify.ts           # toasts (success, error, notice), with an optional action such as Undo
         └── use-now.ts          # the time, refreshed every 30 s (null on the server), for what is due
 ```
 
@@ -281,6 +285,21 @@ The Server Actions are passed in as `ThoughtServer` and `CategoryServer`.
 ## 9. PWA and offline
 
 The manifest (`src/app/manifest.ts`), icons, `theme-color` and safe areas are **done** (brought
-forward, D-014; see DESIGN.md §7a). Still planned for Phase 6 (spec §10): a service worker that
-caches the app shell and static assets, with an offline fallback. Do not cache user data or claim
-offline support until draft sync exists (post-MVP).
+forward, D-014; see DESIGN.md §7a).
+
+**The service worker (P6.2, D-023)** is hand-written. `src/app/sw.js/route.ts` serves
+`service-worker.js` at `/sw.js` with the deploy's version first.
+
+- **What it stores:** only `/offline` and the assets that page links to, in one cache per
+  deploy.
+- **What it never stores:** pages, page data, Server Actions and Supabase calls. They always
+  go to the network.
+- **What it does:** a full page load that fails shows `/offline`.
+
+`AppUpdates` (`src/components/pwa/`, root layout) registers the worker in production builds.
+When the app returns to the foreground, it looks for a deploy and offers Refresh to a page older
+than the live version. `ConnectionStatus` (signed-in layout) shows the offline notice.
+
+`/offline` is a public route in the proxy, and `/sw.js` is outside its matcher.
+
+Do not cache user data or claim offline support until draft sync exists (post-MVP).

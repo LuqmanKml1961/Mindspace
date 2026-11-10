@@ -749,10 +749,36 @@ and then the private beta.
       theme and background colours), plus icons (192, 512 and maskable). Uses the name from D-001.
       **Brought forward on 2026-11-03 (D-014)** to fix the screen edges on the home-screen app.
       The icon is your "Sleeping Brain House" artwork, made full-bleed (DESIGN.md §7a).
-- [ ] P6.2 Service worker: cache the app shell and static assets, add an offline fallback page and
+- [x] P6.2 Service worker: cache the app shell and static assets, add an offline fallback page and
       a connection-status indicator. Choose between a hand-written worker (Next.js PWA guide) and a
       library such as Serwist after checking compatibility with the installed Next.js version.
-      Do not cache user data yet.
+      Do not cache user data yet. **Done 2026-11-10 (D-023):**
+  - **Hand-written worker** (your choice over Serwist), served at `/sw.js` by a static Route
+    Handler with the deploy's `VERCEL_DEPLOYMENT_ID` built in.
+    - It stores only `/offline` and the styles, fonts, scripts and logo that page links to, in
+      one cache per deploy.
+    - Pages, page data, Server Actions and Supabase calls always go to the network.
+    - A page that can't load offline shows `/offline` ("You're offline", Try again). This
+      includes tapping a link, because Next.js then falls back to a full page load.
+  - **Connection status** (your choice): a notice that stays while you're offline on a
+    signed-in page, closed when the connection returns, then "You're back online."
+  - **Updates:**
+    - Each deploy is a new worker, which replaces the old one at once and deletes its cache.
+    - The app looks for a deploy when it comes back to the foreground. A page older than the
+      live deploy gets "A new version is ready" with **Refresh**. Nothing reloads by itself.
+    - **Version skew:** Next.js already reloads on the next navigation after a deploy (build ID
+      check, read in the 16.4.5 source).
+    - Vercel's Skew Protection, which keeps old pages' saves working, is Pro and Enterprise
+      only, and the project is on Hobby (D-009). So a save from an outdated page now says
+      "Mindspace has just been updated. Copy your text, refresh the page, then save it again."
+  - **Checked** on two local production builds:
+    - the worker installs, and its cache holds the offline page and its 17 assets, all 200;
+    - with the server stopped, `/home` shows the styled offline page;
+    - after a rebuild, the old page offered Refresh and didn't reload by itself, and the old
+      cache was gone;
+    - a fresh page shows no prompt.
+  - **Still to check:** the offline notice needs a real connection drop on a signed-in page
+    (P6.3 on your phone).
   - **Updates (added 2026-11-06, your request):** a new deploy must reach the installed app
     without reinstalling.
     - The worker must never pin an old version.
